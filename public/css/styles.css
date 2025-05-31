@@ -1,0 +1,81 @@
+body {
+  background-color: #f4f6f8;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+h2 {
+  font-weight: bold;
+  color: #004aad; /* Azul eléctrico */
+}
+
+a.btn-outline-secondary {
+  border-color: #004aad;
+  color: #004aad;
+}
+
+a.btn-outline-secondary:hover {
+  background-color: #004aad;
+  color: #fff;
+}
+
+.table thead {
+  background-color: #000;
+  color: #fff;
+}
+
+.btn-primary {
+  background-color: #004aad;
+  border-color: #004aad;
+}
+
+.btn-primary:hover {
+  background-color: #003788;
+  border-color: #003788;
+}
+
+.btn-success {
+  background-color: #00b386;
+  border-color: #00b386;
+}
+
+.btn-success:hover {
+  background-color: #009e75;
+  border-color: #009e75;
+}
+
+.card {
+  border-radius: 1rem;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+select,
+textarea {
+  border-radius: 0.5rem;
+}
+
+.form-check-input:checked {
+  background-color: #004aad;
+  border-color: #004aad;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #eaf2ff;
+}
+
+@media (max-width: 768px) {
+  .form-control,
+  .form-select {
+    font-size: 0.95rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    text-align: center;
+  }
+
+  table th, table td {
+    font-size: 0.9rem;
+  }
+}

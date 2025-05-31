@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Editar Cliente - JP Entrenamiento</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <div class="container mt-5 mb-4">
+    <a href="/" class="btn btn-outline-secondary mb-4">← Volver</a>
+    <h2 class="text-center text-primary mb-4">Editar Cliente</h2>
+
+    <form action="/editar/<%= cliente._id %>" method="POST" class="card p-4 shadow">
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label>Nombre</label>
+          <input type="text" name="nombre" value="<%= cliente.nombre %>" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+          <label>Apellido</label>
+          <input type="text" name="apellido" value="<%= cliente.apellido %>" class="form-control" required>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-md-3">
+          <label>Edad</label>
+          <input type="number" name="edad" value="<%= cliente.edad %>" class="form-control" required>
+        </div>
+        <div class="col-md-5">
+          <label>Celular</label>
+          <input type="text" name="celular" value="<%= cliente.celular %>" class="form-control" required>
+        </div>
+        <div class="col-md-4">
+          <label>Dirección</label>
+          <input type="text" name="direccion" value="<%= cliente.direccion %>" class="form-control" required>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label>Fecha de Inicio</label>
+          <input type="date" name="fechaInicio" value="<%= cliente.fechaInicio.toISOString().split('T')[0] %>" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+          <label>Fecha de Último Pago</label>
+          <input type="date" name="fechaPago" value="<%= cliente.fechaPago.toISOString().split('T')[0] %>" class="form-control" required>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label>Plan Elegido</label>
+        <select name="plan" class="form-select" required>
+          <option value="Básico" <%= cliente.plan === "Básico" ? "selected" : "" %>>Básico</option>
+          <option value="Intermedio" <%= cliente.plan === "Intermedio" ? "selected" : "" %>>Intermedio</option>
+          <option value="Full" <%= cliente.plan === "Full" ? "selected" : "" %>>Full</option>
+        </select>
+      </div>
+
+      <div class="mb-4">
+        <label>Asistencia Semanal</label>
+        <div class="form-check form-check-inline ms-2">
+          <input class="form-check-input" type="checkbox" name="asistencia.semanal.lunes" value="true" <%= cliente.asistencia?.semanal?.lunes ? "checked" : "" %>>
+          <label class="form-check-label">Lunes</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" name="asistencia.semanal.martes" value="true" <%= cliente.asistencia?.semanal?.martes ? "checked" : "" %>>
+          <label class="form-check-label">Martes</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" name="asistencia.semanal.miercoles" value="true" <%= cliente.asistencia?.semanal?.miercoles ? "checked" : "" %>>
+          <label class="form-check-label">Miércoles</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" name="asistencia.semanal.jueves" value="true" <%= cliente.asistencia?.semanal?.jueves ? "checked" : "" %>>
+          <label class="form-check-label">Jueves</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" name="asistencia.semanal.viernes" value="true" <%= cliente.asistencia?.semanal?.viernes ? "checked" : "" %>>
+          <label class="form-check-label">Viernes</label>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">Actualizar Cliente</button>
+    </form>
+  </div>
+
+</body>
+</html>

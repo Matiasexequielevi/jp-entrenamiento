@@ -1,0 +1,54 @@
+const Cliente = require('../models/cliente');
+
+// Mostrar todos los clientes
+exports.listarClientes = async (req, res) => {
+  const clientes = await Cliente.find().sort({ creadoEn: -1 });
+  res.render('index', { clientes });
+};
+
+// Mostrar formulario nuevo
+exports.formularioNuevo = (req, res) => {
+  res.render('nueva');
+};
+
+// Guardar cliente nuevo
+exports.guardarCliente = async (req, res) => {
+  try {
+    const nuevoCliente = new Cliente(req.body);
+    await nuevoCliente.save();
+    res.redirect('/');
+  } catch (error) {
+    console.error('Error al guardar cliente:', error);
+    res.status(500).send('Error al guardar cliente');
+  }
+};
+
+// Mostrar formulario para editar cliente
+exports.formularioEditar = async (req, res) => {
+  try {
+    const cliente = await Cliente.findById(req.params.id);
+    res.render('editar', { cliente });
+  } catch (error) {
+    res.status(500).send('Error al cargar cliente');
+  }
+};
+
+// Actualizar cliente
+exports.actualizarCliente = async (req, res) => {
+  try {
+    await Cliente.findByIdAndUpdate(req.params.id, req.body);
+    res.redirect('/');
+  } catch (error) {
+    res.status(500).send('Error al actualizar cliente');
+  }
+};
+
+// Eliminar cliente
+exports.eliminarCliente = async (req, res) => {
+  try {
+    await Cliente.findByIdAndDelete(req.params.id);
+    res.redirect('/');
+  } catch (error) {
+    res.status(500).send('Error al eliminar cliente');
+  }
+};
