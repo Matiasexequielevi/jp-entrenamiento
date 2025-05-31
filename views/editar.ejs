@@ -6,73 +6,85 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
+  <style>
+    input[readonly] {
+      background-color: #f8f9fa;
+      border: none;
+    }
+  </style>
 </head>
 <body class="bg-light">
 
   <div class="container py-4">
 
+    <!-- Botón volver -->
+    <div class="mb-3">
+      <a href="/" class="btn btn-outline-secondary">← Volver</a>
+    </div>
+
     <!-- Logo y título -->
     <div class="text-center mb-4">
       <img src="/images/logo-jp.png" alt="Logo JP" class="rounded-circle shadow" style="width: 100px; height: 100px; object-fit: cover;">
-      <h2 class="text-primary fw-bold mt-3">Ficha de <%= cliente.nombre %> <%= cliente.apellido %></h2>
+      <h2 class="text-primary fw-bold mt-3"> Alumno <%= cliente.nombre %> <%= cliente.apellido %></h2>
     </div>
 
-    <!-- Ficha del cliente -->
-    <div class="card shadow-sm p-4 mb-5" style="border-radius: 20px;">
-      <table class="table table-borderless mb-0">
-        <tbody>
-          <tr>
-            <th class="text-end">Nombre:</th>
-            <td><%= cliente.nombre %></td>
-            <th class="text-end">Apellido:</th>
-            <td><%= cliente.apellido %></td>
-          </tr>
-          <tr>
-            <th class="text-end">Edad:</th>
-            <td><%= cliente.edad %></td>
-            <th class="text-end">Celular:</th>
-            <td><%= cliente.celular %></td>
-          </tr>
-          <tr>
-            <th class="text-end">Dirección:</th>
-            <td colspan="3"><%= cliente.direccion %></td>
-          </tr>
-          <tr>
-            <th class="text-end">Fecha de Inicio:</th>
-            <td><%= new Date(cliente.fechaInicio).toLocaleDateString() %></td>
-            <th class="text-end">Plan:</th>
-            <td><%= cliente.plan %></td>
-          </tr>
-          <tr>
-            <th class="text-end">Asistencia:</th>
-            <td colspan="3">
-              <% const dias = cliente.asistencia?.semanal || {}; %>
-              <%= dias.lunes ? 'Lunes ' : '' %>
-              <%= dias.martes ? 'Martes ' : '' %>
-              <%= dias.miercoles ? 'Miércoles ' : '' %>
-              <%= dias.jueves ? 'Jueves ' : '' %>
-              <%= dias.viernes ? 'Viernes' : '' %>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- Formulario -->
+    <form action="/editar/<%= cliente._id %>" method="POST">
+      <div class="card shadow-sm p-4 mb-5" style="border-radius: 20px;">
 
-      <form action="/editar/<%= cliente._id %>" method="POST">
-        <input type="hidden" name="nombre" value="<%= cliente.nombre %>">
-        <input type="hidden" name="apellido" value="<%= cliente.apellido %>">
-        <input type="hidden" name="edad" value="<%= cliente.edad %>">
-        <input type="hidden" name="celular" value="<%= cliente.celular %>">
-        <input type="hidden" name="direccion" value="<%= cliente.direccion %>">
-        <input type="hidden" name="fechaInicio" value="<%= cliente.fechaInicio.toISOString().split('T')[0] %>">
-        <input type="hidden" name="plan" value="<%= cliente.plan %>">
-        <% if (cliente.asistencia?.semanal) { %>
-          <% Object.entries(cliente.asistencia.semanal).forEach(([dia, valor]) => { %>
-            <input type="hidden" name="asistencia.semanal.<%= dia %>" value="<%= valor %>">
-          <% }) %>
-        <% } %>
-        <button type="submit" class="btn btn-primary w-100 mt-3">Guardar Cambios</button>
-      </form>
-    </div>
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Nombre:</label>
+            <input type="text" name="nombre" class="form-control" value="<%= cliente.nombre %>" readonly>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Apellido:</label>
+            <input type="text" name="apellido" class="form-control" value="<%= cliente.apellido %>" readonly>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Edad:</label>
+            <input type="number" name="edad" class="form-control" value="<%= cliente.edad %>" readonly>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Celular:</label>
+            <input type="text" name="celular" class="form-control" value="<%= cliente.celular %>" readonly>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-bold">Dirección:</label>
+          <input type="text" name="direccion" class="form-control" value="<%= cliente.direccion %>" readonly>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Fecha de Inicio:</label>
+            <input type="date" name="fechaInicio" class="form-control" value="<%= cliente.fechaInicio.toISOString().split('T')[0] %>" readonly>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Plan:</label>
+            <input type="text" name="plan" class="form-control" value="<%= cliente.plan %>" readonly>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-bold">Asistencia:</label>
+          <input type="text" class="form-control" readonly value="
+            <% const dias = cliente.asistencia?.semanal || {}; %>
+            <%= dias.lunes ? 'Lunes ' : '' %>
+            <%= dias.martes ? 'Martes ' : '' %>
+            <%= dias.miercoles ? 'Miércoles ' : '' %>
+            <%= dias.jueves ? 'Jueves ' : '' %>
+            <%= dias.viernes ? 'Viernes' : '' %>">
+        </div>
+
+        <button type="button" id="editarBtn" class="btn btn-warning w-100 mt-3">Editar Información</button>
+        <button type="submit" id="guardarBtn" class="btn btn-primary w-100 mt-3 d-none">Guardar Cambios</button>
+      </div>
+    </form>
 
     <!-- Pagos -->
     <div class="card p-4 shadow-sm mb-5" style="border-radius: 20px;">
@@ -125,8 +137,17 @@
     <footer class="text-center text-muted small border-top pt-3">
       Todos los derechos reservados - Levi Prog.
     </footer>
-
   </div>
+
+  <script>
+    document.getElementById('editarBtn').addEventListener('click', () => {
+      document.querySelectorAll('input').forEach(input => {
+        input.removeAttribute('readonly');
+      });
+      document.getElementById('editarBtn').classList.add('d-none');
+      document.getElementById('guardarBtn').classList.remove('d-none');
+    });
+  </script>
 
 </body>
 </html>
