@@ -10,41 +10,42 @@
 <body class="bg-light">
 
   <div class="container py-4">
-    <a href="/" class="btn btn-outline-secondary mb-3">← Volver</a>
 
-    <h2 class="text-center text-primary mb-4">Ficha de <%= cliente.nombre %> <%= cliente.apellido %></h2>
+    <!-- Logo y título -->
+    <div class="text-center mb-4">
+      <img src="/images/logo-jp.png" alt="Logo JP" class="rounded-circle shadow" style="width: 100px; height: 100px; object-fit: cover;">
+      <h2 class="text-primary fw-bold mt-3">Ficha de <%= cliente.nombre %> <%= cliente.apellido %></h2>
+    </div>
 
-    <!-- FICHA DEL CLIENTE -->
-    <div class="card shadow-sm p-4 mb-4">
-      <table class="table table-borderless">
+    <!-- Ficha del cliente -->
+    <div class="card shadow-sm p-4 mb-5" style="border-radius: 20px;">
+      <table class="table table-borderless mb-0">
         <tbody>
           <tr>
-            <th>Nombre:</th>
+            <th class="text-end">Nombre:</th>
             <td><%= cliente.nombre %></td>
-            <th>Apellido:</th>
+            <th class="text-end">Apellido:</th>
             <td><%= cliente.apellido %></td>
           </tr>
           <tr>
-            <th>Edad:</th>
+            <th class="text-end">Edad:</th>
             <td><%= cliente.edad %></td>
-            <th>Celular:</th>
+            <th class="text-end">Celular:</th>
             <td><%= cliente.celular %></td>
           </tr>
           <tr>
-            <th>Dirección:</th>
+            <th class="text-end">Dirección:</th>
             <td colspan="3"><%= cliente.direccion %></td>
           </tr>
           <tr>
-            <th>Fecha de Inicio:</th>
+            <th class="text-end">Fecha de Inicio:</th>
             <td><%= new Date(cliente.fechaInicio).toLocaleDateString() %></td>
-            <th>Último Pago:</th>
-            <td><%= new Date(cliente.fechaPago).toLocaleDateString() %></td>
+            <th class="text-end">Plan:</th>
+            <td><%= cliente.plan %></td>
           </tr>
           <tr>
-            <th>Plan:</th>
-            <td><%= cliente.plan %></td>
-            <th>Asistencia:</th>
-            <td>
+            <th class="text-end">Asistencia:</th>
+            <td colspan="3">
               <% const dias = cliente.asistencia?.semanal || {}; %>
               <%= dias.lunes ? 'Lunes ' : '' %>
               <%= dias.martes ? 'Martes ' : '' %>
@@ -56,7 +57,6 @@
         </tbody>
       </table>
 
-      <!-- Formulario para actualizar datos -->
       <form action="/editar/<%= cliente._id %>" method="POST">
         <input type="hidden" name="nombre" value="<%= cliente.nombre %>">
         <input type="hidden" name="apellido" value="<%= cliente.apellido %>">
@@ -64,21 +64,18 @@
         <input type="hidden" name="celular" value="<%= cliente.celular %>">
         <input type="hidden" name="direccion" value="<%= cliente.direccion %>">
         <input type="hidden" name="fechaInicio" value="<%= cliente.fechaInicio.toISOString().split('T')[0] %>">
-        <input type="hidden" name="fechaPago" value="<%= cliente.fechaPago.toISOString().split('T')[0] %>">
         <input type="hidden" name="plan" value="<%= cliente.plan %>">
-
         <% if (cliente.asistencia?.semanal) { %>
           <% Object.entries(cliente.asistencia.semanal).forEach(([dia, valor]) => { %>
             <input type="hidden" name="asistencia.semanal.<%= dia %>" value="<%= valor %>">
           <% }) %>
         <% } %>
-
         <button type="submit" class="btn btn-primary w-100 mt-3">Guardar Cambios</button>
       </form>
     </div>
 
-    <!-- PAGOS -->
-    <div class="card p-4 shadow-sm">
+    <!-- Pagos -->
+    <div class="card p-4 shadow-sm mb-5" style="border-radius: 20px;">
       <h4 class="text-primary mb-3">Pagos</h4>
 
       <form action="/agregar-pago/<%= cliente._id %>" method="POST" class="row g-3 mb-4">
@@ -123,6 +120,12 @@
         <p class="text-muted">No hay pagos registrados aún.</p>
       <% } %>
     </div>
+
+    <!-- Footer -->
+    <footer class="text-center text-muted small border-top pt-3">
+      Todos los derechos reservados - Levi Prog.
+    </footer>
+
   </div>
 
 </body>
