@@ -2,89 +2,127 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Editar Cliente - JP Entrenamiento</title>
+  <title>Ficha de <%= cliente.nombre %> <%= cliente.apellido %></title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
 </head>
 <body class="bg-light">
 
-  <div class="container mt-5 mb-4">
-    <a href="/" class="btn btn-outline-secondary mb-4">← Volver</a>
-    <h2 class="text-center text-primary mb-4">Editar Cliente</h2>
+  <div class="container py-4">
+    <a href="/" class="btn btn-outline-secondary mb-3">← Volver</a>
 
-    <form action="/editar/<%= cliente._id %>" method="POST" class="card p-4 shadow">
-      <div class="row mb-3">
-        <div class="col-md-6">
-          <label>Nombre</label>
-          <input type="text" name="nombre" value="<%= cliente.nombre %>" class="form-control" required>
-        </div>
-        <div class="col-md-6">
-          <label>Apellido</label>
-          <input type="text" name="apellido" value="<%= cliente.apellido %>" class="form-control" required>
-        </div>
-      </div>
+    <h2 class="text-center text-primary mb-4">Ficha de <%= cliente.nombre %> <%= cliente.apellido %></h2>
 
-      <div class="row mb-3">
-        <div class="col-md-3">
-          <label>Edad</label>
-          <input type="number" name="edad" value="<%= cliente.edad %>" class="form-control" required>
+    <!-- FICHA DEL CLIENTE -->
+    <div class="card shadow-sm p-4 mb-4">
+      <table class="table table-borderless">
+        <tbody>
+          <tr>
+            <th>Nombre:</th>
+            <td><%= cliente.nombre %></td>
+            <th>Apellido:</th>
+            <td><%= cliente.apellido %></td>
+          </tr>
+          <tr>
+            <th>Edad:</th>
+            <td><%= cliente.edad %></td>
+            <th>Celular:</th>
+            <td><%= cliente.celular %></td>
+          </tr>
+          <tr>
+            <th>Dirección:</th>
+            <td colspan="3"><%= cliente.direccion %></td>
+          </tr>
+          <tr>
+            <th>Fecha de Inicio:</th>
+            <td><%= new Date(cliente.fechaInicio).toLocaleDateString() %></td>
+            <th>Último Pago:</th>
+            <td><%= new Date(cliente.fechaPago).toLocaleDateString() %></td>
+          </tr>
+          <tr>
+            <th>Plan:</th>
+            <td><%= cliente.plan %></td>
+            <th>Asistencia:</th>
+            <td>
+              <% const dias = cliente.asistencia?.semanal || {}; %>
+              <%= dias.lunes ? 'Lunes ' : '' %>
+              <%= dias.martes ? 'Martes ' : '' %>
+              <%= dias.miercoles ? 'Miércoles ' : '' %>
+              <%= dias.jueves ? 'Jueves ' : '' %>
+              <%= dias.viernes ? 'Viernes' : '' %>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Formulario para actualizar datos -->
+      <form action="/editar/<%= cliente._id %>" method="POST">
+        <input type="hidden" name="nombre" value="<%= cliente.nombre %>">
+        <input type="hidden" name="apellido" value="<%= cliente.apellido %>">
+        <input type="hidden" name="edad" value="<%= cliente.edad %>">
+        <input type="hidden" name="celular" value="<%= cliente.celular %>">
+        <input type="hidden" name="direccion" value="<%= cliente.direccion %>">
+        <input type="hidden" name="fechaInicio" value="<%= cliente.fechaInicio.toISOString().split('T')[0] %>">
+        <input type="hidden" name="fechaPago" value="<%= cliente.fechaPago.toISOString().split('T')[0] %>">
+        <input type="hidden" name="plan" value="<%= cliente.plan %>">
+
+        <% if (cliente.asistencia?.semanal) { %>
+          <% Object.entries(cliente.asistencia.semanal).forEach(([dia, valor]) => { %>
+            <input type="hidden" name="asistencia.semanal.<%= dia %>" value="<%= valor %>">
+          <% }) %>
+        <% } %>
+
+        <button type="submit" class="btn btn-primary w-100 mt-3">Guardar Cambios</button>
+      </form>
+    </div>
+
+    <!-- PAGOS -->
+    <div class="card p-4 shadow-sm">
+      <h4 class="text-primary mb-3">Pagos</h4>
+
+      <form action="/agregar-pago/<%= cliente._id %>" method="POST" class="row g-3 mb-4">
+        <div class="col-md-5">
+          <label>Fecha de Pago</label>
+          <input type="date" name="fecha" class="form-control" required>
         </div>
         <div class="col-md-5">
-          <label>Celular</label>
-          <input type="text" name="celular" value="<%= cliente.celular %>" class="form-control" required>
+          <label>Monto</label>
+          <input type="number" name="monto" step="0.01" class="form-control" required>
         </div>
-        <div class="col-md-4">
-          <label>Dirección</label>
-          <input type="text" name="direccion" value="<%= cliente.direccion %>" class="form-control" required>
+        <div class="col-md-2 d-flex align-items-end">
+          <button type="submit" class="btn btn-success w-100">Agregar</button>
         </div>
-      </div>
+      </form>
 
-      <div class="row mb-3">
-        <div class="col-md-6">
-          <label>Fecha de Inicio</label>
-          <input type="date" name="fechaInicio" value="<%= cliente.fechaInicio.toISOString().split('T')[0] %>" class="form-control" required>
-        </div>
-        <div class="col-md-6">
-          <label>Fecha de Último Pago</label>
-          <input type="date" name="fechaPago" value="<%= cliente.fechaPago.toISOString().split('T')[0] %>" class="form-control" required>
-        </div>
-      </div>
-
-      <div class="mb-3">
-        <label>Plan Elegido</label>
-        <select name="plan" class="form-select" required>
-          <option value="Básico" <%= cliente.plan === "Básico" ? "selected" : "" %>>Básico</option>
-          <option value="Intermedio" <%= cliente.plan === "Intermedio" ? "selected" : "" %>>Intermedio</option>
-          <option value="Full" <%= cliente.plan === "Full" ? "selected" : "" %>>Full</option>
-        </select>
-      </div>
-
-      <div class="mb-4">
-        <label>Asistencia Semanal</label>
-        <div class="form-check form-check-inline ms-2">
-          <input class="form-check-input" type="checkbox" name="asistencia.semanal.lunes" value="true" <%= cliente.asistencia?.semanal?.lunes ? "checked" : "" %>>
-          <label class="form-check-label">Lunes</label>
-        </div>
-        <div class="form-check form-check-inline">
-          <input class="form-check-input" type="checkbox" name="asistencia.semanal.martes" value="true" <%= cliente.asistencia?.semanal?.martes ? "checked" : "" %>>
-          <label class="form-check-label">Martes</label>
-        </div>
-        <div class="form-check form-check-inline">
-          <input class="form-check-input" type="checkbox" name="asistencia.semanal.miercoles" value="true" <%= cliente.asistencia?.semanal?.miercoles ? "checked" : "" %>>
-          <label class="form-check-label">Miércoles</label>
-        </div>
-        <div class="form-check form-check-inline">
-          <input class="form-check-input" type="checkbox" name="asistencia.semanal.jueves" value="true" <%= cliente.asistencia?.semanal?.jueves ? "checked" : "" %>>
-          <label class="form-check-label">Jueves</label>
-        </div>
-        <div class="form-check form-check-inline">
-          <input class="form-check-input" type="checkbox" name="asistencia.semanal.viernes" value="true" <%= cliente.asistencia?.semanal?.viernes ? "checked" : "" %>>
-          <label class="form-check-label">Viernes</label>
-        </div>
-      </div>
-
-      <button type="submit" class="btn btn-primary w-100">Actualizar Cliente</button>
-    </form>
+      <% if (cliente.pagos && cliente.pagos.length > 0) { %>
+        <table class="table table-bordered text-center">
+          <thead class="table-light">
+            <tr>
+              <th>Fecha</th>
+              <th>Monto</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% let total = 0; %>
+            <% cliente.pagos.forEach(pago => { total += pago.monto; %>
+              <tr>
+                <td><%= new Date(pago.fecha).toLocaleDateString() %></td>
+                <td>$<%= pago.monto.toFixed(2) %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+          <tfoot>
+            <tr>
+              <th>Total</th>
+              <th>$<%= total.toFixed(2) %></th>
+            </tr>
+          </tfoot>
+        </table>
+      <% } else { %>
+        <p class="text-muted">No hay pagos registrados aún.</p>
+      <% } %>
+    </div>
   </div>
 
 </body>
