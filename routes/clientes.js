@@ -16,4 +16,7 @@ router.post('/editar/:id', clienteController.actualizarCliente);
 // Eliminar un cliente
 router.post('/eliminar/:id', clienteController.eliminarCliente);
 
+router.post('/agregar-pago/:id', clienteController.agregarPago);
+
+
 module.exports = router;
