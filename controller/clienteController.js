@@ -1,6 +1,5 @@
 const Cliente = require('../models/cliente');
 
-// Mostrar todos los clientes con resumen
 // Mostrar todos los clientes con resumen real de pagos
 exports.listarClientes = async (req, res) => {
   const clientes = await Cliente.find().sort({ creadoEn: -1 });
@@ -24,7 +23,10 @@ exports.listarClientes = async (req, res) => {
     }
 
     // Verificar si está al día (último pago dentro de los últimos 30 días)
-    if (ultimoPago && (new Date(ultimoPago.fecha) >= new Date(hoy.setDate(hoy.getDate() - 30)))) {
+    const hace30Dias = new Date();
+    hace30Dias.setDate(hace30Dias.getDate() - 30);
+
+    if (ultimoPago && new Date(ultimoPago.fecha) >= hace30Dias) {
       alDia++;
       cliente.estadoPago = 'aldia';
     } else {
@@ -44,6 +46,10 @@ exports.listarClientes = async (req, res) => {
   });
 };
 
+// Mostrar formulario nuevo
+exports.formularioNuevo = (req, res) => {
+  res.render('nueva');
+};
 
 // Mostrar formulario para editar cliente
 exports.formularioEditar = async (req, res) => {
