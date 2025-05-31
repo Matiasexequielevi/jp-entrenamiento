@@ -6,7 +6,7 @@ const clienteController = require('../controller/clienteController');
 router.get('/', clienteController.listarClientes);
 
 // Formulario para agregar un nuevo cliente
-router.get('/nueva', clienteController.formularioNuevo);
+router.get('/nueva', clienteController.formularioNuevo); // Asegurate que esta función exista
 router.post('/nueva', clienteController.guardarCliente);
 
 // Formulario para editar un cliente
@@ -16,7 +16,7 @@ router.post('/editar/:id', clienteController.actualizarCliente);
 // Eliminar un cliente
 router.post('/eliminar/:id', clienteController.eliminarCliente);
 
+// Agregar pago
 router.post('/agregar-pago/:id', clienteController.agregarPago);
-
 
 module.exports = router;
