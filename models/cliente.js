@@ -23,8 +23,13 @@ const clienteSchema = new mongoose.Schema({
       jueves: { type: Boolean, default: false },
       viernes: { type: Boolean, default: false }
     },
-    totalAsistencias: { type: Number, default: 0 } // mensual
+    totalAsistencias: { type: Number, default: 0 }
   },
+
+  pagos: [{
+    fecha: { type: Date, required: true },
+    monto: { type: Number, required: true }
+  }],
 
   creadoEn: { type: Date, default: Date.now }
 });

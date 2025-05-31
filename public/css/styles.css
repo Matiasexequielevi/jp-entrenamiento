@@ -1,11 +1,12 @@
 body {
-  background-color: #f4f6f8;
+  background-color: #f8f9fa;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
 }
 
 h2 {
   font-weight: bold;
-  color: #004aad; /* Azul eléctrico */
+  color: #004aad; /* Azul del logo */
 }
 
 a.btn-outline-secondary {
@@ -26,11 +27,12 @@ a.btn-outline-secondary:hover {
 .btn-primary {
   background-color: #004aad;
   border-color: #004aad;
+  transition: all 0.2s ease-in-out;
 }
 
 .btn-primary:hover {
-  background-color: #003788;
-  border-color: #003788;
+  background-color: #00388a;
+  border-color: #00388a;
 }
 
 .btn-success {
@@ -43,15 +45,23 @@ a.btn-outline-secondary:hover {
   border-color: #009e75;
 }
 
-.card {
-  border-radius: 1rem;
+.btn-danger {
+  background-color: #dc3545;
+  border-color: #dc3545;
 }
 
-input[type="text"],
-input[type="number"],
-input[type="date"],
-select,
-textarea {
+.btn-danger:hover {
+  background-color: #bb2d3b;
+  border-color: #bb2d3b;
+}
+
+.card {
+  border-radius: 1rem;
+  border: none;
+}
+
+input,
+select {
   border-radius: 0.5rem;
 }
 
@@ -64,18 +74,22 @@ textarea {
   background-color: #eaf2ff;
 }
 
-@media (max-width: 768px) {
-  .form-control,
-  .form-select {
-    font-size: 0.95rem;
-  }
+img.rounded-circle {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+}
 
+@media (max-width: 768px) {
   h2 {
     font-size: 1.5rem;
-    text-align: center;
+    margin-top: 1rem;
   }
 
-  table th, table td {
-    font-size: 0.9rem;
+  .btn {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .form-control {
+    width: 100% !important;
   }
 }
