@@ -94,3 +94,14 @@ exports.agregarPago = async (req, res) => {
     res.status(500).send('Error al agregar pago');
   }
 };
+// Guardar cliente nuevo
+exports.guardarCliente = async (req, res) => {
+  try {
+    const nuevoCliente = new Cliente(req.body);
+    await nuevoCliente.save();
+    res.redirect('/');
+  } catch (error) {
+    console.error('Error al guardar cliente:', error);
+    res.status(500).send('Error al guardar cliente');
+  }
+};

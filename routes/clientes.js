@@ -3,7 +3,7 @@
 const express = require('express');
 const router = express.Router();
 const clienteController = require('../controller/clienteController');
-console.log('FUNCIONES DISPONIBLES:', clienteController);
+
 
 // Ruta principal: listar todos los clientes
 router.get('/', clienteController.listarClientes);
