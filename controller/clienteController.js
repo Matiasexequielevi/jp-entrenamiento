@@ -5,23 +5,32 @@ exports.listarClientes = async (req, res) => {
   const clientes = await Cliente.find().sort({ creadoEn: -1 });
 
   const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+
   let totalClientes = clientes.length;
   let alDia = 0;
   let vencidos = 0;
-  let totalRecaudado = 0;
+  let totalRecaudadoHoy = 0;
 
   clientes.forEach(cliente => {
     let ultimoPago = null;
 
     if (cliente.pagos && cliente.pagos.length > 0) {
-      // Buscar el pago más reciente
+      // Buscar el último pago
       ultimoPago = cliente.pagos.reduce((ultimo, actual) => {
         return new Date(actual.fecha) > new Date(ultimo.fecha) ? actual : ultimo;
       });
 
-      totalRecaudado += cliente.pagos.reduce((suma, pago) => suma + pago.monto, 0);
+      // Sumar pagos de hoy
+      cliente.pagos.forEach(p => {
+        const fechaPago = new Date(p.fecha);
+        if (fechaPago >= hoy) {
+          totalRecaudadoHoy += p.monto;
+        }
+      });
     }
 
+    // Verificar si está al día
     const hace30Dias = new Date();
     hace30Dias.setDate(hace30Dias.getDate() - 30);
 
@@ -40,10 +49,22 @@ exports.listarClientes = async (req, res) => {
       totalClientes,
       alDia,
       vencidos,
-      totalRecaudado
+      totalRecaudado: totalRecaudadoHoy // solo del día
     }
   });
 };
+
+
+  res.render('index', {
+    clientes,
+    resumen: {
+      totalClientes,
+      alDia,
+      vencidos,
+      totalRecaudado
+    }
+  });
+
 
 exports.formularioNuevo = (req, res) => {
   res.render('nueva');
