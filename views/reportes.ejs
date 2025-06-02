@@ -4,7 +4,11 @@
   <meta charset="UTF-8">
   <title>Reporte de Ingresos</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Estilos -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
   <style>
     body {
       background-color: #f8f9fa;
@@ -36,8 +40,15 @@
       margin-top: 3rem;
     }
 
-    .filtro-select {
-      max-width: 220px;
+    #rangoFechas {
+      max-width: 300px;
+      margin: 0 auto;
+      border: 2px solid #0d6efd;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-weight: bold;
+      color: #0d6efd;
+      text-align: center;
     }
   </style>
 </head>
@@ -60,20 +71,14 @@
     <!-- FILTRO -->
     <div class="row justify-content-center mb-4">
       <div class="col-auto">
-        <select id="filtro" class="form-select filtro-select">
-          <option value="hoy">Hoy</option>
-          <option value="semana">Esta Semana</option>
-          <option value="mes">Este Mes</option>
-          <option value="anio">Este Año</option>
-        </select>
+        <input type="text" id="rangoFechas" class="form-control" placeholder="Seleccionar rango de fechas">
       </div>
     </div>
 
     <!-- TOTAL -->
     <div class="text-center mb-4">
       <h5 class="resumen-total">
-        Total Ingresos <span id="tituloFiltro"><%= filtro.charAt(0).toUpperCase() + filtro.slice(1) %></span>: 
-        <span class="text-success">$<span id="totalFiltro"><%= total.toFixed(2) %></span></span>
+        Total Ingresos: <span class="text-success">$<span id="totalFiltro"><%= total.toFixed(2) %></span></span>
       </h5>
     </div>
 
@@ -105,55 +110,55 @@
     Todos los derechos reservados - Levi Prog.
   </div>
 
-  <!-- SCRIPT FILTRO -->
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
   <script>
-    const filtro = document.getElementById('filtro');
-    const tabla = document.getElementById('tablaPagos');
-    const total = document.getElementById('totalFiltro');
-    const titulo = document.getElementById('tituloFiltro');
+    $(function () {
+      const tabla = document.getElementById('tablaPagos');
+      const total = document.getElementById('totalFiltro');
 
-    filtro.addEventListener('change', () => {
-      const filas = tabla.querySelectorAll('tr');
-      const ahora = new Date();
-      let totalMonto = 0;
+      $('#rangoFechas').daterangepicker({
+        startDate: moment().startOf('day'),
+        endDate: moment().endOf('day'),
+        locale: {
+          format: 'YYYY-MM-DD',
+          separator: ' al ',
+          applyLabel: 'Aplicar',
+          cancelLabel: 'Cancelar',
+          fromLabel: 'Desde',
+          toLabel: 'Hasta',
+          customRangeLabel: 'Personalizado',
+          weekLabel: 'S',
+          daysOfWeek: ['Do','Lu','Ma','Mi','Ju','Vi','Sa'],
+          monthNames: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
+          firstDay: 1
+        }
+      }, function(start, end) {
+        let totalMonto = 0;
 
-      filas.forEach(fila => {
-        const fechaStr = fila.getAttribute('data-fecha');
-        const fecha = new Date(fechaStr);
-        let mostrar = false;
+        $('#tablaPagos tr').each(function () {
+          const fechaStr = $(this).data('fecha');
+          if (!fechaStr) return;
 
-        switch (filtro.value) {
-          case 'hoy':
-            mostrar = fecha.toDateString() === ahora.toDateString();
-            titulo.textContent = 'Hoy';
-            break;
-          case 'semana': {
-            const inicioSemana = new Date(ahora);
-            inicioSemana.setDate(ahora.getDate() - ahora.getDay());
-            mostrar = fecha >= inicioSemana;
-            titulo.textContent = 'Esta Semana';
-            break;
+          const fecha = new Date(fechaStr);
+          if (fecha >= start.toDate() && fecha <= end.toDate()) {
+            $(this).show();
+            totalMonto += parseFloat($(this).find('td:eq(2)').text().replace('$',''));
+          } else {
+            $(this).hide();
           }
-          case 'mes':
-            mostrar = fecha.getMonth() === ahora.getMonth() && fecha.getFullYear() === ahora.getFullYear();
-            titulo.textContent = 'Este Mes';
-            break;
-          case 'anio':
-            mostrar = fecha.getFullYear() === ahora.getFullYear();
-            titulo.textContent = 'Este Año';
-            break;
-        }
+        });
 
-        if (mostrar) {
-          fila.style.display = '';
-          totalMonto += parseFloat(fila.children[2].textContent.replace('$', ''));
-        } else {
-          fila.style.display = 'none';
-        }
+        total.textContent = totalMonto.toFixed(2);
       });
 
-      total.textContent = totalMonto.toFixed(2);
+      // Ejecutar al cargar
+      $('#rangoFechas').trigger('apply.daterangepicker');
     });
   </script>
+
 </body>
 </html>

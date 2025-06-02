@@ -16,12 +16,10 @@ exports.listarClientes = async (req, res) => {
     let ultimoPago = null;
 
     if (cliente.pagos && cliente.pagos.length > 0) {
-      // Buscar el último pago
       ultimoPago = cliente.pagos.reduce((ultimo, actual) => {
         return new Date(actual.fecha) > new Date(ultimo.fecha) ? actual : ultimo;
       });
 
-      // Sumar pagos hechos hoy
       cliente.pagos.forEach(p => {
         const fechaPago = new Date(p.fecha);
         fechaPago.setHours(0, 0, 0, 0);
@@ -31,7 +29,6 @@ exports.listarClientes = async (req, res) => {
       });
     }
 
-    // Verificar si está al día
     const hace30Dias = new Date();
     hace30Dias.setDate(hace30Dias.getDate() - 30);
 
@@ -50,7 +47,7 @@ exports.listarClientes = async (req, res) => {
       totalClientes,
       alDia,
       vencidos,
-      totalRecaudado: totalRecaudadoHoy // SOLO del día
+      totalRecaudado: totalRecaudadoHoy
     }
   });
 };
@@ -65,6 +62,7 @@ exports.guardarCliente = async (req, res) => {
     await nuevoCliente.save();
     res.redirect('/');
   } catch (error) {
+    console.error('Error al guardar cliente:', error);
     res.status(500).send('Error al guardar cliente');
   }
 };
@@ -120,10 +118,11 @@ exports.eliminarPago = async (req, res) => {
   }
 };
 
-// Reportes
+// REPORTES
 exports.reportePagos = async (req, res) => {
   const filtro = req.query.filtro || 'hoy';
   const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
   const inicio = new Date(hoy);
 
   switch (filtro) {
@@ -136,22 +135,23 @@ exports.reportePagos = async (req, res) => {
     case 'anio':
       inicio.setFullYear(hoy.getFullYear() - 1);
       break;
-    default: // hoy
-      inicio.setHours(0, 0, 0, 0);
   }
 
   const clientes = await Cliente.find();
-
   let pagosFiltrados = [];
 
   clientes.forEach(cliente => {
-    const pagosValidos = cliente.pagos.filter(p => new Date(p.fecha) >= inicio);
-    pagosValidos.forEach(p => {
-      pagosFiltrados.push({
-        nombre: cliente.nombre + ' ' + cliente.apellido,
-        fecha: new Date(p.fecha),
-        monto: p.monto
-      });
+    cliente.pagos.forEach(p => {
+      const fechaPago = new Date(p.fecha);
+      fechaPago.setHours(0, 0, 0, 0);
+
+      if (fechaPago >= inicio) {
+        pagosFiltrados.push({
+          nombre: `${cliente.nombre} ${cliente.apellido}`,
+          fecha: fechaPago,
+          monto: p.monto
+        });
+      }
     });
   });
 
