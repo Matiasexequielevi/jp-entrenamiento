@@ -1,27 +1,26 @@
-
-
 const express = require('express');
 const router = express.Router();
 const clienteController = require('../controller/clienteController');
 
-
-// Ruta principal: listar todos los clientes
+// Ruta principal
 router.get('/', clienteController.listarClientes);
 
-// Formulario para agregar un nuevo cliente
-router.get('/nueva', clienteController.formularioNuevo); // Asegurate que esta función exista
+// Formulario para nuevo cliente
+router.get('/nueva', clienteController.formularioNuevo);
 router.post('/nueva', clienteController.guardarCliente);
 
-// Formulario para editar un cliente
+// Editar cliente
 router.get('/editar/:id', clienteController.formularioEditar);
 router.post('/editar/:id', clienteController.actualizarCliente);
 
-// Eliminar un cliente
+// Eliminar cliente
 router.post('/eliminar/:id', clienteController.eliminarCliente);
 
-// Agregar pago
+// Pagos
 router.post('/agregar-pago/:id', clienteController.agregarPago);
-router.post('/eliminar-pago/:id/:index', clienteController.eliminarPago);
+router.get('/eliminar-pago/:clienteId/:pagoId', clienteController.eliminarPago); // ← corregido aquí
+
+// Reportes
 router.get('/reportes', clienteController.mostrarReportes);
 
 module.exports = router;
