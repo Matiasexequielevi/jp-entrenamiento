@@ -5,7 +5,7 @@ exports.listarClientes = async (req, res) => {
   const clientes = await Cliente.find().sort({ creadoEn: -1 });
 
   const hoy = new Date();
-  hoy.setHours(0, 0, 0, 0); // Comienza el día a las 00:00
+  hoy.setHours(0, 0, 0, 0); // Comienzo del día
 
   let totalClientes = clientes.length;
   let alDia = 0;
@@ -21,7 +21,7 @@ exports.listarClientes = async (req, res) => {
         return new Date(actual.fecha) > new Date(ultimo.fecha) ? actual : ultimo;
       });
 
-      // Sumar pagos del día
+      // Sumar pagos hechos HOY
       cliente.pagos.forEach(p => {
         const fechaPago = new Date(p.fecha);
         fechaPago.setHours(0, 0, 0, 0);
@@ -53,6 +53,7 @@ exports.listarClientes = async (req, res) => {
     }
   });
 };
+
 
 exports.formularioNuevo = (req, res) => {
   res.render('nueva');

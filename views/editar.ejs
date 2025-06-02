@@ -72,13 +72,8 @@
 
         <div class="mb-3">
           <label class="form-label fw-bold">Asistencia:</label>
-          <input type="text" class="form-control" readonly value="
-            <% const dias = cliente.asistencia?.semanal || {}; %>
-            <%= dias.lunes ? 'Lunes ' : '' %>
-            <%= dias.martes ? 'Martes ' : '' %>
-            <%= dias.miercoles ? 'Miércoles ' : '' %>
-            <%= dias.jueves ? 'Jueves ' : '' %>
-            <%= dias.viernes ? 'Viernes' : '' %>">
+          <input type="text" class="form-control" readonly 
+          value="<%= Object.entries(cliente.asistencia?.semanal || {}).filter(([dia, activo]) => activo).map(([dia]) => dia.charAt(0).toUpperCase() + dia.slice(1)).join(', ') %>">
         </div>
 
         <button type="button" id="editarBtn" class="btn btn-warning w-100 mt-3">Editar Información</button>
@@ -115,12 +110,12 @@
           </thead>
           <tbody>
             <% let total = 0; %>
-            <% cliente.pagos.forEach((pago, index) => { total += pago.monto; %>
+            <% cliente.pagos.forEach((pago) => { total += pago.monto; %>
               <tr>
                 <td><%= new Date(pago.fecha).toLocaleDateString() %></td>
                 <td>$<%= pago.monto.toFixed(2) %></td>
                 <td>
-                  <form action="/eliminar-pago/<%= cliente._id %>/<%= index %>" method="POST" onsubmit="return confirm('¿Eliminar este pago?');">
+                  <form action="/eliminar-pago/<%= cliente._id %>/<%= pago._id %>" method="POST" onsubmit="return confirm('¿Eliminar este pago?');">
                     <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
                   </form>
                 </td>
