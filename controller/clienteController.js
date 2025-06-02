@@ -105,3 +105,14 @@ exports.guardarCliente = async (req, res) => {
     res.status(500).send('Error al guardar cliente');
   }
 };
+exports.eliminarPago = async (req, res) => {
+  const { clienteId, pagoId } = req.params;
+  try {
+    await Cliente.findByIdAndUpdate(clienteId, {
+      $pull: { pagos: { _id: pagoId } }
+    });
+    res.redirect('/editar/' + clienteId);
+  } catch (error) {
+    res.status(500).send('Error al eliminar el pago');
+  }
+};

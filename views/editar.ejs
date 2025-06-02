@@ -28,7 +28,7 @@
       <h2 class="text-primary fw-bold mt-3"> Alumno <%= cliente.nombre %> <%= cliente.apellido %></h2>
     </div>
 
-    <!-- Formulario -->
+    <!-- Formulario de datos -->
     <form action="/editar/<%= cliente._id %>" method="POST">
       <div class="card shadow-sm p-4 mb-5" style="border-radius: 20px;">
 
@@ -105,25 +105,31 @@
       </form>
 
       <% if (cliente.pagos && cliente.pagos.length > 0) { %>
-        <table class="table table-bordered text-center">
+        <table class="table table-bordered text-center align-middle">
           <thead class="table-light">
             <tr>
               <th>Fecha</th>
               <th>Monto</th>
+              <th>Acción</th>
             </tr>
           </thead>
           <tbody>
             <% let total = 0; %>
-            <% cliente.pagos.forEach(pago => { total += pago.monto; %>
+            <% cliente.pagos.forEach((pago, index) => { total += pago.monto; %>
               <tr>
                 <td><%= new Date(pago.fecha).toLocaleDateString() %></td>
                 <td>$<%= pago.monto.toFixed(2) %></td>
+                <td>
+                  <form action="/eliminar-pago/<%= cliente._id %>/<%= index %>" method="POST" onsubmit="return confirm('¿Eliminar este pago?');">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                  </form>
+                </td>
               </tr>
             <% }) %>
           </tbody>
           <tfoot>
             <tr>
-              <th>Total</th>
+              <th colspan="2">Total</th>
               <th>$<%= total.toFixed(2) %></th>
             </tr>
           </tfoot>
