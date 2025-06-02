@@ -22,5 +22,6 @@ router.post('/eliminar/:id', clienteController.eliminarCliente);
 // Agregar pago
 router.post('/agregar-pago/:id', clienteController.agregarPago);
 router.post('/eliminar-pago/:id/:index', clienteController.eliminarPago);
+router.get('/reportes', clienteController.mostrarReportes);
 
 module.exports = router;

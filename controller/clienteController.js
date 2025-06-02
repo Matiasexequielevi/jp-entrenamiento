@@ -22,7 +22,6 @@ exports.listarClientes = async (req, res) => {
       totalRecaudado += cliente.pagos.reduce((suma, pago) => suma + pago.monto, 0);
     }
 
-    // Verificar si está al día (último pago dentro de los últimos 30 días)
     const hace30Dias = new Date();
     hace30Dias.setDate(hace30Dias.getDate() - 30);
 
@@ -46,12 +45,21 @@ exports.listarClientes = async (req, res) => {
   });
 };
 
-// Mostrar formulario nuevo
 exports.formularioNuevo = (req, res) => {
   res.render('nueva');
 };
 
-// Mostrar formulario para editar cliente
+exports.guardarCliente = async (req, res) => {
+  try {
+    const nuevoCliente = new Cliente(req.body);
+    await nuevoCliente.save();
+    res.redirect('/');
+  } catch (error) {
+    console.error('Error al guardar cliente:', error);
+    res.status(500).send('Error al guardar cliente');
+  }
+};
+
 exports.formularioEditar = async (req, res) => {
   try {
     const cliente = await Cliente.findById(req.params.id);
@@ -61,7 +69,6 @@ exports.formularioEditar = async (req, res) => {
   }
 };
 
-// Actualizar cliente
 exports.actualizarCliente = async (req, res) => {
   try {
     await Cliente.findByIdAndUpdate(req.params.id, req.body);
@@ -71,7 +78,6 @@ exports.actualizarCliente = async (req, res) => {
   }
 };
 
-// Eliminar cliente
 exports.eliminarCliente = async (req, res) => {
   try {
     await Cliente.findByIdAndDelete(req.params.id);
@@ -81,7 +87,6 @@ exports.eliminarCliente = async (req, res) => {
   }
 };
 
-// Agregar pago
 exports.agregarPago = async (req, res) => {
   const { fecha, monto } = req.body;
 
@@ -94,32 +99,61 @@ exports.agregarPago = async (req, res) => {
     res.status(500).send('Error al agregar pago');
   }
 };
-// Guardar cliente nuevo
-exports.guardarCliente = async (req, res) => {
-  try {
-    const nuevoCliente = new Cliente(req.body);
-    await nuevoCliente.save();
-    res.redirect('/');
-  } catch (error) {
-    console.error('Error al guardar cliente:', error);
-    res.status(500).send('Error al guardar cliente');
-  }
-};
+
 exports.eliminarPago = async (req, res) => {
-  const { id, index } = req.params;
-
+  const { clienteId, pagoId } = req.params;
   try {
-    const cliente = await Cliente.findById(id);
-    if (!cliente || !cliente.pagos || cliente.pagos.length <= index) {
-      return res.status(404).send('Pago no encontrado');
-    }
-
-    cliente.pagos.splice(index, 1); // Elimina el pago por índice
-    await cliente.save();
-
-    res.redirect('/editar/' + id);
+    await Cliente.findByIdAndUpdate(clienteId, {
+      $pull: { pagos: { _id: pagoId } }
+    });
+    res.redirect('/editar/' + clienteId);
   } catch (error) {
-    console.error('Error al eliminar pago:', error);
     res.status(500).send('Error al eliminar el pago');
   }
+};
+
+// REPORTES
+exports.reportePagos = async (req, res) => {
+  const filtro = req.query.filtro || 'hoy';
+  const hoy = new Date();
+  const inicio = new Date();
+
+  switch (filtro) {
+    case 'semana':
+      inicio.setDate(hoy.getDate() - 7);
+      break;
+    case 'mes':
+      inicio.setMonth(hoy.getMonth() - 1);
+      break;
+    case 'anio':
+      inicio.setFullYear(hoy.getFullYear() - 1);
+      break;
+    default: // hoy
+      inicio.setHours(0, 0, 0, 0);
+  }
+
+  const clientes = await Cliente.find();
+
+  let pagosFiltrados = [];
+
+  clientes.forEach(cliente => {
+    const pagosValidos = cliente.pagos.filter(p => new Date(p.fecha) >= inicio);
+    pagosValidos.forEach(p => {
+      pagosFiltrados.push({
+        nombre: cliente.nombre + ' ' + cliente.apellido,
+        fecha: new Date(p.fecha),
+        monto: p.monto
+      });
+    });
+  });
+
+  pagosFiltrados.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+  const total = pagosFiltrados.reduce((acc, pago) => acc + pago.monto, 0);
+
+  res.render('reportes', {
+    pagos: pagosFiltrados,
+    total,
+    filtro
+  });
 };
