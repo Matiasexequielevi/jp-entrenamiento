@@ -106,13 +106,20 @@ exports.guardarCliente = async (req, res) => {
   }
 };
 exports.eliminarPago = async (req, res) => {
-  const { clienteId, pagoId } = req.params;
+  const { id, index } = req.params;
+
   try {
-    await Cliente.findByIdAndUpdate(clienteId, {
-      $pull: { pagos: { _id: pagoId } }
-    });
-    res.redirect('/editar/' + clienteId);
+    const cliente = await Cliente.findById(id);
+    if (!cliente || !cliente.pagos || cliente.pagos.length <= index) {
+      return res.status(404).send('Pago no encontrado');
+    }
+
+    cliente.pagos.splice(index, 1); // Elimina el pago por índice
+    await cliente.save();
+
+    res.redirect('/editar/' + id);
   } catch (error) {
+    console.error('Error al eliminar pago:', error);
     res.status(500).send('Error al eliminar el pago');
   }
 };
