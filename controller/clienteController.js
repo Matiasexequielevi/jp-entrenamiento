@@ -1,11 +1,14 @@
 const Cliente = require('../models/cliente');
 
 // Mostrar todos los clientes con resumen real de pagos (solo total del día)
+// Mostrar todos los clientes con resumen real de pagos del día
 exports.listarClientes = async (req, res) => {
   const clientes = await Cliente.find().sort({ creadoEn: -1 });
 
   const hoy = new Date();
-  hoy.setHours(0, 0, 0, 0); // Comienzo del día
+  hoy.setHours(0, 0, 0, 0); // Normalizar a 00:00:00
+  const maniana = new Date(hoy);
+  maniana.setDate(hoy.getDate() + 1); // Fin del día
 
   let totalClientes = clientes.length;
   let alDia = 0;
@@ -21,16 +24,16 @@ exports.listarClientes = async (req, res) => {
         return new Date(actual.fecha) > new Date(ultimo.fecha) ? actual : ultimo;
       });
 
-      // Sumar pagos hechos HOY
+      // Sumar pagos hechos HOY (entre 00:00 y 23:59)
       cliente.pagos.forEach(p => {
         const fechaPago = new Date(p.fecha);
-        fechaPago.setHours(0, 0, 0, 0);
-        if (fechaPago.getTime() === hoy.getTime()) {
+        if (fechaPago >= hoy && fechaPago < maniana) {
           totalRecaudadoHoy += p.monto;
         }
       });
     }
 
+    // Verificar si el último pago está dentro de los últimos 30 días
     const hace30Dias = new Date();
     hace30Dias.setDate(hace30Dias.getDate() - 30);
 
@@ -53,6 +56,7 @@ exports.listarClientes = async (req, res) => {
     }
   });
 };
+
 
 
 exports.formularioNuevo = (req, res) => {
