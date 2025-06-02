@@ -120,47 +120,47 @@ exports.eliminarPago = async (req, res) => {
 
 // REPORTES
 exports.reportePagos = async (req, res) => {
-  const filtro = req.query.filtro || 'hoy';
-  const hoy = new Date();
-  hoy.setHours(0, 0, 0, 0);
-  const inicio = new Date(hoy);
+  try {
+    const clientes = await Cliente.find();
 
-  switch (filtro) {
-    case 'semana':
-      inicio.setDate(hoy.getDate() - 7);
-      break;
-    case 'mes':
-      inicio.setMonth(hoy.getMonth() - 1);
-      break;
-    case 'anio':
-      inicio.setFullYear(hoy.getFullYear() - 1);
-      break;
-  }
+    // Obtener rango de fechas del query o usar por defecto hoy
+    const desde = req.query.desde ? new Date(req.query.desde) : new Date();
+    const hasta = req.query.hasta ? new Date(req.query.hasta) : new Date();
 
-  const clientes = await Cliente.find();
-  let pagosFiltrados = [];
+    // Ajustar la hora de las fechas
+    desde.setHours(0, 0, 0, 0);
+    hasta.setHours(23, 59, 59, 999);
 
-  clientes.forEach(cliente => {
-    cliente.pagos.forEach(p => {
-      const fechaPago = new Date(p.fecha);
-      fechaPago.setHours(0, 0, 0, 0);
+    let pagosFiltrados = [];
 
-      if (fechaPago >= inicio) {
+    clientes.forEach(cliente => {
+      const pagosValidos = cliente.pagos.filter(p => {
+        const fechaPago = new Date(p.fecha);
+        return fechaPago >= desde && fechaPago <= hasta;
+      });
+
+      pagosValidos.forEach(p => {
         pagosFiltrados.push({
-          nombre: `${cliente.nombre} ${cliente.apellido}`,
-          fecha: fechaPago,
+          nombre: cliente.nombre + ' ' + cliente.apellido,
+          fecha: new Date(p.fecha),
           monto: p.monto
         });
-      }
+      });
     });
-  });
 
-  pagosFiltrados.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-  const total = pagosFiltrados.reduce((acc, pago) => acc + pago.monto, 0);
+    pagosFiltrados.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
-  res.render('reportes', {
-    pagos: pagosFiltrados,
-    total,
-    filtro
-  });
+    const total = pagosFiltrados.reduce((acc, pago) => acc + pago.monto, 0);
+
+    res.render('reportes', {
+      pagos: pagosFiltrados,
+      total,
+      desde: desde.toISOString().split('T')[0],
+      hasta: hasta.toISOString().split('T')[0]
+    });
+  } catch (error) {
+    console.error('Error en reportePagos:', error);
+    res.status(500).send('Error al generar reporte');
+  }
 };
+

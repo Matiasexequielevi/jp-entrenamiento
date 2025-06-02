@@ -116,49 +116,54 @@
   <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 
   <script>
-    $(function () {
-      const tabla = document.getElementById('tablaPagos');
-      const total = document.getElementById('totalFiltro');
+  $(function () {
+    const tabla = document.getElementById('tablaPagos');
+    const total = document.getElementById('totalFiltro');
 
-      $('#rangoFechas').daterangepicker({
-        startDate: moment().startOf('day'),
-        endDate: moment().endOf('day'),
-        locale: {
-          format: 'YYYY-MM-DD',
-          separator: ' al ',
-          applyLabel: 'Aplicar',
-          cancelLabel: 'Cancelar',
-          fromLabel: 'Desde',
-          toLabel: 'Hasta',
-          customRangeLabel: 'Personalizado',
-          weekLabel: 'S',
-          daysOfWeek: ['Do','Lu','Ma','Mi','Ju','Vi','Sa'],
-          monthNames: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
-          firstDay: 1
+    function filtrarTabla(start, end) {
+      let totalMonto = 0;
+
+      $('#tablaPagos tr').each(function () {
+        const fechaStr = $(this).data('fecha');
+        if (!fechaStr) return;
+
+        const fecha = new Date(fechaStr);
+        if (fecha >= start.toDate() && fecha <= end.toDate()) {
+          $(this).show();
+          totalMonto += parseFloat($(this).find('td:eq(2)').text().replace('$',''));
+        } else {
+          $(this).hide();
         }
-      }, function(start, end) {
-        let totalMonto = 0;
-
-        $('#tablaPagos tr').each(function () {
-          const fechaStr = $(this).data('fecha');
-          if (!fechaStr) return;
-
-          const fecha = new Date(fechaStr);
-          if (fecha >= start.toDate() && fecha <= end.toDate()) {
-            $(this).show();
-            totalMonto += parseFloat($(this).find('td:eq(2)').text().replace('$',''));
-          } else {
-            $(this).hide();
-          }
-        });
-
-        total.textContent = totalMonto.toFixed(2);
       });
 
-      // Ejecutar al cargar
-      $('#rangoFechas').trigger('apply.daterangepicker');
-    });
-  </script>
+      total.textContent = totalMonto.toFixed(2);
+    }
+
+    // Inicialización del daterangepicker
+    $('#rangoFechas').daterangepicker({
+      startDate: moment().startOf('day'),
+      endDate: moment().endOf('day'),
+      locale: {
+        format: 'YYYY-MM-DD',
+        separator: ' al ',
+        applyLabel: 'Aplicar',
+        cancelLabel: 'Cancelar',
+        fromLabel: 'Desde',
+        toLabel: 'Hasta',
+        customRangeLabel: 'Personalizado',
+        weekLabel: 'S',
+        daysOfWeek: ['Do','Lu','Ma','Mi','Ju','Vi','Sa'],
+        monthNames: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
+        firstDay: 1
+      }
+    }, filtrarTabla);
+
+    // Ejecutar filtrado al cargar la página
+    const picker = $('#rangoFechas').data('daterangepicker');
+    filtrarTabla(picker.startDate, picker.endDate);
+  });
+</script>
+
 
 </body>
 </html>
