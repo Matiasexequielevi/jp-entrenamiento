@@ -1,11 +1,11 @@
 const Cliente = require('../models/cliente');
 
-// Mostrar todos los clientes con resumen real de pagos
+// Mostrar todos los clientes con resumen real de pagos (solo total del día)
 exports.listarClientes = async (req, res) => {
   const clientes = await Cliente.find().sort({ creadoEn: -1 });
 
   const hoy = new Date();
-  hoy.setHours(0, 0, 0, 0);
+  hoy.setHours(0, 0, 0, 0); // Comienza el día a las 00:00
 
   let totalClientes = clientes.length;
   let alDia = 0;
@@ -21,16 +21,16 @@ exports.listarClientes = async (req, res) => {
         return new Date(actual.fecha) > new Date(ultimo.fecha) ? actual : ultimo;
       });
 
-      // Sumar pagos de hoy
+      // Sumar pagos del día
       cliente.pagos.forEach(p => {
         const fechaPago = new Date(p.fecha);
-        if (fechaPago >= hoy) {
+        fechaPago.setHours(0, 0, 0, 0);
+        if (fechaPago.getTime() === hoy.getTime()) {
           totalRecaudadoHoy += p.monto;
         }
       });
     }
 
-    // Verificar si está al día
     const hace30Dias = new Date();
     hace30Dias.setDate(hace30Dias.getDate() - 30);
 
@@ -49,22 +49,10 @@ exports.listarClientes = async (req, res) => {
       totalClientes,
       alDia,
       vencidos,
-      totalRecaudado: totalRecaudadoHoy // solo del día
+      totalRecaudado: totalRecaudadoHoy
     }
   });
 };
-
-
-  res.render('index', {
-    clientes,
-    resumen: {
-      totalClientes,
-      alDia,
-      vencidos,
-      totalRecaudado
-    }
-  });
-
 
 exports.formularioNuevo = (req, res) => {
   res.render('nueva');
@@ -133,7 +121,7 @@ exports.eliminarPago = async (req, res) => {
   }
 };
 
-// REPORTES
+// Reportes por fecha
 exports.reportePagos = async (req, res) => {
   const filtro = req.query.filtro || 'hoy';
   const hoy = new Date();
@@ -149,12 +137,11 @@ exports.reportePagos = async (req, res) => {
     case 'anio':
       inicio.setFullYear(hoy.getFullYear() - 1);
       break;
-    default: // hoy
+    default:
       inicio.setHours(0, 0, 0, 0);
   }
 
   const clientes = await Cliente.find();
-
   let pagosFiltrados = [];
 
   clientes.forEach(cliente => {
@@ -169,7 +156,6 @@ exports.reportePagos = async (req, res) => {
   });
 
   pagosFiltrados.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-
   const total = pagosFiltrados.reduce((acc, pago) => acc + pago.monto, 0);
 
   res.render('reportes', {
