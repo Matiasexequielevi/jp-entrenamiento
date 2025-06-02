@@ -1,14 +1,11 @@
 const Cliente = require('../models/cliente');
 
-// Mostrar todos los clientes con resumen real de pagos (solo total del día)
-// Mostrar todos los clientes con resumen real de pagos del día
+// Mostrar todos los clientes con resumen real de pagos
 exports.listarClientes = async (req, res) => {
   const clientes = await Cliente.find().sort({ creadoEn: -1 });
 
   const hoy = new Date();
-  hoy.setHours(0, 0, 0, 0); // Normalizar a 00:00:00
-  const maniana = new Date(hoy);
-  maniana.setDate(hoy.getDate() + 1); // Fin del día
+  hoy.setHours(0, 0, 0, 0);
 
   let totalClientes = clientes.length;
   let alDia = 0;
@@ -24,16 +21,17 @@ exports.listarClientes = async (req, res) => {
         return new Date(actual.fecha) > new Date(ultimo.fecha) ? actual : ultimo;
       });
 
-      // Sumar pagos hechos HOY (entre 00:00 y 23:59)
+      // Sumar pagos hechos hoy
       cliente.pagos.forEach(p => {
         const fechaPago = new Date(p.fecha);
-        if (fechaPago >= hoy && fechaPago < maniana) {
+        fechaPago.setHours(0, 0, 0, 0);
+        if (fechaPago.getTime() === hoy.getTime()) {
           totalRecaudadoHoy += p.monto;
         }
       });
     }
 
-    // Verificar si el último pago está dentro de los últimos 30 días
+    // Verificar si está al día
     const hace30Dias = new Date();
     hace30Dias.setDate(hace30Dias.getDate() - 30);
 
@@ -52,12 +50,10 @@ exports.listarClientes = async (req, res) => {
       totalClientes,
       alDia,
       vencidos,
-      totalRecaudado: totalRecaudadoHoy
+      totalRecaudado: totalRecaudadoHoy // SOLO del día
     }
   });
 };
-
-
 
 exports.formularioNuevo = (req, res) => {
   res.render('nueva');
@@ -69,7 +65,6 @@ exports.guardarCliente = async (req, res) => {
     await nuevoCliente.save();
     res.redirect('/');
   } catch (error) {
-    console.error('Error al guardar cliente:', error);
     res.status(500).send('Error al guardar cliente');
   }
 };
@@ -103,7 +98,6 @@ exports.eliminarCliente = async (req, res) => {
 
 exports.agregarPago = async (req, res) => {
   const { fecha, monto } = req.body;
-
   try {
     const cliente = await Cliente.findById(req.params.id);
     cliente.pagos.push({ fecha, monto });
@@ -126,11 +120,11 @@ exports.eliminarPago = async (req, res) => {
   }
 };
 
-// Reportes por fecha
+// Reportes
 exports.reportePagos = async (req, res) => {
   const filtro = req.query.filtro || 'hoy';
   const hoy = new Date();
-  const inicio = new Date();
+  const inicio = new Date(hoy);
 
   switch (filtro) {
     case 'semana':
@@ -142,11 +136,12 @@ exports.reportePagos = async (req, res) => {
     case 'anio':
       inicio.setFullYear(hoy.getFullYear() - 1);
       break;
-    default:
+    default: // hoy
       inicio.setHours(0, 0, 0, 0);
   }
 
   const clientes = await Cliente.find();
+
   let pagosFiltrados = [];
 
   clientes.forEach(cliente => {
