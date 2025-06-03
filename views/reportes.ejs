@@ -4,8 +4,6 @@
   <meta charset="UTF-8">
   <title>Reporte de Ingresos</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- Estilos -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 
@@ -94,7 +92,7 @@
         </thead>
         <tbody id="tablaPagos">
           <% pagos.forEach(pago => { %>
-            <tr>
+            <tr data-fecha="<%= pago.fecha.toISOString() %>">
               <td><%= pago.nombre %></td>
               <td><%= pago.fecha.toLocaleDateString() %></td>
               <td>$<%= pago.monto.toFixed(2) %></td>
@@ -117,9 +115,31 @@
 
   <script>
     $(function () {
+      const $tabla = $('#tablaPagos');
+      const $total = $('#totalFiltro');
+
+      function filtrarTabla(start, end) {
+        let totalMonto = 0;
+
+        $tabla.find('tr').each(function () {
+          const fechaStr = $(this).data('fecha');
+          if (!fechaStr) return;
+
+          const fecha = new Date(fechaStr);
+          if (fecha >= start.toDate() && fecha <= end.toDate()) {
+            $(this).show();
+            totalMonto += parseFloat($(this).find('td:eq(2)').text().replace('$', ''));
+          } else {
+            $(this).hide();
+          }
+        });
+
+        $total.text(totalMonto.toFixed(2));
+      }
+
       $('#rangoFechas').daterangepicker({
-        startDate: "<%= desde %>",
-        endDate: "<%= hasta %>",
+        startDate: moment("<%= desde %>"),
+        endDate: moment("<%= hasta %>"),
         locale: {
           format: 'YYYY-MM-DD',
           separator: ' al ',
@@ -134,13 +154,13 @@
           firstDay: 1
         }
       }, function(start, end) {
-        // Redireccionar con los parámetros de fecha al backend
-        const desde = start.format('YYYY-MM-DD');
-        const hasta = end.format('YYYY-MM-DD');
-        window.location.href = `/reportes?desde=${desde}&hasta=${hasta}`;
+        filtrarTabla(start, end);
       });
+
+      // Ejecutar al cargar
+      const picker = $('#rangoFechas').data('daterangepicker');
+      filtrarTabla(picker.startDate, picker.endDate);
     });
   </script>
-
 </body>
 </html>
