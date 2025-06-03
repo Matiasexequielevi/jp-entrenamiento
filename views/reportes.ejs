@@ -5,7 +5,7 @@
   <title>Reporte de Ingresos</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Estilos -->
+  <!-- Estilos y Date Range Picker -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 
@@ -49,6 +49,7 @@
       font-weight: bold;
       color: #0d6efd;
       text-align: center;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -71,7 +72,7 @@
     <!-- FILTRO -->
     <div class="row justify-content-center mb-4">
       <div class="col-auto">
-        <input type="text" id="rangoFechas" class="form-control" placeholder="Seleccionar rango de fechas">
+        <input type="text" id="rangoFechas" class="form-control" value="<%= desde %> al <%= hasta %>">
       </div>
     </div>
 
@@ -94,7 +95,7 @@
         </thead>
         <tbody id="tablaPagos">
           <% pagos.forEach(pago => { %>
-            <tr>
+            <tr data-fecha="<%= pago.fecha.toISOString() %>">
               <td><%= pago.nombre %></td>
               <td><%= pago.fecha.toLocaleDateString() %></td>
               <td>$<%= pago.monto.toFixed(2) %></td>
@@ -110,16 +111,19 @@
     Todos los derechos reservados - Levi Prog.
   </div>
 
-  <!-- Scripts -->
+  <!-- SCRIPTS -->
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 
   <script>
-    $(function () {
+    $(document).ready(function () {
       $('#rangoFechas').daterangepicker({
         startDate: moment('<%= desde %>'),
         endDate: moment('<%= hasta %>'),
+        autoApply: true,
+        showDropdowns: true,
+        linkedCalendars: false,
         locale: {
           format: 'YYYY-MM-DD',
           separator: ' al ',
