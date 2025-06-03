@@ -123,11 +123,11 @@ exports.reportePagos = async (req, res) => {
   try {
     const clientes = await Cliente.find();
 
-    // Obtener rango de fechas del query o usar por defecto hoy
-    const desde = req.query.desde ? new Date(req.query.desde) : new Date();
-    const hasta = req.query.hasta ? new Date(req.query.hasta) : new Date();
+    // Usar fechas del query desde daterangepicker
+    const desde = req.query.start ? new Date(req.query.start) : new Date();
+    const hasta = req.query.end ? new Date(req.query.end) : new Date();
 
-    // Ajustar la hora de las fechas
+    // Ajustar hora completa
     desde.setHours(0, 0, 0, 0);
     hasta.setHours(23, 59, 59, 999);
 
@@ -149,7 +149,6 @@ exports.reportePagos = async (req, res) => {
     });
 
     pagosFiltrados.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-
     const total = pagosFiltrados.reduce((acc, pago) => acc + pago.monto, 0);
 
     res.render('reportes', {
@@ -163,4 +162,3 @@ exports.reportePagos = async (req, res) => {
     res.status(500).send('Error al generar reporte');
   }
 };
-
