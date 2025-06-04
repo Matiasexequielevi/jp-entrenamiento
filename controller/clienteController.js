@@ -123,32 +123,30 @@ exports.reportePagos = async (req, res) => {
   try {
     const clientes = await Cliente.find();
 
-    // Usar fechas del query desde daterangepicker
-    const desde = req.query.start ? new Date(req.query.start) : new Date();
-    const hasta = req.query.end ? new Date(req.query.end) : new Date();
+    // Obtener rango de fechas del query o usar hoy por defecto
+    const desde = req.query.desde ? new Date(req.query.desde) : new Date();
+    const hasta = req.query.hasta ? new Date(req.query.hasta) : new Date();
 
-    // Ajustar hora completa
     desde.setHours(0, 0, 0, 0);
     hasta.setHours(23, 59, 59, 999);
 
     let pagosFiltrados = [];
 
     clientes.forEach(cliente => {
-      const pagosValidos = cliente.pagos.filter(p => {
-        const fechaPago = new Date(p.fecha);
-        return fechaPago >= desde && fechaPago <= hasta;
-      });
-
-      pagosValidos.forEach(p => {
-        pagosFiltrados.push({
-          nombre: cliente.nombre + ' ' + cliente.apellido,
-          fecha: new Date(p.fecha),
-          monto: p.monto
-        });
+      cliente.pagos.forEach(pago => {
+        const fechaPago = new Date(pago.fecha);
+        if (fechaPago >= desde && fechaPago <= hasta) {
+          pagosFiltrados.push({
+            nombre: cliente.nombre + ' ' + cliente.apellido,
+            fecha: fechaPago,
+            monto: pago.monto
+          });
+        }
       });
     });
 
     pagosFiltrados.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
     const total = pagosFiltrados.reduce((acc, pago) => acc + pago.monto, 0);
 
     res.render('reportes', {
