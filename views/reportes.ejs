@@ -48,7 +48,7 @@
           <% pagos.forEach(pago => { %>
             <tr data-fecha="<%= new Date(pago.fecha).toISOString() %>">
               <td><%= pago.nombre %></td>
-              <td><%= new Date(pago.fecha).toLocaleDateString('es-ES') %></td>
+              <td><%= new Date(pago.fecha).toLocaleDateString() %></td>
               <td>$<%= pago.monto.toFixed(2) %></td>
             </tr>
           <% }) %>
@@ -91,7 +91,6 @@
           firstDay: 1
         }
       }, filtrarTabla);
-
       const picker = $('#rangoFechas').data('daterangepicker');
       filtrarTabla(picker.startDate, picker.endDate);
     });

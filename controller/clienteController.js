@@ -52,6 +52,56 @@ exports.listarClientes = async (req, res) => {
   });
 };
 
+// =======================================
+// ============= REPORTES ================
+// =======================================
+exports.reportePagos = async (req, res) => {
+  try {
+    const clientes = await Cliente.find();
+
+    const desde = req.query.desde ? new Date(req.query.desde) : new Date('2000-01-01');
+    const hasta = req.query.hasta ? new Date(req.query.hasta) : new Date();
+
+    desde.setHours(0, 0, 0, 0);
+    hasta.setHours(23, 59, 59, 999);
+
+    let pagosFiltrados = [];
+
+    clientes.forEach(cliente => {
+      cliente.pagos.forEach(pago => {
+        const fechaPago = new Date(pago.fecha);
+
+        if (fechaPago >= desde && fechaPago <= hasta) {
+          pagosFiltrados.push({
+            nombre: cliente.nombre + ' ' + cliente.apellido,
+            fecha: fechaPago,
+            monto: pago.monto
+          });
+        }
+      });
+    });
+
+    pagosFiltrados.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+    const total = pagosFiltrados.reduce((acc, pago) => acc + pago.monto, 0);
+
+    res.render('reportes', {
+      pagos: pagosFiltrados,
+      total,
+      desde: desde.toISOString().split('T')[0],
+      hasta: hasta.toISOString().split('T')[0]
+    });
+
+  } catch (error) {
+    console.error('Error en reportePagos:', error);
+    res.status(500).send('Error al generar el reporte');
+  }
+};
+
+// =======================================
+// === Resto de funciones de clientes ====
+// =======================================
+
 exports.formularioNuevo = (req, res) => {
   res.render('nueva');
 };
@@ -115,48 +165,5 @@ exports.eliminarPago = async (req, res) => {
     res.redirect('/editar/' + clienteId);
   } catch (error) {
     res.status(500).send('Error al eliminar el pago');
-  }
-};
-
-// REPORTES
-exports.reportePagos = async (req, res) => {
-  try {
-    const clientes = await Cliente.find();
-
-    // Obtener rango de fechas del query o usar hoy por defecto
-    const desde = req.query.desde ? new Date(req.query.desde) : new Date();
-    const hasta = req.query.hasta ? new Date(req.query.hasta) : new Date();
-
-    desde.setHours(0, 0, 0, 0);
-    hasta.setHours(23, 59, 59, 999);
-
-    let pagosFiltrados = [];
-
-    clientes.forEach(cliente => {
-      cliente.pagos.forEach(pago => {
-        const fechaPago = new Date(pago.fecha);
-        if (fechaPago >= desde && fechaPago <= hasta) {
-          pagosFiltrados.push({
-            nombre: cliente.nombre + ' ' + cliente.apellido,
-            fecha: fechaPago,
-            monto: pago.monto
-          });
-        }
-      });
-    });
-
-    pagosFiltrados.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-
-    const total = pagosFiltrados.reduce((acc, pago) => acc + pago.monto, 0);
-
-    res.render('reportes', {
-      pagos: pagosFiltrados,
-      total,
-      desde: desde.toISOString().split('T')[0],
-      hasta: hasta.toISOString().split('T')[0]
-    });
-  } catch (error) {
-    console.error('Error en reportePagos:', error);
-    res.status(500).send('Error al generar reporte');
   }
 };
