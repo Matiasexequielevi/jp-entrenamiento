@@ -11,15 +11,32 @@
       background-color: #f8f9fa;
       font-family: 'Segoe UI', sans-serif;
     }
+
     header {
       background-color: #b2bcdd;
       padding: 1rem 0;
       text-align: center;
+      color: rgb(48, 45, 45);
     }
+
     header img {
       width: 80px;
       border-radius: 50%;
+      margin-bottom: 0.5rem;
     }
+
+    .resumen-total {
+      font-size: 1.3rem;
+    }
+
+    .footer {
+      background-color: #b2bcdd;
+      color: rgb(48, 45, 45);
+      text-align: center;
+      padding: 0.8rem 0;
+      margin-top: 3rem;
+    }
+
     #rangoFechas {
       max-width: 300px;
       margin: 0 auto;
@@ -29,6 +46,10 @@
       font-weight: bold;
       color: #0d6efd;
       text-align: center;
+    }
+
+    .filtro-btns .btn {
+      margin: 0 5px 10px;
     }
   </style>
 </head>
@@ -40,21 +61,37 @@
   </header>
 
   <div class="container py-4">
+
     <div class="text-center mb-4">
       <a href="/" class="btn btn-outline-dark mb-3">← Volver al Inicio</a>
       <h3 class="fw-bold text-primary">📊 Reporte de Ingresos</h3>
     </div>
 
-    <div class="row justify-content-center mb-4">
+    <!-- Filtros -->
+    <div class="row justify-content-center mb-3 filtro-btns text-center">
       <div class="col-auto">
-        <input type="text" id="rangoFechas" class="form-control" placeholder="Seleccionar fechas">
+        <button class="btn btn-outline-primary" onclick="filtrar('hoy')">Hoy</button>
+        <button class="btn btn-outline-primary" onclick="filtrar('semana')">Esta Semana</button>
+        <button class="btn btn-outline-primary" onclick="filtrar('mes')">Este Mes</button>
+        <button class="btn btn-outline-primary" onclick="filtrar('anio')">Este Año</button>
       </div>
     </div>
 
-    <div class="text-center mb-4">
-      <h5>Total Ingresos: <span class="text-success">$<span id="totalFiltro"><%= total.toFixed(2) %></span></span></h5>
+    <!-- Filtro personalizado -->
+    <div class="row justify-content-center mb-4">
+      <div class="col-auto">
+        <input type="text" id="rangoFechas" class="form-control" placeholder="Seleccionar rango de fechas">
+      </div>
     </div>
 
+    <!-- Total -->
+    <div class="text-center mb-4">
+      <h5 class="resumen-total">
+        Total Ingresos: <span class="text-success">$<%= total.toFixed(2) %></span>
+      </h5>
+    </div>
+
+    <!-- Tabla -->
     <div class="table-responsive">
       <table class="table table-bordered text-center align-middle">
         <thead class="table-dark">
@@ -64,12 +101,12 @@
             <th>Monto</th>
           </tr>
         </thead>
-        <tbody id="tablaPagos">
-          <% pagos.forEach(p => { %>
-            <tr data-fecha="<%= p.fecha.toISOString() %>">
-              <td><%= p.nombre %></td>
-              <td><%= p.fecha.toLocaleDateString() %></td>
-              <td>$<%= p.monto.toFixed(2) %></td>
+        <tbody>
+          <% pagos.forEach(pago => { %>
+            <tr>
+              <td><%= pago.nombre %></td>
+              <td><%= pago.fecha.toLocaleDateString() %></td>
+              <td>$<%= pago.monto.toFixed(2) %></td>
             </tr>
           <% }) %>
         </tbody>
@@ -77,35 +114,41 @@
     </div>
   </div>
 
-  <div class="text-center text-muted small border-top py-3">
+  <div class="footer">
     Todos los derechos reservados - Levi Prog.
   </div>
 
+  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-  <script>
-    $(function () {
-      const $tabla = $('#tablaPagos');
-      const $total = $('#totalFiltro');
 
-      function filtrarFechas(start, end) {
-        let totalMonto = 0;
-        $tabla.find('tr').each(function () {
-          const fecha = new Date($(this).data('fecha'));
-          if (fecha >= start.toDate() && fecha <= end.toDate()) {
-            $(this).show();
-            totalMonto += parseFloat($(this).find('td:eq(2)').text().replace('$', ''));
-          } else {
-            $(this).hide();
-          }
-        });
-        $total.text(totalMonto.toFixed(2));
+  <script>
+    function filtrar(tipo) {
+      const hoy = moment();
+
+      let desde = hoy.clone();
+      let hasta = hoy.clone();
+
+      if (tipo === 'semana') {
+        desde = hoy.clone().startOf('isoWeek');
+        hasta = hoy.clone().endOf('isoWeek');
+      } else if (tipo === 'mes') {
+        desde = hoy.clone().startOf('month');
+        hasta = hoy.clone().endOf('month');
+      } else if (tipo === 'anio') {
+        desde = hoy.clone().startOf('year');
+        hasta = hoy.clone().endOf('year');
       }
 
+      const url = `/reportes?desde=${desde.format('YYYY-MM-DD')}&hasta=${hasta.format('YYYY-MM-DD')}`;
+      window.location.href = url;
+    }
+
+    $(function () {
       $('#rangoFechas').daterangepicker({
-        startDate: moment("<%= desde %>"),
-        endDate: moment("<%= hasta %>"),
+        startDate: '<%= desde %>',
+        endDate: '<%= hasta %>',
         locale: {
           format: 'YYYY-MM-DD',
           separator: ' al ',
@@ -115,15 +158,14 @@
           toLabel: 'Hasta',
           customRangeLabel: 'Personalizado',
           weekLabel: 'S',
-          daysOfWeek: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+          daysOfWeek: ['Do','Lu','Ma','Mi','Ju','Vi','Sa'],
           monthNames: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
           firstDay: 1
         }
-      }, filtrarFechas);
-
-      // Ejecutar al cargar
-      const picker = $('#rangoFechas').data('daterangepicker');
-      filtrarFechas(picker.startDate, picker.endDate);
+      }, function(start, end) {
+        const url = `/reportes?desde=${start.format('YYYY-MM-DD')}&hasta=${end.format('YYYY-MM-DD')}`;
+        window.location.href = url;
+      });
     });
   </script>
 </body>
