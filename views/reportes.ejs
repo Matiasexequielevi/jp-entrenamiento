@@ -67,38 +67,40 @@
     $(function () {
       const total = document.getElementById('totalFiltro');
 
-      // Detectar fechas disponibles
-      const fechas = [];
-      $('#tablaPagos tr').each(function () {
-        const fechaStr = $(this).data('fecha');
-        if (fechaStr) fechas.push(new Date(fechaStr));
-      });
-
-      const minFecha = fechas.length > 0 ? moment(new Date(Math.min(...fechas))) : moment();
-      const hoy = moment();
+      function normalizarFecha(fechaStr) {
+        const fecha = new Date(fechaStr);
+        return new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
+      }
 
       function filtrarTabla(start, end) {
         let totalMonto = 0;
         $('#tablaPagos tr').each(function () {
           const fechaStr = $(this).data('fecha');
           if (!fechaStr) return;
-          const fecha = new Date(fechaStr);
-          if (fecha >= start.toDate() && fecha <= end.toDate()) {
+
+          const fechaPago = normalizarFecha(fechaStr);
+          const desde = normalizarFecha(start.toISOString());
+          const hasta = normalizarFecha(end.toISOString());
+
+          if (fechaPago >= desde && fechaPago <= hasta) {
             $(this).show();
             totalMonto += parseFloat($(this).find('td:eq(2)').text().replace('$',''));
           } else {
             $(this).hide();
           }
         });
+
         total.textContent = totalMonto.toFixed(2);
       }
 
       $('#rangoFechas').daterangepicker({
-        startDate: minFecha,
-        endDate: hoy,
+        startDate: moment("<%= desde %>"),
+        endDate: moment("<%= hasta %>"),
         locale: {
-          format: 'YYYY-MM-DD', separator: ' al ', applyLabel: 'Aplicar', cancelLabel: 'Cancelar',
-          fromLabel: 'Desde', toLabel: 'Hasta', customRangeLabel: 'Personalizado',
+          format: 'YYYY-MM-DD',
+          separator: ' al ',
+          applyLabel: 'Aplicar',
+          cancelLabel: 'Cancelar',
           daysOfWeek: ['Do','Lu','Ma','Mi','Ju','Vi','Sa'],
           monthNames: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
           firstDay: 1
