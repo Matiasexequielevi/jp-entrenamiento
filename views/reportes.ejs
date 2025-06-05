@@ -46,9 +46,9 @@
         </thead>
         <tbody id="tablaPagos">
           <% pagos.forEach(pago => { %>
-            <tr data-fecha="<%= new Date(pago.fecha).toISOString() %>">
+            <tr data-fecha="<%= pago.fecha.toISOString() %>">
               <td><%= pago.nombre %></td>
-              <td><%= new Date(pago.fecha).toLocaleDateString() %></td>
+              <td><%= pago.fecha.toLocaleDateString() %></td>
               <td>$<%= pago.monto.toFixed(2) %></td>
             </tr>
           <% }) %>
@@ -59,12 +59,24 @@
   <div class="footer">
     Todos los derechos reservados - Levi Prog.
   </div>
+
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
   <script>
     $(function () {
       const total = document.getElementById('totalFiltro');
+
+      // Detectar fechas disponibles
+      const fechas = [];
+      $('#tablaPagos tr').each(function () {
+        const fechaStr = $(this).data('fecha');
+        if (fechaStr) fechas.push(new Date(fechaStr));
+      });
+
+      const minFecha = fechas.length > 0 ? moment(new Date(Math.min(...fechas))) : moment();
+      const hoy = moment();
+
       function filtrarTabla(start, end) {
         let totalMonto = 0;
         $('#tablaPagos tr').each(function () {
@@ -80,9 +92,10 @@
         });
         total.textContent = totalMonto.toFixed(2);
       }
+
       $('#rangoFechas').daterangepicker({
-        startDate: moment("<%= desde %>"),
-        endDate: moment("<%= hasta %>"),
+        startDate: minFecha,
+        endDate: hoy,
         locale: {
           format: 'YYYY-MM-DD', separator: ' al ', applyLabel: 'Aplicar', cancelLabel: 'Cancelar',
           fromLabel: 'Desde', toLabel: 'Hasta', customRangeLabel: 'Personalizado',
@@ -91,6 +104,7 @@
           firstDay: 1
         }
       }, filtrarTabla);
+
       const picker = $('#rangoFechas').data('daterangepicker');
       filtrarTabla(picker.startDate, picker.endDate);
     });
