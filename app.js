@@ -52,7 +52,7 @@ app.post('/login', (req, res) => {
   const { usuario, contrasena } = req.body;
 
   // Usuario y contraseña fijos (podés luego conectarlo con MongoDB)
-  if (usuario === 'admin' && contrasena === '1234') {
+  if (usuario === 'jpentrenamiento' && contrasena === 'burack123') {
     req.session.usuario = usuario;
     res.redirect('/');
   } else {
