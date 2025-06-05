@@ -129,11 +129,17 @@ exports.reportePagos = async (req, res) => {
     hoy.setHours(23, 59, 59, 999);
 
     const hace7Dias = new Date();
-    hace7Dias.setDate(hoy.getDate() - 6); // últimos 7 días
+    hace7Dias.setDate(hoy.getDate() - 6);
     hace7Dias.setHours(0, 0, 0, 0);
 
-    const desde = req.query.desde ? new Date(req.query.desde) : hace7Dias;
-    const hasta = req.query.hasta ? new Date(req.query.hasta) : hoy;
+    // Asegurar formato UTC completo para evitar errores de zona horaria
+    const desde = req.query.desde
+      ? new Date(`${req.query.desde}T00:00:00.000Z`)
+      : hace7Dias;
+
+    const hasta = req.query.hasta
+      ? new Date(`${req.query.hasta}T23:59:59.999Z`)
+      : hoy;
 
     let pagosFiltrados = [];
 

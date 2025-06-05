@@ -46,7 +46,7 @@
         </thead>
         <tbody id="tablaPagos">
           <% pagos.forEach(pago => { %>
-            <tr data-fecha="<%= pago.fecha.toISOString() %>">
+            <tr>
               <td><%= pago.nombre %></td>
               <td><%= pago.fecha.toLocaleDateString() %></td>
               <td>$<%= pago.monto.toFixed(2) %></td>
@@ -56,6 +56,7 @@
       </table>
     </div>
   </div>
+
   <div class="footer">
     Todos los derechos reservados - Levi Prog.
   </div>
@@ -65,34 +66,6 @@
   <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
   <script>
     $(function () {
-      const total = document.getElementById('totalFiltro');
-
-      function normalizarFecha(fechaStr) {
-        const fecha = new Date(fechaStr);
-        return new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
-      }
-
-      function filtrarTabla(start, end) {
-        let totalMonto = 0;
-        $('#tablaPagos tr').each(function () {
-          const fechaStr = $(this).data('fecha');
-          if (!fechaStr) return;
-
-          const fechaPago = normalizarFecha(fechaStr);
-          const desde = normalizarFecha(start.toISOString());
-          const hasta = normalizarFecha(end.toISOString());
-
-          if (fechaPago >= desde && fechaPago <= hasta) {
-            $(this).show();
-            totalMonto += parseFloat($(this).find('td:eq(2)').text().replace('$',''));
-          } else {
-            $(this).hide();
-          }
-        });
-
-        total.textContent = totalMonto.toFixed(2);
-      }
-
       $('#rangoFechas').daterangepicker({
         startDate: moment("<%= desde %>"),
         endDate: moment("<%= hasta %>"),
@@ -105,10 +78,11 @@
           monthNames: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
           firstDay: 1
         }
-      }, filtrarTabla);
-
-      const picker = $('#rangoFechas').data('daterangepicker');
-      filtrarTabla(picker.startDate, picker.endDate);
+      }, function(start, end) {
+        // Redirecciona a /reportes?desde=...&hasta=...
+        const url = `/reportes?desde=${start.format('YYYY-MM-DD')}&hasta=${end.format('YYYY-MM-DD')}`;
+        window.location.href = url;
+      });
     });
   </script>
 </body>
