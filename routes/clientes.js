@@ -23,4 +23,14 @@ router.post('/eliminar-pago/:clienteId/:pagoId', clienteController.eliminarPago)
 // Reportes
 router.get('/reportes', clienteController.reportePagos);
 
+
+// Ruta para mostrar el login
+router.get('/login', (req, res) => {
+  res.render('login');
+});
+
+
+
+
 module.exports = router;
+

@@ -26,16 +26,50 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Configurar sesión
 app.use(session({
   secret: 'jp-entrenamiento',
   resave: false,
   saveUninitialized: false
 }));
 
-// Rutas
-app.use('/', clientesRoutes);
+// Middleware para proteger rutas
+function verificarLogin(req, res, next) {
+  if (req.session.usuario) {
+    next();
+  } else {
+    res.redirect('/login');
+  }
+}
 
-// Servidor
+// Rutas públicas
+app.get('/login', (req, res) => {
+  res.render('login');
+});
+
+app.post('/login', (req, res) => {
+  const { usuario, contrasena } = req.body;
+
+  // Usuario y contraseña fijos (podés luego conectarlo con MongoDB)
+  if (usuario === 'admin' && contrasena === '1234') {
+    req.session.usuario = usuario;
+    res.redirect('/');
+  } else {
+    res.send('Usuario o contraseña incorrectos');
+  }
+});
+
+app.get('/logout', (req, res) => {
+  req.session.destroy(() => {
+    res.redirect('/login');
+  });
+});
+
+// Rutas protegidas
+app.use('/', verificarLogin, clientesRoutes);
+
+// Iniciar servidor
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
 });
