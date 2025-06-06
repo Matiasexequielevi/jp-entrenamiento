@@ -1,6 +1,8 @@
-// whatsapp.js
+// services/whatsapp.js
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
+
+let clientReady = false;
 
 const client = new Client({
   authStrategy: new LocalAuth(),
@@ -16,9 +18,29 @@ client.on('qr', qr => {
 });
 
 client.on('ready', () => {
+  clientReady = true;
   console.log('✅ WhatsApp conectado correctamente');
 });
 
 client.initialize();
 
-module.exports = client;
+// ✅ Función para enviar mensajes solo si está listo
+const sendMessage = async (numero, mensaje) => {
+  if (!clientReady) {
+    console.error('❌ Cliente de WhatsApp no está listo aún.');
+    return;
+  }
+
+  try {
+    // Asegurar formato internacional: 549 + número sin espacios
+    const numeroFormateado = numero.replace(/\D/g, '');
+    const wid = `${numeroFormateado}@c.us`;
+
+    await client.sendMessage(wid, mensaje);
+    console.log(`✅ Mensaje enviado a ${numeroFormateado}`);
+  } catch (err) {
+    console.error(`❌ Error al enviar mensaje a ${numero}:`, err.message);
+  }
+};
+
+module.exports = { client, sendMessage };
