@@ -1,4 +1,5 @@
 const Cliente = require('../models/cliente');
+const whatsappClient = require('../services/whatsapp'); // ✅ Nuevo import
 
 // Mostrar todos los clientes con resumen real de pagos
 exports.listarClientes = async (req, res) => {
@@ -12,7 +13,7 @@ exports.listarClientes = async (req, res) => {
   let vencidos = 0;
   let totalRecaudadoHoy = 0;
 
-  clientes.forEach(cliente => {
+  clientes.forEach(async cliente => {
     let ultimoPago = null;
 
     if (cliente.pagos && cliente.pagos.length > 0) {
@@ -38,6 +39,12 @@ exports.listarClientes = async (req, res) => {
     } else {
       vencidos++;
       cliente.estadoPago = 'vencido';
+
+      // ✅ Enviar WhatsApp si está vencido y tiene celular
+      if (cliente.celular) {
+        const mensaje = `Hola ${cliente.nombre}, te recordamos que tu último pago fue hace más de 30 días. ¡Ponete al día con tu entrenamiento en JP Entrenamiento! 💪`;
+        whatsappClient.sendMessage(cliente.celular, mensaje);
+      }
     }
   });
 
@@ -132,7 +139,6 @@ exports.reportePagos = async (req, res) => {
     hace7Dias.setDate(hoy.getDate() - 6);
     hace7Dias.setHours(0, 0, 0, 0);
 
-    // Asegurar formato UTC completo para evitar errores de zona horaria
     const desde = req.query.desde
       ? new Date(`${req.query.desde}T00:00:00.000Z`)
       : hace7Dias;
