@@ -44,7 +44,12 @@ exports.listarClientes = async (req, res) => {
         const mensaje = `Hola ${cliente.nombre}, te recordamos que tu último pago fue hace más de 30 días. ¡Ponete al día con tu entrenamiento en JP Entrenamiento! 💪`;
 
         try {
-          await whatsappClient.sendMessage('549' + cliente.celular.replace(/\D/g, ''), mensaje);
+          let numero = cliente.celular.replace(/\D/g, '');
+          if (!numero.startsWith('549')) {
+            numero = '549' + numero;
+          }
+
+          await whatsappClient.sendMessage(numero, mensaje);
           console.log(`📤 Mensaje enviado a ${cliente.nombre}`);
           cliente.notificado = true;
           await cliente.save();
