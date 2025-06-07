@@ -42,8 +42,17 @@ exports.listarClientes = async (req, res) => {
 
       // ✅ Enviar WhatsApp si está vencido y tiene celular
       if (cliente.celular) {
+        const numeroFormateado = `549${cliente.celular.replace(/^54/, '')}@c.us`;
         const mensaje = `Hola ${cliente.nombre}, te recordamos que tu último pago fue hace más de 30 días. ¡Ponete al día con tu entrenamiento en JP Entrenamiento! 💪`;
-        whatsappClient.sendMessage(cliente.celular, mensaje);
+
+        console.log(`📤 Enviando mensaje a ${numeroFormateado}`);
+
+        try {
+          await whatsappClient.sendMessage(numeroFormateado, mensaje);
+          console.log(`✅ Mensaje enviado a ${cliente.nombre}`);
+        } catch (err) {
+          console.error(`❌ Error al enviar mensaje a ${cliente.nombre}:`, err.message);
+        }
       }
     }
   });
