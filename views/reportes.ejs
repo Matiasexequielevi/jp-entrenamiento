@@ -7,12 +7,60 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
   <style>
-    body { background: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
-    header { background-color: #b2bcdd; padding: 1rem; text-align: center; }
-    header img { width: 80px; border-radius: 50%; margin-bottom: 0.5rem; }
-    .resumen-total { font-size: 1.3rem; }
-    .footer { background-color: #b2bcdd; color: #302d2d; text-align: center; padding: 0.8rem 0; margin-top: 3rem; }
-    #rangoFechas { max-width: 300px; margin: 0 auto; border: 2px solid #0d6efd; border-radius: 8px; padding: 8px 16px; font-weight: bold; color: #0d6efd; text-align: center; }
+    body {
+      background: url('/images/logo-jp.png') repeat center center fixed;
+      background-size: 120px;
+      opacity: 0.97;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    header {
+      background-color: #b2bcdd;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    header img {
+      width: 80px;
+      border-radius: 50%;
+      margin-bottom: 0.5rem;
+    }
+
+    .resumen-total {
+      font-size: 1.3rem;
+    }
+
+    .footer {
+      background-color: #b2bcdd;
+      color: #302d2d;
+      text-align: center;
+      padding: 0.8rem 0;
+      margin-top: 3rem;
+    }
+
+    #rangoFechas {
+      max-width: 300px;
+      margin: 0 auto;
+      border: 2px solid #0d6efd;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-weight: bold;
+      color: #0d6efd;
+      text-align: center;
+      background-color: white;
+    }
+
+    .table thead th {
+      background-color: #212529;
+      color: white;
+    }
+
+    .card {
+      background-color: rgba(255, 255, 255, 0.95);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+    }
   </style>
 </head>
 <body>
@@ -20,24 +68,28 @@
     <img src="/images/logo-jp.png" alt="Logo JP">
     <h2 class="fw-bold">JP Entrenamiento Personalizado</h2>
   </header>
+
   <div class="container py-4">
     <div class="text-center mb-4">
       <a href="/" class="btn btn-outline-dark mb-3">&larr; Volver al Inicio</a>
       <h3 class="fw-bold text-primary">📊 Reporte de Ingresos</h3>
     </div>
+
     <div class="row justify-content-center mb-4">
       <div class="col-auto">
         <input type="text" id="rangoFechas" class="form-control" placeholder="Seleccionar rango de fechas">
       </div>
     </div>
+
     <div class="text-center mb-4">
       <h5 class="resumen-total">
         Total Ingresos: <span class="text-success">$<span id="totalFiltro"><%= total.toFixed(2) %></span></span>
       </h5>
     </div>
+
     <div class="table-responsive">
       <table class="table table-bordered text-center align-middle">
-        <thead class="table-dark">
+        <thead>
           <tr>
             <th>Cliente</th>
             <th>Fecha</th>
@@ -79,7 +131,6 @@
           firstDay: 1
         }
       }, function(start, end) {
-        // Redirecciona a /reportes?desde=...&hasta=...
         const url = `/reportes?desde=${start.format('YYYY-MM-DD')}&hasta=${end.format('YYYY-MM-DD')}`;
         window.location.href = url;
       });
