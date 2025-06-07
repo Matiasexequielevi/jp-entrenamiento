@@ -4,18 +4,60 @@
   <meta charset="UTF-8">
   <title>Ficha de <%= cliente.nombre %> <%= cliente.apellido %></title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css">
+
+  <!-- Estilos personalizados -->
   <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', sans-serif;
+      position: relative;
+    }
+
     input[readonly] {
       background-color: #f8f9fa;
       border: none;
     }
+
+    .fondo-logo {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      background-image: url('/images/logo-jp.png');
+      background-repeat: repeat;
+      background-size: 80px;
+      opacity: 0.03;
+      pointer-events: none;
+    }
+
+    .contenido {
+      position: relative;
+      z-index: 1;
+    }
+
+    .card {
+      border-radius: 20px;
+      background-color: white;
+      box-shadow: 0 0 15px rgba(0,0,0,0.06);
+    }
+
+    footer {
+      margin-top: 3rem;
+      color: #666;
+    }
   </style>
 </head>
-<body class="bg-light">
+<body>
+  <!-- Fondo de agua -->
+  <div class="fondo-logo"></div>
 
-  <div class="container py-4">
+  <!-- Contenido -->
+  <div class="container py-4 contenido">
 
     <!-- Botón volver -->
     <div class="mb-3">
@@ -28,9 +70,9 @@
       <h2 class="text-primary fw-bold mt-3"> Alumno <%= cliente.nombre %> <%= cliente.apellido %></h2>
     </div>
 
-    <!-- Formulario de datos -->
+    <!-- Formulario datos del alumno -->
     <form action="/editar/<%= cliente._id %>" method="POST">
-      <div class="card shadow-sm p-4 mb-5" style="border-radius: 20px;">
+      <div class="card p-4 mb-5">
 
         <div class="row mb-3">
           <div class="col-md-6">
@@ -82,9 +124,10 @@
     </form>
 
     <!-- Pagos -->
-    <div class="card p-4 shadow-sm mb-5" style="border-radius: 20px;">
-      <h4 class="text-primary mb-3">Pagos</h4>
+    <div class="card p-4 shadow-sm mb-5">
+      <h4 class="text-primary mb-4">Pagos del Alumno</h4>
 
+      <!-- Formulario agregar pago -->
       <form action="/agregar-pago/<%= cliente._id %>" method="POST" class="row g-3 mb-4">
         <div class="col-md-5">
           <label>Fecha de Pago</label>
@@ -99,36 +142,39 @@
         </div>
       </form>
 
+      <!-- Tabla de pagos -->
       <% if (cliente.pagos && cliente.pagos.length > 0) { %>
-        <table class="table table-bordered text-center align-middle">
-          <thead class="table-light">
-            <tr>
-              <th>Fecha</th>
-              <th>Monto</th>
-              <th>Acción</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% let total = 0; %>
-            <% cliente.pagos.forEach((pago) => { total += pago.monto; %>
+        <div class="table-responsive">
+          <table class="table table-bordered text-center align-middle">
+            <thead class="table-light">
               <tr>
-                <td><%= new Date(pago.fecha).toLocaleDateString() %></td>
-                <td>$<%= pago.monto.toFixed(2) %></td>
-                <td>
-                  <form action="/eliminar-pago/<%= cliente._id %>/<%= pago._id %>" method="POST" onsubmit="return confirm('¿Eliminar este pago?');">
-                    <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
-                  </form>
-                </td>
+                <th>Fecha</th>
+                <th>Monto</th>
+                <th>Acción</th>
               </tr>
-            <% }) %>
-          </tbody>
-          <tfoot>
-            <tr>
-              <th colspan="2">Total</th>
-              <th>$<%= total.toFixed(2) %></th>
-            </tr>
-          </tfoot>
-        </table>
+            </thead>
+            <tbody>
+              <% let total = 0; %>
+              <% cliente.pagos.forEach((pago) => { total += pago.monto; %>
+                <tr>
+                  <td><%= new Date(pago.fecha).toLocaleDateString() %></td>
+                  <td>$<%= pago.monto.toFixed(2) %></td>
+                  <td>
+                    <form action="/eliminar-pago/<%= cliente._id %>/<%= pago._id %>" method="POST" onsubmit="return confirm('¿Eliminar este pago?');">
+                      <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                    </form>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+            <tfoot>
+              <tr>
+                <th colspan="2">Total</th>
+                <th>$<%= total.toFixed(2) %></th>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
       <% } else { %>
         <p class="text-muted">No hay pagos registrados aún.</p>
       <% } %>
@@ -138,6 +184,7 @@
     <footer class="text-center text-muted small border-top pt-3">
       Todos los derechos reservados - Levi Prog.
     </footer>
+
   </div>
 
   <script>
@@ -149,6 +196,5 @@
       document.getElementById('guardarBtn').classList.remove('d-none');
     });
   </script>
-
 </body>
 </html>
