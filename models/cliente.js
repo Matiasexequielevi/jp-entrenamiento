@@ -31,6 +31,8 @@ const clienteSchema = new mongoose.Schema({
     monto: { type: Number, required: true }
   }],
 
+  notificado: { type: Boolean, default: false }, // ✅ NUEVO CAMPO
+
   creadoEn: { type: Date, default: Date.now }
 });
 

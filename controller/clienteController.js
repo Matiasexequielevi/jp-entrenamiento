@@ -1,5 +1,5 @@
 const Cliente = require('../models/cliente');
-const whatsappClient = require('../services/whatsapp'); // ✅ Nuevo import
+const whatsappClient = require('../services/whatsapp');
 
 // Mostrar todos los clientes con resumen real de pagos
 exports.listarClientes = async (req, res) => {
@@ -13,7 +13,7 @@ exports.listarClientes = async (req, res) => {
   let vencidos = 0;
   let totalRecaudadoHoy = 0;
 
-  clientes.forEach(async cliente => {
+  for (const cliente of clientes) {
     let ultimoPago = null;
 
     if (cliente.pagos && cliente.pagos.length > 0) {
@@ -40,14 +40,20 @@ exports.listarClientes = async (req, res) => {
       vencidos++;
       cliente.estadoPago = 'vencido';
 
-      // ✅ Enviar WhatsApp si está vencido y tiene celular
-      if (cliente.celular) {
-        const numeroFormateado = `549${cliente.celular.replace(/^549?/, '')}`;
-        const mensaje = `Hola ${cliente.nombre}, te recuerdo que mañana es mi festejo de cumple y espero verte ahi, confirmame tu presencia, gracias`;
-        whatsappClient.sendMessage(numeroFormateado, mensaje);
+      if (cliente.celular && !cliente.notificado) {
+        const mensaje = `Hola ${cliente.nombre}, te recordamos que tu último pago fue hace más de 30 días. ¡Ponete al día con tu entrenamiento en JP Entrenamiento! 💪`;
+
+        try {
+          await whatsappClient.sendMessage('549' + cliente.celular.replace(/\D/g, ''), mensaje);
+          console.log(`📤 Mensaje enviado a ${cliente.nombre}`);
+          cliente.notificado = true;
+          await cliente.save();
+        } catch (error) {
+          console.error(`❌ Error al enviar mensaje a ${cliente.nombre}:`, error.message);
+        }
       }
     }
-  });
+  }
 
   res.render('index', {
     clientes,
@@ -107,6 +113,7 @@ exports.agregarPago = async (req, res) => {
   try {
     const cliente = await Cliente.findById(req.params.id);
     cliente.pagos.push({ fecha, monto });
+    cliente.notificado = false;
     await cliente.save();
     res.redirect('/editar/' + req.params.id);
   } catch (error) {
@@ -126,9 +133,6 @@ exports.eliminarPago = async (req, res) => {
   }
 };
 
-// ===============================
-// 📊 REPORTE DE PAGOS
-// ===============================
 exports.reportePagos = async (req, res) => {
   try {
     const clientes = await Cliente.find();
