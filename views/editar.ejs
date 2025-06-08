@@ -53,24 +53,19 @@
   </style>
 </head>
 <body>
-  <!-- Fondo de agua -->
   <div class="fondo-logo"></div>
 
-  <!-- Contenido -->
   <div class="container py-4 contenido">
 
-    <!-- Botón volver -->
     <div class="mb-3">
       <a href="/" class="btn btn-outline-secondary">← Volver</a>
     </div>
 
-    <!-- Logo y título -->
     <div class="text-center mb-4">
       <img src="/images/logo-jp.png" alt="Logo JP" class="rounded-circle shadow" style="width: 100px; height: 100px; object-fit: cover;">
       <h2 class="text-primary fw-bold mt-3"> Alumno <%= cliente.nombre %> <%= cliente.apellido %></h2>
     </div>
 
-    <!-- Formulario datos del alumno -->
     <form action="/editar/<%= cliente._id %>" method="POST">
       <div class="card p-4 mb-5">
 
@@ -118,7 +113,37 @@
           value="<%= Object.entries(cliente.asistencia?.semanal || {}).filter(([dia, activo]) => activo).map(([dia]) => dia.charAt(0).toUpperCase() + dia.slice(1)).join(', ') %>">
         </div>
 
-        <button type="button" id="editarBtn" class="btn btn-warning w-100 mt-3">Editar Información</button>
+        <!-- NUEVO BLOQUE: Plan de Entrenamiento -->
+        <div class="card p-4 mt-4">
+          <h5 class="text-primary fw-bold mb-3">Plan de Entrenamiento (por día)</h5>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Lunes:</label>
+              <input type="text" name="planLunes" class="form-control" value="<%= cliente.planLunes || '' %>" readonly>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Martes:</label>
+              <input type="text" name="planMartes" class="form-control" value="<%= cliente.planMartes || '' %>" readonly>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Miércoles:</label>
+              <input type="text" name="planMiercoles" class="form-control" value="<%= cliente.planMiercoles || '' %>" readonly>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Jueves:</label>
+              <input type="text" name="planJueves" class="form-control" value="<%= cliente.planJueves || '' %>" readonly>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Viernes:</label>
+            <input type="text" name="planViernes" class="form-control" value="<%= cliente.planViernes || '' %>" readonly>
+          </div>
+        </div>
+        <!-- FIN NUEVO BLOQUE -->
+
+        <button type="button" id="editarBtn" class="btn btn-warning w-100 mt-4">Editar Información</button>
         <button type="submit" id="guardarBtn" class="btn btn-primary w-100 mt-3 d-none">Guardar Cambios</button>
       </div>
     </form>
@@ -127,7 +152,6 @@
     <div class="card p-4 shadow-sm mb-5">
       <h4 class="text-primary mb-4">Pagos del Alumno</h4>
 
-      <!-- Formulario agregar pago -->
       <form action="/agregar-pago/<%= cliente._id %>" method="POST" class="row g-3 mb-4">
         <div class="col-md-5">
           <label>Fecha de Pago</label>
@@ -142,7 +166,6 @@
         </div>
       </form>
 
-      <!-- Tabla de pagos -->
       <% if (cliente.pagos && cliente.pagos.length > 0) { %>
         <div class="table-responsive">
           <table class="table table-bordered text-center align-middle">
@@ -180,11 +203,9 @@
       <% } %>
     </div>
 
-    <!-- Footer -->
     <footer class="text-center text-muted small border-top pt-3">
       Todos los derechos reservados - Levi Prog.
     </footer>
-
   </div>
 
   <script>

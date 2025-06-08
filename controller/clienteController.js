@@ -49,7 +49,6 @@ exports.listarClientes = async (req, res) => {
             numero = '549' + numero;
           }
 
-          // Esperar a que WhatsApp esté listo
           const esperarWhatsapp = () => new Promise(resolve => {
             const check = setInterval(() => {
               if (whatsappClient.clientReady) {
@@ -89,7 +88,24 @@ exports.formularioNuevo = (req, res) => {
 
 exports.guardarCliente = async (req, res) => {
   try {
-    const nuevoCliente = new Cliente(req.body);
+    const datos = req.body;
+
+    const nuevoCliente = new Cliente({
+      ...datos,
+      edad: parseInt(datos.edad),
+      fechaInicio: new Date(datos.fechaInicio),
+      fechaPago: new Date(datos.fechaPago),
+      asistencia: {
+        semanal: {
+          lunes: datos['asistencia.semanal.lunes'] === 'true',
+          martes: datos['asistencia.semanal.martes'] === 'true',
+          miercoles: datos['asistencia.semanal.miercoles'] === 'true',
+          jueves: datos['asistencia.semanal.jueves'] === 'true',
+          viernes: datos['asistencia.semanal.viernes'] === 'true'
+        }
+      }
+    });
+
     await nuevoCliente.save();
     res.redirect('/');
   } catch (error) {
