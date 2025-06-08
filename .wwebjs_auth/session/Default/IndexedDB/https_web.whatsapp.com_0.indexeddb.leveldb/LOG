@@ -1,29 +1,29 @@
-2025/06/06-21:20:28.264 4a78 Reusing MANIFEST C:\Users\mati_\OneDrive\Desktop\jp-entrenamiento\.wwebjs_auth\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
-2025/06/06-21:20:28.265 4a78 Recovering log #345
-2025/06/06-21:20:28.343 4a78 Reusing old log C:\Users\mati_\OneDrive\Desktop\jp-entrenamiento\.wwebjs_auth\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000345.log 
-2025/06/06-21:20:30.532 2184 Manual compaction at level-0 from '\x00/\x00\x00\x00' @ 72057594037927935 : 1 .. '\x000\x00\x00\x00' @ 0 : 0; will stop at (end)
-2025/06/06-21:20:57.498 6f6c Level-0 table #358: started
-2025/06/06-21:20:57.548 6f6c Level-0 table #358: 1276176 bytes OK
-2025/06/06-21:20:57.551 6f6c Delete type=0 #345
-2025/06/06-21:20:57.798 6f6c Compacting 1@1 + 9@2 files
-2025/06/06-21:20:57.916 6f6c Generated table #359@1: 57491 keys, 2218991 bytes
-2025/06/06-21:20:57.999 6f6c Generated table #360@1: 25641 keys, 2185010 bytes
-2025/06/06-21:20:58.051 6f6c Generated table #361@1: 2680 keys, 2157942 bytes
-2025/06/06-21:20:58.099 6f6c Generated table #362@1: 2582 keys, 2153883 bytes
-2025/06/06-21:20:58.183 6f6c Generated table #363@1: 17425 keys, 2210690 bytes
-2025/06/06-21:20:58.296 6f6c Generated table #364@1: 29514 keys, 2250158 bytes
-2025/06/06-21:20:58.369 6f6c Generated table #365@1: 18771 keys, 2172722 bytes
-2025/06/06-21:20:58.538 6f6c Generated table #366@1: 99713 keys, 2250878 bytes
-2025/06/06-21:20:58.612 6f6c Generated table #367@1: 54818 keys, 1273615 bytes
-2025/06/06-21:20:58.612 6f6c Compacted 1@1 + 9@2 files => 18873889 bytes
-2025/06/06-21:20:58.614 6f6c compacted to: files[ 0 0 9 0 0 0 0 ]
-2025/06/06-21:20:58.615 6f6c Delete type=2 #347
-2025/06/06-21:20:58.615 6f6c Delete type=2 #348
-2025/06/06-21:20:58.615 6f6c Delete type=2 #349
-2025/06/06-21:20:58.615 6f6c Delete type=2 #350
-2025/06/06-21:20:58.615 6f6c Delete type=2 #351
-2025/06/06-21:20:58.615 6f6c Delete type=2 #352
-2025/06/06-21:20:58.615 6f6c Delete type=2 #353
-2025/06/06-21:20:58.615 6f6c Delete type=2 #354
-2025/06/06-21:20:58.615 6f6c Delete type=2 #355
-2025/06/06-21:20:58.615 6f6c Delete type=2 #358
+2025/06/08-19:37:46.942 376c Reusing MANIFEST C:\Users\mati_\OneDrive\Desktop\jp-entrenamiento\.wwebjs_auth\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2025/06/08-19:37:46.943 376c Recovering log #514
+2025/06/08-19:37:47.024 376c Reusing old log C:\Users\mati_\OneDrive\Desktop\jp-entrenamiento\.wwebjs_auth\session\Default\IndexedDB\https_web.whatsapp.com_0.indexeddb.leveldb/000514.log 
+2025/06/08-19:37:49.136 3940 Level-0 table #527: started
+2025/06/08-19:37:49.150 3940 Level-0 table #527: 294229 bytes OK
+2025/06/08-19:37:49.152 3940 Delete type=0 #514
+2025/06/08-19:37:49.153 3940 Manual compaction at level-0 from '\x006\x00\x00\x00' @ 72057594037927935 : 1 .. '\x007\x00\x00\x00' @ 0 : 0; will stop at (end)
+2025/06/08-19:37:51.626 16cc Compacting 1@1 + 9@2 files
+2025/06/08-19:37:51.737 16cc Generated table #528@1: 64780 keys, 2219501 bytes
+2025/06/08-19:37:51.888 16cc Generated table #529@1: 45523 keys, 2213388 bytes
+2025/06/08-19:37:51.931 16cc Generated table #530@1: 3602 keys, 2160305 bytes
+2025/06/08-19:37:51.992 16cc Generated table #531@1: 2824 keys, 2158783 bytes
+2025/06/08-19:37:52.074 16cc Generated table #532@1: 15387 keys, 2202306 bytes
+2025/06/08-19:37:52.210 16cc Generated table #533@1: 28828 keys, 2249543 bytes
+2025/06/08-19:37:52.292 16cc Generated table #534@1: 17789 keys, 2177296 bytes
+2025/06/08-19:37:52.440 16cc Generated table #535@1: 89580 keys, 2236922 bytes
+2025/06/08-19:37:52.554 16cc Generated table #536@1: 70763 keys, 1641520 bytes
+2025/06/08-19:37:52.554 16cc Compacted 1@1 + 9@2 files => 19259564 bytes
+2025/06/08-19:37:52.555 16cc compacted to: files[ 0 0 9 0 0 0 0 ]
+2025/06/08-19:37:52.556 16cc Delete type=2 #516
+2025/06/08-19:37:52.556 16cc Delete type=2 #517
+2025/06/08-19:37:52.556 16cc Delete type=2 #518
+2025/06/08-19:37:52.556 16cc Delete type=2 #519
+2025/06/08-19:37:52.556 16cc Delete type=2 #520
+2025/06/08-19:37:52.556 16cc Delete type=2 #521
+2025/06/08-19:37:52.556 16cc Delete type=2 #522
+2025/06/08-19:37:52.556 16cc Delete type=2 #523
+2025/06/08-19:37:52.556 16cc Delete type=2 #524
+2025/06/08-19:37:52.556 16cc Delete type=2 #527
