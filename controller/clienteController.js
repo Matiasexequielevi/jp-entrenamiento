@@ -49,6 +49,18 @@ exports.listarClientes = async (req, res) => {
             numero = '549' + numero;
           }
 
+          // Esperar a que WhatsApp esté listo
+          const esperarWhatsapp = () => new Promise(resolve => {
+            const check = setInterval(() => {
+              if (whatsappClient.clientReady) {
+                clearInterval(check);
+                resolve();
+              }
+            }, 200);
+          });
+
+          await esperarWhatsapp();
+
           await whatsappClient.sendMessage(numero, mensaje);
           console.log(`📤 Mensaje enviado a ${cliente.nombre}`);
           cliente.notificado = true;
