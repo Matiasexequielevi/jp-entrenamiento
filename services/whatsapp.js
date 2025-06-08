@@ -32,12 +32,11 @@ const sendMessage = async (numero, mensaje) => {
   }
 
   try {
-    // Asegurar formato internacional: 549 + número sin espacios
     const numeroFormateado = numero.replace(/\D/g, '');
     const wid = `${numeroFormateado}@c.us`;
 
     await client.sendMessage(wid, mensaje);
-    console.log(`✅ Mensaje enviado a ${numeroFormateado}`);
+    console.log(`📤 Mensaje enviado a ${numeroFormateado}`);
   } catch (err) {
     console.error(`❌ Error al enviar mensaje a ${numero}:`, err.message);
   }
