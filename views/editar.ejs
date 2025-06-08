@@ -138,6 +138,43 @@
           </div>
         </div>
         <!-- FIN NUEVO BLOQUE -->
+<!-- 👇 AGREGALO justo después del bloque de plan semanal -->
+<!-- Tabla tipo Excel del Plan Semanal -->
+<div class="card p-4 mt-4 mb-4">
+  <h5 class="text-success fw-bold mb-3">Resumen del Plan Semanal (tipo Excel)</h5>
+  <div class="table-responsive">
+    <table class="table table-bordered table-striped text-center align-middle">
+      <thead class="table-success">
+        <tr>
+          <th>Día</th>
+          <th>Ejercicios / Rutina</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="fw-bold">Lunes</td>
+          <td><%= cliente.planLunes || '—' %></td>
+        </tr>
+        <tr>
+          <td class="fw-bold">Martes</td>
+          <td><%= cliente.planMartes || '—' %></td>
+        </tr>
+        <tr>
+          <td class="fw-bold">Miércoles</td>
+          <td><%= cliente.planMiercoles || '—' %></td>
+        </tr>
+        <tr>
+          <td class="fw-bold">Jueves</td>
+          <td><%= cliente.planJueves || '—' %></td>
+        </tr>
+        <tr>
+          <td class="fw-bold">Viernes</td>
+          <td><%= cliente.planViernes || '—' %></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 
         <button type="button" id="editarBtn" class="btn btn-warning w-100 mt-4">Editar Información</button>
         <button type="submit" id="guardarBtn" class="btn btn-primary w-100 mt-3 d-none">Guardar Cambios</button>
