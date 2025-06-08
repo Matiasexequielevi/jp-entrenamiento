@@ -31,7 +31,14 @@ const clienteSchema = new mongoose.Schema({
     monto: { type: Number, required: true }
   }],
 
-  notificado: { type: Boolean, default: false }, // ✅ NUEVO CAMPO
+  // 🆕 Plan de entrenamiento por día
+  planLunes: { type: String, default: '' },
+  planMartes: { type: String, default: '' },
+  planMiercoles: { type: String, default: '' },
+  planJueves: { type: String, default: '' },
+  planViernes: { type: String, default: '' },
+
+  notificado: { type: Boolean, default: false },
 
   creadoEn: { type: Date, default: Date.now }
 });
