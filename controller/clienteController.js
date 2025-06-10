@@ -41,9 +41,10 @@ exports.listarClientes = async (req, res) => {
       cliente.estadoPago = 'vencido';
 
       if (
-        whatsappClient.client.clientReady && // ✅ Solo si WhatsApp está listo
+        whatsappClient.client.clientReady &&
         cliente.celular &&
-        !cliente.notificado
+        !cliente.notificado &&
+        ultimoPago && new Date(ultimoPago.fecha) < hace30Dias
       ) {
         const mensaje = `Hola ${cliente.nombre}, te recordamos que tu último pago fue hace más de 30 días. ¡Ponete al día con tu entrenamiento en JP Entrenamiento! 💪`;
 

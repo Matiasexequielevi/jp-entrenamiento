@@ -77,15 +77,20 @@
         </div>
 
         <div class="row mb-3">
-          <div class="col-md-6">
-            <label class="form-label fw-bold">Edad:</label>
-            <input type="number" name="edad" class="form-control" value="<%= cliente.edad %>" readonly>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label fw-bold">Celular:</label>
-            <input type="text" name="celular" class="form-control" value="<%= cliente.celular %>" readonly>
-          </div>
-        </div>
+  <div class="col-md-4">
+    <label class="form-label fw-bold">Edad:</label>
+    <input type="number" name="edad" class="form-control" value="<%= cliente.edad %>" readonly>
+  </div>
+  <div class="col-md-4">
+    <label class="form-label fw-bold">Fecha de Nacimiento:</label>
+    <input type="date" name="fechaNacimiento" class="form-control" value="<%= cliente.fechaNacimiento ? cliente.fechaNacimiento.toISOString().split('T')[0] : '' %>" readonly>
+  </div>
+  <div class="col-md-4">
+    <label class="form-label fw-bold">Celular:</label>
+    <input type="text" name="celular" class="form-control" value="<%= cliente.celular %>" readonly>
+  </div>
+</div>
+
 
         <div class="mb-3">
           <label class="form-label fw-bold">Dirección:</label>
