@@ -157,12 +157,13 @@
             <th>Plan</th>
             <th>Inicio</th>
             <th>Pago</th>
+            <th>Estado</th>
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
           <% clientes.forEach(cliente => { %>
-            <tr>
+            <tr class="<%= cliente.estadoPago === 'vencido' ? 'table-danger' : '' %>">
               <td><%= cliente.nombre %> <%= cliente.apellido %></td>
               <td><%= cliente.edad %></td>
               <td><%= cliente.celular %></td>
@@ -173,6 +174,13 @@
                   <%= new Date(cliente.pagos[cliente.pagos.length - 1].fecha).toLocaleDateString() %>
                 <% } else { %>
                   -
+                <% } %>
+              </td>
+              <td>
+                <% if (cliente.estadoPago === 'vencido') { %>
+                  <span class="badge bg-danger">VENCIDO</span>
+                <% } else { %>
+                  <span class="badge bg-success">AL DÍA</span>
                 <% } %>
               </td>
               <td>

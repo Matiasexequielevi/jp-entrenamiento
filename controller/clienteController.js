@@ -65,6 +65,13 @@ exports.listarClientes = async (req, res) => {
     }
   }
 
+  // 🔁 Ordenar: vencidos primero
+  clientes.sort((a, b) => {
+    if (a.estadoPago === 'vencido' && b.estadoPago !== 'vencido') return -1;
+    if (a.estadoPago !== 'vencido' && b.estadoPago === 'vencido') return 1;
+    return 0;
+  });
+
   res.render('index', {
     clientes,
     resumen: {
@@ -75,6 +82,7 @@ exports.listarClientes = async (req, res) => {
     }
   });
 };
+
 
 exports.formularioNuevo = (req, res) => {
   res.render('nueva');
