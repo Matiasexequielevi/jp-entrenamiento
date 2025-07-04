@@ -4,6 +4,7 @@ const clienteSchema = new mongoose.Schema({
   nombre: { type: String, required: true },
   apellido: { type: String, required: true },
   edad: { type: Number, required: true },
+  fechaNacimiento: { type: Date },
   celular: { type: String, required: true },
   direccion: { type: String, required: true },
   fechaInicio: { type: Date, required: true },
