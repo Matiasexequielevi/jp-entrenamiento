@@ -12,6 +12,7 @@ exports.listarClientes = async (req, res) => {
   let alDia = 0;
   let vencidos = 0;
   let totalRecaudadoHoy = 0;
+  let cumpleañeros = [];
 
   for (const cliente of clientes) {
     let ultimoPago = null;
@@ -63,6 +64,17 @@ exports.listarClientes = async (req, res) => {
         }
       }
     }
+
+    // 🎂 Verificar cumpleaños
+    if (cliente.fechaNacimiento) {
+      const cumple = new Date(cliente.fechaNacimiento);
+      if (
+        hoy.getDate() === cumple.getDate() &&
+        hoy.getMonth() === cumple.getMonth()
+      ) {
+        cumpleañeros.push(cliente.nombre + ' ' + cliente.apellido);
+      }
+    }
   }
 
   // 🔁 Ordenar: vencidos primero
@@ -79,10 +91,10 @@ exports.listarClientes = async (req, res) => {
       alDia,
       vencidos,
       totalRecaudado: totalRecaudadoHoy
-    }
+    },
+    cumpleañeros // 🎉 Pasamos a la vista
   });
 };
-
 
 exports.formularioNuevo = (req, res) => {
   res.render('nueva');

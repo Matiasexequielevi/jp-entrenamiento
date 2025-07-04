@@ -4,10 +4,7 @@
   <meta charset="UTF-8">
   <title>ALUMNOS JP</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- Bootstrap + estilos personalizados -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
   <style>
     body {
       background-color: #f8f9fa;
@@ -74,7 +71,6 @@
       font-weight: bold;
     }
 
-    /* ✅ Logos de fondo tipo marca de agua */
     .fondo-logo {
       position: fixed;
       top: 0;
@@ -93,20 +89,59 @@
       position: relative;
       z-index: 1;
     }
+
+    /* 🎂 Ventana flotante cumpleaños */
+    .ventana-cumple {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #fff8dc;
+      color: #333;
+      border: 2px solid #ffc107;
+      padding: 1rem 1.2rem;
+      z-index: 9999;
+      border-radius: 12px;
+      max-width: 300px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      animation: entrada 0.4s ease;
+    }
+
+    .btn-cerrar {
+      position: absolute;
+      top: 5px;
+      right: 8px;
+      background: transparent;
+      border: none;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #444;
+      cursor: pointer;
+    }
+
+    @keyframes entrada {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
-  <!-- Logos de fondo tenues -->
   <div class="fondo-logo"></div>
 
-  <!-- HEADER -->
+  <% if (cumpleañeros && cumpleañeros.length > 0) { %>
+    <div id="ventanaCumple" class="ventana-cumple alert alert-warning shadow">
+      <button class="btn-cerrar" onclick="cerrarCumple()">×</button>
+      <h5 class="mb-2">🎉 ¡Cumpleaños de Hoy!</h5>
+      <p><%= cumpleañeros.join(', ') %></p>
+      <p class="mb-0">¡No te olvides de saludar! 🎂</p>
+    </div>
+  <% } %>
+
   <header>
     <img src="/images/logo-jp.png" alt="Logo JP">
     <h2 class="fw-bold">JP Entrenamiento Personalizado</h2>
   </header>
 
   <div class="container my-4 contenido">
-    <!-- RESUMEN -->
     <div class="row text-center mb-4">
       <div class="col-md-3">
         <div class="resumen-box">
@@ -138,7 +173,6 @@
       <a href="/reportes" class="btn btn-outline-dark">📊 Ver Reportes</a>
     </div>
 
-    <!-- NUEVO CLIENTE Y BUSCADOR -->
     <div class="d-flex justify-content-between align-items-center mb-3">
       <a href="/nueva" class="btn btn-success">
         <i class="bi bi-person-plus"></i> + Nuevo Alumno
@@ -146,7 +180,6 @@
       <input type="text" id="buscador" class="form-control w-50" placeholder="Buscar por nombre o apellido...">
     </div>
 
-    <!-- TABLA DE CLIENTES -->
     <div class="table-responsive">
       <table class="table table-bordered text-center align-middle tabla-clientes" id="tablaClientes">
         <thead>
@@ -196,12 +229,10 @@
     </div>
   </div>
 
-  <!-- FOOTER -->
   <div class="footer">
     Todos los derechos reservados - Levi Prog.
   </div>
 
-  <!-- BUSCADOR -->
   <script>
     const buscador = document.getElementById('buscador');
     const filas = document.querySelectorAll('#tablaClientes tbody tr');
@@ -213,6 +244,11 @@
         fila.style.display = nombre.includes(texto) ? '' : 'none';
       });
     });
+
+    function cerrarCumple() {
+      const aviso = document.getElementById('ventanaCumple');
+      if (aviso) aviso.style.display = 'none';
+    }
   </script>
 </body>
 </html>
