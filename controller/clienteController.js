@@ -67,14 +67,17 @@ exports.listarClientes = async (req, res) => {
 
     // 🎂 Verificar cumpleaños
     if (cliente.fechaNacimiento) {
-      const cumple = new Date(cliente.fechaNacimiento);
-      if (
-        hoy.getDate() === cumple.getDate() &&
-        hoy.getMonth() === cumple.getMonth()
-      ) {
-        cumpleañeros.push(cliente.nombre + ' ' + cliente.apellido);
-      }
-    }
+  const cumple = new Date(cliente.fechaNacimiento);
+  console.log('🎂 Analizando:', cliente.nombre, cumple);
+  if (
+    hoy.getDate() === cumple.getDate() &&
+    hoy.getMonth() === cumple.getMonth()
+  ) {
+    console.log('🎉 Cumpleaños detectado:', cliente.nombre);
+    cumpleañeros.push(cliente.nombre + ' ' + cliente.apellido);
+  }
+}
+
   }
 
   // 🔁 Ordenar: vencidos primero
