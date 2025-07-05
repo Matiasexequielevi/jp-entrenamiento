@@ -102,8 +102,11 @@ exports.formularioNuevo = (req, res) => {
 
 exports.guardarCliente = async (req, res) => {
   try {
+    console.log('🧪 Fecha recibida:', req.body.fechaNacimiento);
+
     if (req.body.fechaNacimiento) {
       req.body.fechaNacimiento = new Date(req.body.fechaNacimiento);
+      console.log('✅ Convertido a Date:', req.body.fechaNacimiento);
     }
 
     const nuevoCliente = new Cliente(req.body);
@@ -114,6 +117,7 @@ exports.guardarCliente = async (req, res) => {
     res.status(500).send('Error al guardar cliente');
   }
 };
+
 
 exports.formularioEditar = async (req, res) => {
   try {
