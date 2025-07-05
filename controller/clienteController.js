@@ -66,17 +66,22 @@ exports.listarClientes = async (req, res) => {
     }
 
     // 🎂 Verificar cumpleaños (día y mes locales)
-    if (cliente.fechaNacimiento) {
-      const cumple = new Date(cliente.fechaNacimiento);
-      const hoyLocal = new Date();
-      if (
-        cumple.getDate() === hoyLocal.getDate() &&
-        cumple.getMonth() === hoyLocal.getMonth()
-      ) {
-        console.log('🎉 Cumpleaños detectado:', cliente.nombre);
-        cumpleañeros.push(cliente.nombre + ' ' + cliente.apellido);
-      }
-    }
+    // 🎂 Verificar cumpleaños (comparar día y mes LOCAL)
+if (cliente.fechaNacimiento) {
+  const cumple = new Date(cliente.fechaNacimiento);
+  const diaCumple = cumple.getDate();
+  const mesCumple = cumple.getMonth();
+
+  const hoy = new Date();
+  const diaHoy = hoy.getDate();
+  const mesHoy = hoy.getMonth();
+
+  if (diaCumple === diaHoy && mesCumple === mesHoy) {
+    console.log('🎉 Cumpleaños detectado:', cliente.nombre);
+    cumpleañeros.push(cliente.nombre + ' ' + cliente.apellido);
+  }
+}
+
   }
 
   // 🔁 Ordenar: vencidos primero
