@@ -65,19 +65,21 @@ exports.listarClientes = async (req, res) => {
       }
     }
 
-    // 🎂 Verificar cumpleaños
+    // 🎂 Verificar cumpleaños (comparar día y mes UTC)
     if (cliente.fechaNacimiento) {
-  const cumple = new Date(cliente.fechaNacimiento);
-  console.log('🎂 Analizando:', cliente.nombre, cumple);
-  if (
-    hoy.getDate() === cumple.getDate() &&
-    hoy.getMonth() === cumple.getMonth()
-  ) {
-    console.log('🎉 Cumpleaños detectado:', cliente.nombre);
-    cumpleañeros.push(cliente.nombre + ' ' + cliente.apellido);
-  }
-}
+      const cumple = new Date(cliente.fechaNacimiento);
+      const diaCumple = cumple.getUTCDate();
+      const mesCumple = cumple.getUTCMonth();
 
+      const hoyUTC = new Date();
+      const diaHoy = hoyUTC.getUTCDate();
+      const mesHoy = hoyUTC.getUTCMonth();
+
+      if (diaCumple === diaHoy && mesCumple === mesHoy) {
+        console.log('🎉 Cumpleaños detectado:', cliente.nombre);
+        cumpleañeros.push(cliente.nombre + ' ' + cliente.apellido);
+      }
+    }
   }
 
   // 🔁 Ordenar: vencidos primero
@@ -105,11 +107,8 @@ exports.formularioNuevo = (req, res) => {
 
 exports.guardarCliente = async (req, res) => {
   try {
-    console.log('🧪 Fecha recibida:', req.body.fechaNacimiento);
-
     if (req.body.fechaNacimiento) {
       req.body.fechaNacimiento = new Date(req.body.fechaNacimiento);
-      console.log('✅ Convertido a Date:', req.body.fechaNacimiento);
     }
 
     const nuevoCliente = new Cliente(req.body);
@@ -120,7 +119,6 @@ exports.guardarCliente = async (req, res) => {
     res.status(500).send('Error al guardar cliente');
   }
 };
-
 
 exports.formularioEditar = async (req, res) => {
   try {
