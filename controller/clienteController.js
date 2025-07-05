@@ -19,6 +19,7 @@ exports.listarClientes = async (req, res) => {
   let vencidos = 0;
   let totalRecaudadoHoy = 0;
   let cumpleañeros = [];
+  let proximosCumples = [];
 
   for (const cliente of clientes) {
     let ultimoPago = null;
@@ -71,22 +72,25 @@ exports.listarClientes = async (req, res) => {
       }
     }
 
-    // ✅ Verificar cumpleaños con horario local
+    // Cumpleaños
     if (cliente.fechaNacimiento) {
       const cumple = new Date(cliente.fechaNacimiento);
       const diaCumple = cumple.getDate();
       const mesCumple = cumple.getMonth();
 
-      console.log(`🕵️‍♂️ Verificando cumple: ${cliente.nombre}, cumple: ${diaCumple}/${mesCumple}, hoy: ${diaHoy}/${mesHoy}`);
-
       if (diaCumple === diaHoy && mesCumple === mesHoy) {
-        console.log('🎉 Cumpleaños detectado:', cliente.nombre);
         cumpleañeros.push(cliente.nombre + ' ' + cliente.apellido);
+      } else {
+        const esteAño = new Date(ahoraArgentina.getFullYear(), mesCumple, diaCumple);
+        const diffDias = Math.ceil((esteAño - ahoraArgentina) / (1000 * 60 * 60 * 24));
+        if (diffDias > 0 && diffDias <= 5) {
+          proximosCumples.push(`${cliente.nombre} ${cliente.apellido} (${diaCumple}/${mesCumple + 1})`);
+        }
       }
     }
   }
 
-  // 🔁 Ordenar: vencidos primero
+  // Ordenar: vencidos primero
   clientes.sort((a, b) => {
     if (a.estadoPago === 'vencido' && b.estadoPago !== 'vencido') return -1;
     if (a.estadoPago !== 'vencido' && b.estadoPago === 'vencido') return 1;
@@ -101,9 +105,11 @@ exports.listarClientes = async (req, res) => {
       vencidos,
       totalRecaudado: totalRecaudadoHoy
     },
-    cumpleañeros
+    cumpleañeros,
+    proximosCumples
   });
 };
+
 exports.formularioNuevo = (req, res) => {
   res.render('nueva');
 };

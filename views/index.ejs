@@ -90,7 +90,6 @@
       z-index: 1;
     }
 
-    /* 🎂 Ventana flotante cumpleaños */
     .ventana-cumple {
       position: fixed;
       top: 20px;
@@ -103,6 +102,21 @@
       border-radius: 12px;
       max-width: 300px;
       box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      animation: entrada 0.4s ease;
+    }
+
+    .ventana-proximos {
+      position: fixed;
+      top: 140px;
+      right: 20px;
+      background: #e6f3ff;
+      color: #004085;
+      border: 2px solid #66b0ff;
+      padding: 1rem 1.2rem;
+      z-index: 9998;
+      border-radius: 12px;
+      max-width: 300px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.15);
       animation: entrada 0.4s ease;
     }
 
@@ -133,6 +147,19 @@
       <h5 class="mb-2">🎉 ¡Cumpleaños de Hoy!</h5>
       <p><%= cumpleañeros.join(', ') %></p>
       <p class="mb-0">¡No te olvides de saludar! 🎂</p>
+    </div>
+  <% } %>
+
+  <% if (proximosCumples && proximosCumples.length > 0) { %>
+    <div id="ventanaProximos" class="ventana-proximos alert alert-info shadow">
+      <button class="btn-cerrar" onclick="cerrarProximos()">×</button>
+      <h5 class="mb-2">🎁 Próximos Cumpleaños</h5>
+      <ul class="mb-1 ps-3">
+        <% proximosCumples.forEach(cumple => { %>
+          <li>🎈 <%= cumple %></li>
+        <% }) %>
+      </ul>
+      <p class="mb-0">¡Prepará los saludos y sorpresas! 🥳</p>
     </div>
   <% } %>
 
@@ -174,9 +201,7 @@
     </div>
 
     <div class="d-flex justify-content-between align-items-center mb-3">
-      <a href="/nueva" class="btn btn-success">
-        <i class="bi bi-person-plus"></i> + Nuevo Alumno
-      </a>
+      <a href="/nueva" class="btn btn-success">➕ Nuevo Alumno</a>
       <input type="text" id="buscador" class="form-control w-50" placeholder="Buscar por nombre o apellido...">
     </div>
 
@@ -247,6 +272,11 @@
 
     function cerrarCumple() {
       const aviso = document.getElementById('ventanaCumple');
+      if (aviso) aviso.style.display = 'none';
+    }
+
+    function cerrarProximos() {
+      const aviso = document.getElementById('ventanaProximos');
       if (aviso) aviso.style.display = 'none';
     }
   </script>
