@@ -5,8 +5,14 @@ const whatsappClient = require('../services/whatsapp');
 exports.listarClientes = async (req, res) => {
   const clientes = await Cliente.find().sort({ creadoEn: -1 });
 
-  const hoy = new Date();
-  hoy.setHours(0, 0, 0, 0);
+  // Día actual en horario Argentina
+  const ahora = new Date();
+  const ahoraArgentina = new Date(ahora.toLocaleString("en-US", { timeZone: "America/Argentina/Buenos_Aires" }));
+  const hoySinHora = new Date(ahoraArgentina);
+  hoySinHora.setHours(0, 0, 0, 0);
+
+  const diaHoy = ahoraArgentina.getDate();
+  const mesHoy = ahoraArgentina.getMonth(); // enero = 0
 
   let totalClientes = clientes.length;
   let alDia = 0;
@@ -25,7 +31,7 @@ exports.listarClientes = async (req, res) => {
       cliente.pagos.forEach(p => {
         const fechaPago = new Date(p.fecha);
         fechaPago.setHours(0, 0, 0, 0);
-        if (fechaPago.getTime() === hoy.getTime()) {
+        if (fechaPago.getTime() === hoySinHora.getTime()) {
           totalRecaudadoHoy += p.monto;
         }
       });
@@ -65,27 +71,19 @@ exports.listarClientes = async (req, res) => {
       }
     }
 
-    // 🎂 Verificar cumpleaños (día y mes locales)
-    // 🎂 Verificar cumpleaños (comparar día y mes LOCAL)
-// 🎂 Verificar cumpleaños (comparar día y mes en horario LOCAL)
-if (cliente.fechaNacimiento) {
-  const cumple = new Date(cliente.fechaNacimiento);
-  const hoy = new Date();
+    // ✅ Verificar cumpleaños con horario local
+    if (cliente.fechaNacimiento) {
+      const cumple = new Date(cliente.fechaNacimiento);
+      const diaCumple = cumple.getDate();
+      const mesCumple = cumple.getMonth();
 
-  const diaCumple = cumple.getDate();
-  const mesCumple = cumple.getMonth();
-  const diaHoy = hoy.getDate();
-  const mesHoy = hoy.getMonth();
+      console.log(`🕵️‍♂️ Verificando cumple: ${cliente.nombre}, cumple: ${diaCumple}/${mesCumple}, hoy: ${diaHoy}/${mesHoy}`);
 
-  console.log(`🕵️‍♂️ Verificando cumple: ${cliente.nombre}, cumple: ${diaCumple}/${mesCumple}, hoy: ${diaHoy}/${mesHoy}`);
-
-  if (diaCumple === diaHoy && mesCumple === mesHoy) {
-    console.log('🎉 Cumpleaños detectado:', cliente.nombre);
-    cumpleañeros.push(cliente.nombre + ' ' + cliente.apellido);
-  }
-}
-
-
+      if (diaCumple === diaHoy && mesCumple === mesHoy) {
+        console.log('🎉 Cumpleaños detectado:', cliente.nombre);
+        cumpleañeros.push(cliente.nombre + ' ' + cliente.apellido);
+      }
+    }
   }
 
   // 🔁 Ordenar: vencidos primero
@@ -106,7 +104,6 @@ if (cliente.fechaNacimiento) {
     cumpleañeros
   });
 };
-
 exports.formularioNuevo = (req, res) => {
   res.render('nueva');
 };
