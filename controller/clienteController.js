@@ -65,17 +65,14 @@ exports.listarClientes = async (req, res) => {
       }
     }
 
-    // 🎂 Verificar cumpleaños (comparar día y mes UTC)
+    // 🎂 Verificar cumpleaños (día y mes locales)
     if (cliente.fechaNacimiento) {
       const cumple = new Date(cliente.fechaNacimiento);
-      const diaCumple = cumple.getUTCDate();
-      const mesCumple = cumple.getUTCMonth();
-
-      const hoyUTC = new Date();
-      const diaHoy = hoyUTC.getUTCDate();
-      const mesHoy = hoyUTC.getUTCMonth();
-
-      if (diaCumple === diaHoy && mesCumple === mesHoy) {
+      const hoyLocal = new Date();
+      if (
+        cumple.getDate() === hoyLocal.getDate() &&
+        cumple.getMonth() === hoyLocal.getMonth()
+      ) {
         console.log('🎉 Cumpleaños detectado:', cliente.nombre);
         cumpleañeros.push(cliente.nombre + ' ' + cliente.apellido);
       }
