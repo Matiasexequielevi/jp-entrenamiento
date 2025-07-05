@@ -67,20 +67,24 @@ exports.listarClientes = async (req, res) => {
 
     // 🎂 Verificar cumpleaños (día y mes locales)
     // 🎂 Verificar cumpleaños (comparar día y mes LOCAL)
+// 🎂 Verificar cumpleaños (comparar día y mes en horario LOCAL)
 if (cliente.fechaNacimiento) {
   const cumple = new Date(cliente.fechaNacimiento);
+  const hoy = new Date();
+
   const diaCumple = cumple.getDate();
   const mesCumple = cumple.getMonth();
-
-  const hoy = new Date();
   const diaHoy = hoy.getDate();
   const mesHoy = hoy.getMonth();
+
+  console.log(`🕵️‍♂️ Verificando cumple: ${cliente.nombre}, cumple: ${diaCumple}/${mesCumple}, hoy: ${diaHoy}/${mesHoy}`);
 
   if (diaCumple === diaHoy && mesCumple === mesHoy) {
     console.log('🎉 Cumpleaños detectado:', cliente.nombre);
     cumpleañeros.push(cliente.nombre + ' ' + cliente.apellido);
   }
 }
+
 
   }
 
