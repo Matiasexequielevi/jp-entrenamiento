@@ -92,7 +92,7 @@ exports.listarClientes = async (req, res) => {
       vencidos,
       totalRecaudado: totalRecaudadoHoy
     },
-    cumpleañeros // 🎉 Pasamos a la vista
+    cumpleañeros
   });
 };
 
@@ -102,6 +102,10 @@ exports.formularioNuevo = (req, res) => {
 
 exports.guardarCliente = async (req, res) => {
   try {
+    if (req.body.fechaNacimiento) {
+      req.body.fechaNacimiento = new Date(req.body.fechaNacimiento);
+    }
+
     const nuevoCliente = new Cliente(req.body);
     await nuevoCliente.save();
     res.redirect('/');
@@ -122,6 +126,10 @@ exports.formularioEditar = async (req, res) => {
 
 exports.actualizarCliente = async (req, res) => {
   try {
+    if (req.body.fechaNacimiento) {
+      req.body.fechaNacimiento = new Date(req.body.fechaNacimiento);
+    }
+
     await Cliente.findByIdAndUpdate(req.params.id, req.body);
     res.redirect('/editar/' + req.params.id);
   } catch (error) {
