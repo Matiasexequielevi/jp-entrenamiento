@@ -38,10 +38,10 @@ exports.listarClientes = async (req, res) => {
       });
     }
 
-    const hace30Dias = new Date();
-    hace30Dias.setDate(hace30Dias.getDate() - 30);
+    const hace34Dias = new Date();
+    hace34Dias.setDate(hace34Dias.getDate() - 34);
 
-    if (ultimoPago && new Date(ultimoPago.fecha) >= hace30Dias) {
+    if (ultimoPago && new Date(ultimoPago.fecha) >= hace34Dias) {
       alDia++;
       cliente.estadoPago = 'aldia';
     } else {
@@ -52,7 +52,7 @@ exports.listarClientes = async (req, res) => {
         whatsappClient.client.clientReady &&
         cliente.celular &&
         !cliente.notificado &&
-        ultimoPago && new Date(ultimoPago.fecha) < hace30Dias
+        ultimoPago && new Date(ultimoPago.fecha) < hace34Dias
       ) {
         const mensaje = `Hola ${cliente.nombre}, te recordamos que tu último pago fue hace más de 30 días. ¡Ponete al día con tu entrenamiento en JP Entrenamiento! 💪`;
 
