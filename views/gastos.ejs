@@ -214,8 +214,13 @@
 
               <div class="field">
                 <label for="fecha">Fecha</label>
-                <input type="date" id="fecha" name="fecha" required>
-              </div>
+<input
+  type="date"
+  id="fecha"
+  name="fecha"
+  required
+  value="<%= new Date().toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }) %>"
+>              </div>
             </div>
 
             <div class="field">
