@@ -2,9 +2,8 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>JP Entrenamiento | Gastos</title>
+  <title>Gastos | JP</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -12,754 +11,116 @@
     :root{
       --jp-primary:#223a73;
       --jp-primary-2:#2f4f9a;
-      --jp-accent:#7ea7ff;
-      --jp-soft:#dfe8ff;
       --jp-bg:#f4f7fc;
-      --jp-card:#ffffff;
       --jp-text:#1f2937;
       --jp-muted:#6b7280;
-      --jp-success:#159447;
       --jp-danger:#d62839;
-      --jp-warning:#d4a017;
-      --jp-info:#0d6efd;
+      --jp-border:#d9e2f1;
       --jp-shadow:0 10px 30px rgba(27,47,95,.10);
-      --jp-shadow-strong:0 20px 40px rgba(27,47,95,.14);
-      --jp-radius:22px;
     }
-
-    *{
-      box-sizing:border-box;
-    }
-
+    *{ box-sizing:border-box; }
     body{
-      margin:0;
-      min-height:100vh;
-      color:var(--jp-text);
-      font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(126,167,255,.15), transparent 26%),
-        radial-gradient(circle at top right, rgba(34,58,115,.12), transparent 28%),
-        linear-gradient(180deg, #f8fbff 0%, var(--jp-bg) 100%);
-      position:relative;
+      margin:0; min-height:100vh; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background:linear-gradient(180deg,#f8fbff 0%, var(--jp-bg) 100%);
+      color:var(--jp-text); position:relative;
     }
-
     body::before{
-      content:"";
-      position:fixed;
-      inset:0;
-      background-image:url('/images/logo-jp.png');
-      background-repeat:repeat;
-      background-size:110px;
-      opacity:.035;
-      z-index:0;
-      pointer-events:none;
+      content:""; position:fixed; inset:0; background-image:url('/images/logo-jp.png');
+      background-repeat:repeat; background-size:110px; opacity:.03; pointer-events:none;
     }
-
-    .contenido,
-    .main-header,
-    .footer{
-      position:relative;
-      z-index:1;
+    .topbar,.wrap,.footer{ position:relative; z-index:1; }
+    .topbar{
+      background:linear-gradient(135deg, var(--jp-primary), var(--jp-primary-2));
+      color:#fff; padding:20px 0; box-shadow:0 10px 24px rgba(34,58,115,.18);
     }
+    .brand{ display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap; text-align:center; }
+    .brand img{ width:72px; height:72px; border-radius:50%; background:#fff; padding:4px; }
+    .brand h1{ margin:0; font-size:clamp(1.4rem,3vw,2rem); font-weight:800; }
+    .brand p{ margin:4px 0 0; opacity:.9; }
 
-    .main-header{
-      background:linear-gradient(135deg, var(--jp-primary) 0%, var(--jp-primary-2) 100%);
-      color:#fff;
-      overflow:hidden;
-      box-shadow:0 12px 28px rgba(34,58,115,.18);
-    }
-
-    .main-header::before{
-      content:'';
-      position:absolute;
-      inset:0;
-      background:
-        radial-gradient(circle at 12% 20%, rgba(255,255,255,.18), transparent 18%),
-        radial-gradient(circle at 88% 16%, rgba(255,255,255,.12), transparent 18%),
-        radial-gradient(circle at 65% 75%, rgba(255,255,255,.09), transparent 18%);
-      pointer-events:none;
-    }
-
-    .header-inner{
-      position:relative;
-      z-index:2;
-      padding:28px 0 24px;
-    }
-
-    .brand-wrap{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:16px;
-      flex-wrap:wrap;
-      text-align:center;
-    }
-
-    .brand-logo{
-      width:84px;
-      height:84px;
-      object-fit:cover;
-      border-radius:50%;
-      border:3px solid rgba(255,255,255,.85);
-      background:#fff;
-      box-shadow:0 10px 25px rgba(0,0,0,.18);
-      flex-shrink:0;
-    }
-
-    .brand-text h1{
-      margin:0;
-      font-size:clamp(1.45rem, 3vw, 2.1rem);
-      font-weight:800;
-      letter-spacing:.2px;
-    }
-
-    .brand-text p{
-      margin:.35rem 0 0;
-      color:rgba(255,255,255,.86);
-      font-size:.98rem;
-    }
-
-    .page-wrap{
-      padding:28px 0 36px;
-    }
-
-    .hero-card{
-      background:rgba(255,255,255,.88);
-      border:1px solid rgba(34,58,115,.08);
-      border-radius:28px;
-      box-shadow:var(--jp-shadow-strong);
-      backdrop-filter:blur(10px);
-      overflow:hidden;
-      margin-bottom:22px;
-    }
-
-    .hero-top{
-      padding:24px 24px 18px;
-      border-bottom:1px solid rgba(34,58,115,.08);
-      background:linear-gradient(180deg, rgba(34,58,115,.05), rgba(34,58,115,.015));
-    }
-
-    .hero-head{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:14px;
-      flex-wrap:wrap;
-    }
-
-    .hero-title{
-      margin:0;
-      font-size:clamp(1.35rem, 2.4vw, 2rem);
-      font-weight:800;
-      color:var(--jp-primary);
-    }
-
-    .hero-subtitle{
-      margin:.4rem 0 0;
-      color:var(--jp-muted);
-      font-size:.98rem;
-      max-width:760px;
-    }
-
-    .hero-actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    .btn-header{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      text-decoration:none;
-      border:none;
-      border-radius:999px;
-      padding:11px 18px;
-      font-weight:700;
-      transition:.18s ease;
-      white-space:nowrap;
-    }
-
-    .btn-header-back{
-      background:#fff;
-      color:var(--jp-primary);
-      box-shadow:0 10px 20px rgba(34,58,115,.10);
-    }
-
-    .btn-header-back:hover{
-      transform:translateY(-1px);
-      color:var(--jp-primary);
-      background:#f3f6ff;
-    }
-
-    .btn-header-report{
-      background:linear-gradient(135deg, var(--jp-danger), #ef4c5d);
-      color:#fff;
-      box-shadow:0 10px 22px rgba(214,40,57,.18);
-    }
-
-    .btn-header-report:hover{
-      color:#fff;
-      transform:translateY(-1px);
-      filter:brightness(1.03);
-    }
-
-    .hero-body{
-      padding:22px 24px 24px;
-    }
-
-    .stats-grid{
-      display:grid;
-      grid-template-columns:repeat(4, minmax(0, 1fr));
-      gap:16px;
-      margin-bottom:22px;
-    }
-
-    .summary-card{
-      background:#fff;
-      border-radius:22px;
-      border:1px solid rgba(34,58,115,.08);
-      box-shadow:var(--jp-shadow);
-      padding:18px;
-      position:relative;
-      overflow:hidden;
-      min-height:142px;
-    }
-
-    .summary-card::after{
-      content:'';
-      position:absolute;
-      right:-18px;
-      top:-18px;
-      width:82px;
-      height:82px;
-      border-radius:50%;
-      background:rgba(34,58,115,.05);
-    }
-
-    .summary-top{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:10px;
-      margin-bottom:14px;
-      position:relative;
-      z-index:1;
-    }
-
-    .summary-label{
-      margin:0;
-      font-size:.88rem;
-      color:var(--jp-muted);
-      font-weight:700;
-    }
-
-    .summary-icon{
-      width:44px;
-      height:44px;
-      border-radius:14px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:1.15rem;
-      font-weight:800;
-      flex-shrink:0;
-    }
-
-    .summary-value{
-      margin:0 0 8px;
-      font-size:1.65rem;
-      line-height:1.05;
-      font-weight:900;
-      color:var(--jp-text);
-      position:relative;
-      z-index:1;
-    }
-
-    .summary-note{
-      margin:0;
-      color:var(--jp-muted);
-      font-size:.84rem;
-      position:relative;
-      z-index:1;
-    }
-
-    .card-danger .summary-icon{
-      background:rgba(214,40,57,.12);
-      color:var(--jp-danger);
-    }
-
-    .card-warning .summary-icon{
-      background:rgba(212,160,23,.14);
-      color:var(--jp-warning);
-    }
-
-    .card-primary .summary-icon{
-      background:rgba(34,58,115,.10);
-      color:var(--jp-primary);
-    }
-
-    .card-info .summary-icon{
-      background:rgba(13,110,253,.12);
-      color:var(--jp-info);
-    }
-
-    .grid-two{
-      display:grid;
-      grid-template-columns:minmax(0, 1.1fr) minmax(0, .9fr);
-      gap:18px;
-      margin-bottom:22px;
-    }
-
+    .page{ max-width:1120px; margin:28px auto; padding:0 16px; }
     .panel{
-      background:#fff;
-      border:1px solid rgba(34,58,115,.08);
-      border-radius:24px;
-      box-shadow:var(--jp-shadow);
-      overflow:hidden;
+      background:rgba(255,255,255,.94); border:1px solid var(--jp-border);
+      border-radius:28px; box-shadow:var(--jp-shadow); overflow:hidden;
+    }
+    .head{
+      padding:24px 28px; border-bottom:1px solid var(--jp-border);
+      display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap;
+    }
+    .head h2{ margin:0; color:var(--jp-primary); font-size:clamp(1.4rem,2.4vw,2rem); font-weight:800; }
+    .head p{ margin:6px 0 0; color:var(--jp-muted); }
+    .actions{ display:flex; gap:10px; flex-wrap:wrap; }
+
+    .btn-soft,.btn-main{
+      border:none; border-radius:999px; padding:12px 18px; font-weight:700; text-decoration:none;
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    }
+    .btn-soft{ background:#fff; color:var(--jp-primary); box-shadow:0 8px 18px rgba(34,58,115,.10); }
+    .btn-main{ background:linear-gradient(135deg, var(--jp-danger), #ef4c5d); color:#fff; box-shadow:0 10px 20px rgba(214,40,57,.18); }
+
+    .body{ padding:24px 28px 28px; }
+    .stats{
+      display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:14px; margin-bottom:22px;
+    }
+    .stat{
+      background:#f8fbff; border:1px solid var(--jp-border); border-radius:18px; padding:16px;
+    }
+    .stat span{ display:block; font-size:.84rem; color:var(--jp-muted); font-weight:700; margin-bottom:8px; }
+    .stat strong{ font-size:1.35rem; font-weight:800; color:var(--jp-primary); }
+    .stat .danger{ color:var(--jp-danger); }
+
+    .form-box{
+      background:#fff; border:1px solid var(--jp-border); border-radius:20px; padding:20px; margin-bottom:20px;
+    }
+    form{ display:grid; gap:18px; }
+    .grid-5{
+      display:grid; grid-template-columns:2fr 1fr 1.2fr 1.2fr 1.2fr; gap:16px;
+    }
+    .field{ display:flex; flex-direction:column; gap:7px; }
+    .field label{ font-size:.92rem; font-weight:700; color:#43506a; }
+    .field input,.field select{
+      width:100%; border:1px solid #c8d3e4; border-radius:14px; padding:14px 15px;
+      font-size:1rem; background:#fff; color:var(--jp-text); outline:none;
+    }
+    .field input:focus,.field select:focus{
+      border-color:#7ea7ff; box-shadow:0 0 0 4px rgba(126,167,255,.14);
     }
 
-    .panel-header{
-      padding:18px 20px;
-      border-bottom:1px solid rgba(34,58,115,.08);
-      background:linear-gradient(180deg, rgba(34,58,115,.04), rgba(34,58,115,.01));
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      flex-wrap:wrap;
+    .search{ margin:0 0 18px; }
+    .search input{
+      width:100%; border:1px solid #c8d3e4; border-radius:16px; padding:14px 16px; font-size:1rem;
     }
 
-    .panel-header h3{
-      margin:0;
-      font-size:1rem;
-      font-weight:800;
-      color:var(--jp-primary);
+    .table-wrap{
+      background:#fff; border:1px solid var(--jp-border); border-radius:22px; overflow:hidden;
     }
+    table{ width:100%; border-collapse:collapse; }
+    thead th{
+      background:#18284b; color:#fff; padding:14px 12px; font-size:.86rem; text-transform:uppercase;
+    }
+    tbody td{
+      padding:14px 12px; border-top:1px solid #edf1f7; text-align:center;
+    }
+    tbody tr:hover{ background:#f8fbff; }
 
-    .panel-header p{
-      margin:4px 0 0;
-      color:var(--jp-muted);
-      font-size:.9rem;
-    }
-
-    .panel-body{
-      padding:18px;
-    }
-
-    .form-grid{
-      display:grid;
-      grid-template-columns:repeat(12, minmax(0, 1fr));
-      gap:14px;
-    }
-
-    .field{
-      grid-column:span 12;
-    }
-
-    .field.col-6{
-      grid-column:span 6;
-    }
-
-    .field.col-4{
-      grid-column:span 4;
-    }
-
-    .field.col-3{
-      grid-column:span 3;
-    }
-
-    .field.col-2{
-      grid-column:span 2;
-    }
-
-    .field label{
-      display:block;
-      font-size:.86rem;
-      color:var(--jp-muted);
-      font-weight:700;
-      margin-bottom:7px;
-    }
-
-    .field input,
-    .field select{
-      width:100%;
-      border:1px solid rgba(34,58,115,.14);
-      border-radius:14px;
-      padding:13px 14px;
-      background:#f8fbff;
-      color:var(--jp-text);
-      font-weight:600;
-      outline:none;
-      transition:.18s ease;
-    }
-
-    .field input:focus,
-    .field select:focus{
-      border-color:rgba(34,58,115,.28);
-      background:#fff;
-      box-shadow:0 10px 18px rgba(34,58,115,.08);
-    }
-
-    .form-actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:4px;
-    }
-
-    .btn-main{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      background:linear-gradient(135deg, var(--jp-danger), #ef4c5d);
-      color:#fff;
-      border:none;
-      border-radius:16px;
-      padding:13px 18px;
-      font-weight:800;
-      text-decoration:none;
-      box-shadow:0 10px 22px rgba(214,40,57,.18);
-      transition:.18s ease;
-    }
-
-    .btn-main:hover{
-      color:#fff;
-      transform:translateY(-1px);
-      filter:brightness(1.03);
-    }
-
-    .btn-secondary-soft{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      background:#eef3ff;
-      color:var(--jp-primary);
-      border:none;
-      border-radius:16px;
-      padding:13px 18px;
-      font-weight:800;
-      text-decoration:none;
-      transition:.18s ease;
-    }
-
-    .btn-secondary-soft:hover{
-      background:#e3ecff;
-      color:var(--jp-primary);
-    }
-
-    .mini-list{
-      display:grid;
-      gap:14px;
-    }
-
-    .mini-card{
-      background:linear-gradient(135deg, rgba(34,58,115,.03), rgba(126,167,255,.06));
-      border:1px solid rgba(34,58,115,.08);
-      border-radius:18px;
-      padding:16px;
-    }
-
-    .mini-card-label{
-      margin:0 0 8px;
-      color:var(--jp-muted);
-      font-size:.84rem;
-      font-weight:700;
-    }
-
-    .mini-card-value{
-      margin:0;
-      font-size:1.28rem;
-      font-weight:900;
-      color:var(--jp-primary);
-      line-height:1.1;
-    }
-
-    .mini-card-sub{
-      margin:8px 0 0;
-      color:var(--jp-muted);
-      font-size:.83rem;
-      line-height:1.35;
-    }
-
-    .negative{
-      color:var(--jp-danger) !important;
-    }
-
-    .toolbar{
-      display:grid;
-      grid-template-columns:minmax(220px, 280px) 1fr;
-      gap:14px;
-      align-items:center;
-      margin-bottom:20px;
-    }
-
-    .toolbar-card{
-      background:#fff;
-      border:1px solid rgba(34,58,115,.08);
-      border-radius:20px;
-      padding:14px 16px;
-      box-shadow:var(--jp-shadow);
-    }
-
-    .toolbar-title{
-      margin:0 0 4px;
-      font-size:.9rem;
-      font-weight:800;
-      color:var(--jp-primary);
-    }
-
-    .toolbar-subtitle{
-      margin:0;
-      color:var(--jp-muted);
-      font-size:.83rem;
-    }
-
-    .search-wrap{
-      position:relative;
-    }
-
-    .search-input{
-      width:100%;
-      border:none;
-      border-radius:16px;
-      padding:15px 18px 15px 46px;
-      background:#fff;
-      box-shadow:var(--jp-shadow);
-      border:1px solid rgba(34,58,115,.08);
-      font-size:.98rem;
-      outline:none;
-      transition:.18s ease;
-    }
-
-    .search-input:focus{
-      border-color:rgba(34,58,115,.28);
-      box-shadow:0 12px 24px rgba(34,58,115,.12);
-    }
-
-    .search-icon{
-      position:absolute;
-      left:16px;
-      top:50%;
-      transform:translateY(-50%);
-      color:var(--jp-muted);
-      font-size:1rem;
-      pointer-events:none;
-    }
-
-    .table-card{
-      background:#fff;
-      border-radius:24px;
-      box-shadow:var(--jp-shadow);
-      border:1px solid rgba(34,58,115,.08);
-      overflow:hidden;
-    }
-
-    .table-card-header{
-      padding:16px 18px;
-      border-bottom:1px solid rgba(34,58,115,.08);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-      background:linear-gradient(180deg, rgba(34,58,115,.03), rgba(34,58,115,.01));
-    }
-
-    .table-card-header h3{
-      margin:0;
-      font-size:1.02rem;
-      font-weight:800;
-      color:var(--jp-primary);
-    }
-
-    .table-card-header p{
-      margin:0;
-      color:var(--jp-muted);
-      font-size:.9rem;
-    }
-
-    .table-responsive{
-      margin:0;
-    }
-
-    .tabla-gastos{
-      margin:0;
-      vertical-align:middle;
-    }
-
-    .tabla-gastos thead th{
-      background:#18284b;
-      color:#fff;
-      border:none;
-      font-size:.86rem;
-      text-transform:uppercase;
-      letter-spacing:.3px;
-      padding:15px 12px;
-      white-space:nowrap;
-      text-align:center;
-    }
-
-    .tabla-gastos tbody td{
-      padding:14px 12px;
-      border-color:#eef2f8;
-      vertical-align:middle;
-      text-align:center;
-    }
-
-    .tabla-gastos tbody tr{
-      transition:background .16s ease;
-    }
-
-    .tabla-gastos tbody tr:hover{
-      background:#f9fbff;
-    }
-
-    .gasto-name{
-      text-align:left !important;
-    }
-
-    .gasto-name strong{
-      display:block;
-      color:#162542;
-      font-weight:800;
-      margin-bottom:2px;
-    }
-
-    .gasto-name span{
-      display:block;
-      color:var(--jp-muted);
-      font-size:.83rem;
-    }
-
-    .monto-gasto{
-      color:var(--jp-danger);
-      font-weight:900;
-      white-space:nowrap;
-    }
-
-    .tipo-badge{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      border-radius:999px;
-      padding:7px 12px;
-      font-size:.74rem;
-      font-weight:800;
-      letter-spacing:.2px;
-      white-space:nowrap;
-      background:rgba(34,58,115,.10);
-      color:var(--jp-primary);
-    }
-
-    .empty-state{
-      padding:34px 18px;
-      text-align:center;
-      color:var(--jp-muted);
-    }
+    .desc-cell{ text-align:left; font-weight:700; color:#223a73; }
+    .amount-cell{ color:var(--jp-danger); font-weight:800; }
+    .empty{ text-align:center; padding:24px; color:var(--jp-muted); }
 
     .footer{
-      margin-top:34px;
-      background:linear-gradient(135deg, #dbe5ff, #c7d6ff);
-      color:#30415f;
-      text-align:center;
-      padding:18px 12px;
-      font-weight:600;
-      border-top:1px solid rgba(34,58,115,.08);
+      text-align:center; padding:18px 12px 28px; color:#53627f; font-weight:600;
     }
 
-    @media (max-width: 1199px){
-      .stats-grid{
-        grid-template-columns:repeat(2, minmax(0, 1fr));
-      }
-
-      .grid-two{
-        grid-template-columns:1fr;
-      }
+    @media (max-width: 950px){
+      .stats{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+      .grid-5{ grid-template-columns:1fr 1fr; }
     }
-
-    @media (max-width: 767px){
-      .header-inner{
-        padding:22px 0 20px;
-      }
-
-      .brand-wrap{
-        flex-direction:column;
-        gap:12px;
-      }
-
-      .brand-logo{
-        width:76px;
-        height:76px;
-      }
-
-      .page-wrap{
-        padding:20px 0 26px;
-      }
-
-      .hero-top,
-      .hero-body{
-        padding:18px 16px;
-      }
-
-      .hero-actions{
-        width:100%;
-      }
-
-      .hero-actions .btn-header{
-        flex:1 1 100%;
-        justify-content:center;
-      }
-
-      .stats-grid{
-        grid-template-columns:1fr;
-        gap:12px;
-      }
-
-      .summary-card{
-        min-height:auto;
-      }
-
-      .toolbar{
-        grid-template-columns:1fr;
-      }
-
-      .form-grid{
-        grid-template-columns:1fr;
-      }
-
-      .field,
-      .field.col-6,
-      .field.col-4,
-      .field.col-3,
-      .field.col-2{
-        grid-column:span 1;
-      }
-
-      .table-card{
-        border-radius:20px;
-      }
-
-      .table-card-header{
-        padding:14px 14px;
-      }
-
-      .tabla-gastos thead th,
-      .tabla-gastos tbody td{
-        padding:12px 10px;
-        font-size:.88rem;
-      }
-
-      .form-actions{
-        flex-direction:column;
-      }
-
-      .btn-main,
-      .btn-secondary-soft{
-        width:100%;
-      }
+    @media (max-width: 600px){
+      .head,.body{ padding:18px; }
+      .stats{ grid-template-columns:1fr; }
+      .grid-5{ grid-template-columns:1fr; }
+      .actions{ flex-direction:column; }
+      .btn-soft,.btn-main{ width:100%; }
     }
   </style>
 </head>
@@ -767,293 +128,149 @@
   <%
     const money = (n) => Number(n || 0).toFixed(2);
     const gastosLista = Array.isArray(gastos) ? gastos : [];
-
     const totalGastadoHoy = Number(totalHoy || 0);
-    const cantidadGastos = gastosLista.length;
-    const promedioGasto = cantidadGastos > 0 ? totalGastadoHoy / cantidadGastos : 0;
   %>
 
-  <header class="main-header">
-    <div class="container header-inner">
-      <div class="brand-wrap">
-        <img src="/images/logo-jp.png" alt="Logo JP" class="brand-logo">
-        <div class="brand-text">
-          <h1>JP Entrenamiento Personalizado</h1>
-          <p>Panel de gastos y egresos para controlar el dinero del gimnasio</p>
-        </div>
+  <header class="topbar">
+    <div class="container brand">
+      <img src="/images/logo-jp.png" alt="Logo JP">
+      <div>
+        <h1>JP Entrenamiento Personalizado</h1>
+        <p>Control de gastos</p>
       </div>
     </div>
   </header>
 
-  <main class="container page-wrap contenido">
-    <section class="hero-card">
-      <div class="hero-top">
-        <div class="hero-head">
-          <div>
-            <h2 class="hero-title">💸 Gestión de gastos</h2>
-            <p class="hero-subtitle">
-              Aquí el dueño del gimnasio puede registrar egresos de forma rápida,
-              revisar en qué se gasta el dinero y mantener el control real del negocio.
-            </p>
-          </div>
+  <main class="page wrap">
+    <section class="panel">
+      <div class="head">
+        <div>
+          <h2>💸 Gastos</h2>
+          <p>Registra y controla los egresos del gimnasio.</p>
+        </div>
 
-          <div class="hero-actions">
-            <a href="/" class="btn-header btn-header-back">← Volver</a>
-            <a href="/reportes" class="btn-header btn-header-report">📊 Ver Reportes</a>
-          </div>
+        <div class="actions">
+          <a href="/" class="btn-soft">← Volver</a>
+          <a href="/reportes" class="btn-soft">📊 Ver Reportes</a>
         </div>
       </div>
 
-      <div class="hero-body">
-        <div class="stats-grid">
-          <div class="summary-card card-danger">
-            <div class="summary-top">
-              <p class="summary-label">Total gastado hoy</p>
-              <div class="summary-icon">💸</div>
-            </div>
-            <h3 class="summary-value">$<%= money(totalGastadoHoy) %></h3>
-            <p class="summary-note">Egresos registrados hoy en el sistema.</p>
+      <div class="body">
+        <div class="stats">
+          <div class="stat">
+            <span>Total gastado hoy</span>
+            <strong class="danger">$<%= money(totalGastadoHoy) %></strong>
           </div>
-
-          <div class="summary-card card-primary">
-            <div class="summary-top">
-              <p class="summary-label">Gastos cargados</p>
-              <div class="summary-icon">🧾</div>
-            </div>
-            <h3 class="summary-value"><%= cantidadGastos %></h3>
-            <p class="summary-note">Cantidad de movimientos visibles en el historial.</p>
+          <div class="stat">
+            <span>Gastos cargados</span>
+            <strong><%= gastosLista.length %></strong>
           </div>
-
-          <div class="summary-card card-warning">
-            <div class="summary-top">
-              <p class="summary-label">Promedio por gasto</p>
-              <div class="summary-icon">📉</div>
-            </div>
-            <h3 class="summary-value">$<%= money(promedioGasto) %></h3>
-            <p class="summary-note">Promedio rápido según los gastos mostrados hoy.</p>
+          <div class="stat">
+            <span>Promedio</span>
+            <strong>$<%= gastosLista.length > 0 ? money(totalGastadoHoy / gastosLista.length) : '0.00' %></strong>
           </div>
-
-          <div class="summary-card card-info">
-            <div class="summary-top">
-              <p class="summary-label">Control del módulo</p>
-              <div class="summary-icon">✅</div>
-            </div>
-            <h3 class="summary-value">Activo</h3>
-            <p class="summary-note">Panel listo para registrar egresos con rapidez.</p>
+          <div class="stat">
+            <span>Estado</span>
+            <strong>Activo</strong>
           </div>
         </div>
 
-        <div class="grid-two">
-          <section class="panel">
-            <div class="panel-header">
-              <div>
-                <h3>Registrar nuevo gasto</h3>
-                <p>Carga rápida para usar todos los días sin perder tiempo</p>
+        <div class="form-box">
+          <form action="/gastos/nuevo" method="POST">
+            <div class="grid-5">
+              <div class="field">
+                <label for="descripcion">Descripción</label>
+                <input type="text" id="descripcion" name="descripcion" placeholder="Ej: Alquiler, luz, limpieza..." required>
+              </div>
+
+              <div class="field">
+                <label for="monto">Monto</label>
+                <input type="number" step="0.01" id="monto" name="monto" placeholder="0.00" required>
+              </div>
+
+              <div class="field">
+                <label for="categoria">Categoría</label>
+                <select name="categoria" id="categoria">
+                  <option>Alquiler</option>
+                  <option>Servicios</option>
+                  <option>Mercadería</option>
+                  <option>Mantenimiento</option>
+                  <option>Limpieza</option>
+                  <option>Publicidad</option>
+                  <option>Sueldos</option>
+                  <option>Otros</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="metodoPago">Pago</label>
+                <select name="metodoPago" id="metodoPago">
+                  <option>Efectivo</option>
+                  <option>Transferencia</option>
+                  <option>Mercado Pago</option>
+                  <option>Otro</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="fecha">Fecha</label>
+                <input type="date" id="fecha" name="fecha" required>
               </div>
             </div>
 
-            <div class="panel-body">
-              <form action="/gastos/nuevo" method="POST">
-                <div class="form-grid">
-                  <div class="field col-6">
-                    <label for="descripcion">Descripción</label>
-                    <input
-                      type="text"
-                      id="descripcion"
-                      name="descripcion"
-                      placeholder="Ej: Alquiler, luz, reposición, limpieza..."
-                      required
-                    >
-                  </div>
-
-                  <div class="field col-2">
-                    <label for="monto">Monto</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      id="monto"
-                      name="monto"
-                      placeholder="0.00"
-                      required
-                    >
-                  </div>
-
-                  <div class="field col-2">
-                    <label for="categoria">Categoría</label>
-                    <select name="categoria" id="categoria">
-                      <option>Alquiler</option>
-                      <option>Servicios</option>
-                      <option>Mercadería</option>
-                      <option>Mantenimiento</option>
-                      <option>Limpieza</option>
-                      <option>Publicidad</option>
-                      <option>Sueldos</option>
-                      <option>Otros</option>
-                    </select>
-                  </div>
-
-                  <div class="field col-2">
-                    <label for="metodoPago">Pago</label>
-                    <select name="metodoPago" id="metodoPago">
-                      <option>Efectivo</option>
-                      <option>Transferencia</option>
-                      <option>Mercado Pago</option>
-                      <option>Otro</option>
-                    </select>
-                  </div>
-
-                  <div class="field col-4">
-                    <label for="fecha">Fecha</label>
-                    <input type="date" id="fecha" name="fecha" required>
-                  </div>
-
-                  <div class="field col-8">
-                    <label for="observacion">Observación</label>
-                    <input
-                      type="text"
-                      id="observacion"
-                      name="observacion"
-                      placeholder="Ej: pago mensual, compra urgente, arreglo del gym..."
-                    >
-                  </div>
-                </div>
-
-                <div class="form-actions">
-                  <button type="submit" class="btn-main">✅ Guardar Gasto</button>
-                  <a href="/reportes" class="btn-secondary-soft">📊 Revisar Balance</a>
-                </div>
-              </form>
-            </div>
-          </section>
-
-          <aside class="panel">
-            <div class="panel-header">
-              <div>
-                <h3>Resumen rápido</h3>
-                <p>Datos útiles para controlar los egresos del negocio</p>
-              </div>
+            <div class="field">
+              <label for="observacion">Observación</label>
+              <input type="text" id="observacion" name="observacion" placeholder="Opcional">
             </div>
 
-            <div class="panel-body">
-              <div class="mini-list">
-                <div class="mini-card">
-                  <p class="mini-card-label">Salida del día</p>
-                  <h4 class="mini-card-value negative">$<%= money(totalGastadoHoy) %></h4>
-                  <p class="mini-card-sub">Suma total de gastos registrados hoy.</p>
-                </div>
-
-                <div class="mini-card">
-                  <p class="mini-card-label">Movimientos cargados</p>
-                  <h4 class="mini-card-value"><%= cantidadGastos %></h4>
-                  <p class="mini-card-sub">Cantidad de egresos visibles en esta pantalla.</p>
-                </div>
-
-                <div class="mini-card">
-                  <p class="mini-card-label">Modo ideal de uso</p>
-                  <h4 class="mini-card-value">Registrar todo</h4>
-                  <p class="mini-card-sub">
-                    Carga alquiler, servicios, compras, limpieza y cualquier egreso real.
-                  </p>
-                </div>
-
-                <div class="mini-card">
-                  <p class="mini-card-label">Consejo</p>
-                  <h4 class="mini-card-value">Control total</h4>
-                  <p class="mini-card-sub">
-                    Todo gasto cargado aquí mejora la precisión de la ganancia neta en reportes.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </aside>
-        </div>
-
-        <div class="toolbar">
-          <div class="toolbar-card">
-            <h3 class="toolbar-title">Historial de gastos</h3>
-            <p class="toolbar-subtitle">Busca por descripción, categoría, pago u observación.</p>
-          </div>
-
-          <div class="search-wrap">
-            <span class="search-icon">🔎</span>
-            <input
-              type="text"
-              id="buscadorGastos"
-              class="search-input"
-              placeholder="Buscar en el historial de gastos..."
-              autocomplete="off"
-            >
-          </div>
-        </div>
-
-        <div class="table-card">
-          <div class="table-card-header">
             <div>
-              <h3>Últimos gastos registrados</h3>
-              <p>Detalle visual de monto, categoría, fecha y medio de pago</p>
+              <button type="submit" class="btn-main">✅ Guardar Gasto</button>
             </div>
-          </div>
+          </form>
+        </div>
 
-          <div class="table-responsive">
-            <table class="table tabla-gastos bg-white" id="tablaGastos">
-              <thead>
-                <tr>
-                  <th>Fecha</th>
-                  <th>Descripción</th>
-                  <th>Categoría</th>
-                  <th>Monto</th>
-                  <th>Pago</th>
-                  <th>Obs.</th>
-                </tr>
-              </thead>
+        <div class="search">
+          <input type="text" id="buscadorGastos" placeholder="Buscar en el historial de gastos...">
+        </div>
 
-              <tbody>
-                <% if (gastosLista.length > 0) { %>
-                  <% gastosLista.forEach(gasto => { %>
-                    <tr>
-                      <td>
-                        <strong><%= new Date(gasto.fecha).toLocaleDateString('es-AR') %></strong>
-                      </td>
-
-                      <td class="gasto-name">
-                        <strong><%= gasto.descripcion %></strong>
-                        <span>Gasto registrado en el sistema</span>
-                      </td>
-
-                      <td>
-                        <span class="tipo-badge"><%= gasto.categoria || 'Otros' %></span>
-                      </td>
-
-                      <td class="monto-gasto">
-                        $<%= money(gasto.monto) %>
-                      </td>
-
-                      <td>
-                        <span class="tipo-badge"><%= gasto.metodoPago || 'No especificado' %></span>
-                      </td>
-
-                      <td>
-                        <%= gasto.observacion && gasto.observacion.trim() ? gasto.observacion : '-' %>
-                      </td>
-                    </tr>
-                  <% }) %>
-                <% } else { %>
+        <div class="table-wrap">
+          <table id="tablaGastos">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Descripción</th>
+                <th>Categoría</th>
+                <th>Monto</th>
+                <th>Pago</th>
+                <th>Obs.</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (gastosLista.length > 0) { %>
+                <% gastosLista.forEach(gasto => { %>
                   <tr>
-                    <td colspan="6" class="empty-state">
-                      Todavía no hay gastos registrados.
-                    </td>
+                    <td><%= new Date(gasto.fecha).toLocaleDateString('es-AR') %></td>
+                    <td class="desc-cell"><%= gasto.descripcion %></td>
+                    <td><%= gasto.categoria || 'Otros' %></td>
+                    <td class="amount-cell">$<%= money(gasto.monto) %></td>
+                    <td><%= gasto.metodoPago || '-' %></td>
+                    <td><%= gasto.observacion && gasto.observacion.trim() ? gasto.observacion : '-' %></td>
                   </tr>
-                <% } %>
-              </tbody>
-            </table>
-          </div>
+                <% }) %>
+              <% } else { %>
+                <tr>
+                  <td colspan="6" class="empty">Todavía no hay gastos registrados.</td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
         </div>
       </div>
     </section>
   </main>
 
   <footer class="footer">
-    Todos los derechos reservados - Levi Prog.
+    Todos los derechos reservados - M.L DESARROLLOS WEB.
   </footer>
 
   <script>
@@ -1063,10 +280,9 @@
     if (buscadorGastos) {
       buscadorGastos.addEventListener('input', () => {
         const texto = buscadorGastos.value.toLowerCase().trim();
-
         filasGastos.forEach(fila => {
-          const textoFila = fila.textContent.toLowerCase();
-          fila.style.display = textoFila.includes(texto) ? '' : 'none';
+          const contenido = fila.textContent.toLowerCase();
+          fila.style.display = contenido.includes(texto) ? '' : 'none';
         });
       });
     }

@@ -2,9 +2,8 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>JP Entrenamiento | Ventas</title>
+  <title>Ventas | JP</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -12,751 +11,122 @@
     :root{
       --jp-primary:#223a73;
       --jp-primary-2:#2f4f9a;
-      --jp-accent:#7ea7ff;
-      --jp-soft:#dfe8ff;
       --jp-bg:#f4f7fc;
-      --jp-card:#ffffff;
       --jp-text:#1f2937;
       --jp-muted:#6b7280;
       --jp-success:#159447;
-      --jp-danger:#d62839;
-      --jp-warning:#d4a017;
-      --jp-info:#0d6efd;
+      --jp-border:#d9e2f1;
       --jp-shadow:0 10px 30px rgba(27,47,95,.10);
-      --jp-shadow-strong:0 20px 40px rgba(27,47,95,.14);
-      --jp-radius:22px;
     }
-
-    *{
-      box-sizing:border-box;
-    }
-
+    *{ box-sizing:border-box; }
     body{
-      margin:0;
-      min-height:100vh;
-      color:var(--jp-text);
-      font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(126,167,255,.15), transparent 26%),
-        radial-gradient(circle at top right, rgba(34,58,115,.12), transparent 28%),
-        linear-gradient(180deg, #f8fbff 0%, var(--jp-bg) 100%);
-      position:relative;
+      margin:0; min-height:100vh; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background:linear-gradient(180deg,#f8fbff 0%, var(--jp-bg) 100%);
+      color:var(--jp-text); position:relative;
     }
-
     body::before{
-      content:"";
-      position:fixed;
-      inset:0;
-      background-image:url('/images/logo-jp.png');
-      background-repeat:repeat;
-      background-size:110px;
-      opacity:.035;
-      z-index:0;
-      pointer-events:none;
+      content:""; position:fixed; inset:0; background-image:url('/images/logo-jp.png');
+      background-repeat:repeat; background-size:110px; opacity:.03; pointer-events:none;
     }
-
-    .contenido,
-    .main-header,
-    .footer{
-      position:relative;
-      z-index:1;
+    .topbar,.wrap,.footer{ position:relative; z-index:1; }
+    .topbar{
+      background:linear-gradient(135deg, var(--jp-primary), var(--jp-primary-2));
+      color:#fff; padding:20px 0; box-shadow:0 10px 24px rgba(34,58,115,.18);
     }
+    .brand{ display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap; text-align:center; }
+    .brand img{ width:72px; height:72px; border-radius:50%; background:#fff; padding:4px; }
+    .brand h1{ margin:0; font-size:clamp(1.4rem,3vw,2rem); font-weight:800; }
+    .brand p{ margin:4px 0 0; opacity:.9; }
 
-    .main-header{
-      background:linear-gradient(135deg, var(--jp-primary) 0%, var(--jp-primary-2) 100%);
-      color:#fff;
-      overflow:hidden;
-      box-shadow:0 12px 28px rgba(34,58,115,.18);
-    }
-
-    .main-header::before{
-      content:'';
-      position:absolute;
-      inset:0;
-      background:
-        radial-gradient(circle at 12% 20%, rgba(255,255,255,.18), transparent 18%),
-        radial-gradient(circle at 88% 16%, rgba(255,255,255,.12), transparent 18%),
-        radial-gradient(circle at 65% 75%, rgba(255,255,255,.09), transparent 18%);
-      pointer-events:none;
-    }
-
-    .header-inner{
-      position:relative;
-      z-index:2;
-      padding:28px 0 24px;
-    }
-
-    .brand-wrap{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:16px;
-      flex-wrap:wrap;
-      text-align:center;
-    }
-
-    .brand-logo{
-      width:84px;
-      height:84px;
-      object-fit:cover;
-      border-radius:50%;
-      border:3px solid rgba(255,255,255,.85);
-      background:#fff;
-      box-shadow:0 10px 25px rgba(0,0,0,.18);
-      flex-shrink:0;
-    }
-
-    .brand-text h1{
-      margin:0;
-      font-size:clamp(1.45rem, 3vw, 2.1rem);
-      font-weight:800;
-      letter-spacing:.2px;
-    }
-
-    .brand-text p{
-      margin:.35rem 0 0;
-      color:rgba(255,255,255,.86);
-      font-size:.98rem;
-    }
-
-    .page-wrap{
-      padding:28px 0 36px;
-    }
-
-    .hero-card{
-      background:rgba(255,255,255,.88);
-      border:1px solid rgba(34,58,115,.08);
-      border-radius:28px;
-      box-shadow:var(--jp-shadow-strong);
-      backdrop-filter:blur(10px);
-      overflow:hidden;
-      margin-bottom:22px;
-    }
-
-    .hero-top{
-      padding:24px 24px 18px;
-      border-bottom:1px solid rgba(34,58,115,.08);
-      background:linear-gradient(180deg, rgba(34,58,115,.05), rgba(34,58,115,.015));
-    }
-
-    .hero-head{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:14px;
-      flex-wrap:wrap;
-    }
-
-    .hero-title{
-      margin:0;
-      font-size:clamp(1.35rem, 2.4vw, 2rem);
-      font-weight:800;
-      color:var(--jp-primary);
-    }
-
-    .hero-subtitle{
-      margin:.4rem 0 0;
-      color:var(--jp-muted);
-      font-size:.98rem;
-      max-width:760px;
-    }
-
-    .hero-actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    .btn-header{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      text-decoration:none;
-      border:none;
-      border-radius:999px;
-      padding:11px 18px;
-      font-weight:700;
-      transition:.18s ease;
-      white-space:nowrap;
-    }
-
-    .btn-header-back{
-      background:#fff;
-      color:var(--jp-primary);
-      box-shadow:0 10px 20px rgba(34,58,115,.10);
-    }
-
-    .btn-header-back:hover{
-      transform:translateY(-1px);
-      color:var(--jp-primary);
-      background:#f3f6ff;
-    }
-
-    .btn-header-products{
-      background:linear-gradient(135deg, var(--jp-success), #20b45a);
-      color:#fff;
-      box-shadow:0 10px 22px rgba(21,148,71,.18);
-    }
-
-    .btn-header-products:hover{
-      color:#fff;
-      transform:translateY(-1px);
-      filter:brightness(1.03);
-    }
-
-    .hero-body{
-      padding:22px 24px 24px;
-    }
-
-    .stats-grid{
-      display:grid;
-      grid-template-columns:repeat(4, minmax(0, 1fr));
-      gap:16px;
-      margin-bottom:22px;
-    }
-
-    .summary-card{
-      background:#fff;
-      border-radius:22px;
-      border:1px solid rgba(34,58,115,.08);
-      box-shadow:var(--jp-shadow);
-      padding:18px;
-      position:relative;
-      overflow:hidden;
-      min-height:142px;
-    }
-
-    .summary-card::after{
-      content:'';
-      position:absolute;
-      right:-18px;
-      top:-18px;
-      width:82px;
-      height:82px;
-      border-radius:50%;
-      background:rgba(34,58,115,.05);
-    }
-
-    .summary-top{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:10px;
-      margin-bottom:14px;
-      position:relative;
-      z-index:1;
-    }
-
-    .summary-label{
-      margin:0;
-      font-size:.88rem;
-      color:var(--jp-muted);
-      font-weight:700;
-    }
-
-    .summary-icon{
-      width:44px;
-      height:44px;
-      border-radius:14px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:1.15rem;
-      font-weight:800;
-      flex-shrink:0;
-    }
-
-    .summary-value{
-      margin:0 0 8px;
-      font-size:1.65rem;
-      line-height:1.05;
-      font-weight:900;
-      color:var(--jp-text);
-      position:relative;
-      z-index:1;
-    }
-
-    .summary-note{
-      margin:0;
-      color:var(--jp-muted);
-      font-size:.84rem;
-      position:relative;
-      z-index:1;
-    }
-
-    .card-income .summary-icon{
-      background:rgba(21,148,71,.12);
-      color:var(--jp-success);
-    }
-
-    .card-primary .summary-icon{
-      background:rgba(34,58,115,.10);
-      color:var(--jp-primary);
-    }
-
-    .card-info .summary-icon{
-      background:rgba(13,110,253,.12);
-      color:var(--jp-info);
-    }
-
-    .card-warning .summary-icon{
-      background:rgba(212,160,23,.14);
-      color:var(--jp-warning);
-    }
-
-    .grid-two{
-      display:grid;
-      grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
-      gap:18px;
-      margin-bottom:22px;
-    }
-
+    .page{ max-width:1120px; margin:28px auto; padding:0 16px; }
     .panel{
-      background:#fff;
-      border:1px solid rgba(34,58,115,.08);
-      border-radius:24px;
-      box-shadow:var(--jp-shadow);
-      overflow:hidden;
+      background:rgba(255,255,255,.94); border:1px solid var(--jp-border);
+      border-radius:28px; box-shadow:var(--jp-shadow); overflow:hidden;
+    }
+    .head{
+      padding:24px 28px; border-bottom:1px solid var(--jp-border);
+      display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap;
+    }
+    .head h2{ margin:0; color:var(--jp-primary); font-size:clamp(1.4rem,2.4vw,2rem); font-weight:800; }
+    .head p{ margin:6px 0 0; color:var(--jp-muted); }
+    .actions{ display:flex; gap:10px; flex-wrap:wrap; }
+
+    .btn-soft,.btn-main{
+      border:none; border-radius:999px; padding:12px 18px; font-weight:700; text-decoration:none;
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    }
+    .btn-soft{ background:#fff; color:var(--jp-primary); box-shadow:0 8px 18px rgba(34,58,115,.10); }
+    .btn-main{ background:linear-gradient(135deg, var(--jp-success), #20b45a); color:#fff; box-shadow:0 10px 20px rgba(21,148,71,.18); }
+
+    .body{ padding:24px 28px 28px; }
+    .stats{
+      display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:14px; margin-bottom:22px;
+    }
+    .stat{
+      background:#f8fbff; border:1px solid var(--jp-border); border-radius:18px; padding:16px;
+    }
+    .stat span{ display:block; font-size:.84rem; color:var(--jp-muted); font-weight:700; margin-bottom:8px; }
+    .stat strong{ font-size:1.35rem; font-weight:800; color:var(--jp-primary); }
+    .stat .success{ color:var(--jp-success); }
+
+    .sale-box{
+      background:#fff; border:1px solid var(--jp-border); border-radius:20px; padding:20px; margin-bottom:20px;
     }
 
-    .panel-header{
-      padding:18px 20px;
-      border-bottom:1px solid rgba(34,58,115,.08);
-      background:linear-gradient(180deg, rgba(34,58,115,.04), rgba(34,58,115,.01));
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      flex-wrap:wrap;
+    form{ display:grid; gap:18px; }
+
+    .grid-4{
+      display:grid; grid-template-columns:2.2fr 1fr 1.3fr 1.5fr; gap:16px;
     }
 
-    .panel-header h3{
-      margin:0;
+    .field{ display:flex; flex-direction:column; gap:7px; }
+    .field label{ font-size:.92rem; font-weight:700; color:#43506a; }
+    .field input,.field select{
+      width:100%; border:1px solid #c8d3e4; border-radius:14px; padding:14px 15px;
+      font-size:1rem; background:#fff; color:var(--jp-text); outline:none;
+    }
+    .field input:focus,.field select:focus{
+      border-color:#7ea7ff; box-shadow:0 0 0 4px rgba(126,167,255,.14);
+    }
+
+    .search{
+      margin:0 0 18px;
+    }
+    .search input{
+      width:100%; border:1px solid #c8d3e4; border-radius:16px; padding:14px 16px;
       font-size:1rem;
-      font-weight:800;
-      color:var(--jp-primary);
     }
 
-    .panel-header p{
-      margin:4px 0 0;
-      color:var(--jp-muted);
-      font-size:.9rem;
+    .table-wrap{
+      background:#fff; border:1px solid var(--jp-border); border-radius:22px; overflow:hidden;
     }
+    table{ width:100%; border-collapse:collapse; }
+    thead th{
+      background:#18284b; color:#fff; padding:14px 12px; font-size:.86rem; text-transform:uppercase;
+    }
+    tbody td{
+      padding:14px 12px; border-top:1px solid #edf1f7; text-align:center;
+    }
+    tbody tr:hover{ background:#f8fbff; }
 
-    .panel-body{
-      padding:18px;
-    }
-
-    .form-grid{
-      display:grid;
-      grid-template-columns:repeat(12, minmax(0, 1fr));
-      gap:14px;
-    }
-
-    .field{
-      grid-column:span 12;
-    }
-
-    .field.col-6{
-      grid-column:span 6;
-    }
-
-    .field.col-4{
-      grid-column:span 4;
-    }
-
-    .field.col-3{
-      grid-column:span 3;
-    }
-
-    .field label{
-      display:block;
-      font-size:.86rem;
-      color:var(--jp-muted);
-      font-weight:700;
-      margin-bottom:7px;
-    }
-
-    .field input,
-    .field select{
-      width:100%;
-      border:1px solid rgba(34,58,115,.14);
-      border-radius:14px;
-      padding:13px 14px;
-      background:#f8fbff;
-      color:var(--jp-text);
-      font-weight:600;
-      outline:none;
-      transition:.18s ease;
-    }
-
-    .field input:focus,
-    .field select:focus{
-      border-color:rgba(34,58,115,.28);
-      background:#fff;
-      box-shadow:0 10px 18px rgba(34,58,115,.08);
-    }
-
-    .form-actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:4px;
-    }
-
-    .btn-main{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      background:linear-gradient(135deg, var(--jp-success), #20b45a);
-      color:#fff;
-      border:none;
-      border-radius:16px;
-      padding:13px 18px;
-      font-weight:800;
-      text-decoration:none;
-      box-shadow:0 10px 22px rgba(21,148,71,.18);
-      transition:.18s ease;
-    }
-
-    .btn-main:hover{
-      color:#fff;
-      transform:translateY(-1px);
-      filter:brightness(1.03);
-    }
-
-    .btn-secondary-soft{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      background:#eef3ff;
-      color:var(--jp-primary);
-      border:none;
-      border-radius:16px;
-      padding:13px 18px;
-      font-weight:800;
-      text-decoration:none;
-      transition:.18s ease;
-    }
-
-    .btn-secondary-soft:hover{
-      background:#e3ecff;
-      color:var(--jp-primary);
-    }
-
-    .mini-list{
-      display:grid;
-      gap:14px;
-    }
-
-    .mini-card{
-      background:linear-gradient(135deg, rgba(34,58,115,.03), rgba(126,167,255,.06));
-      border:1px solid rgba(34,58,115,.08);
-      border-radius:18px;
-      padding:16px;
-    }
-
-    .mini-card-label{
-      margin:0 0 8px;
-      color:var(--jp-muted);
-      font-size:.84rem;
-      font-weight:700;
-    }
-
-    .mini-card-value{
-      margin:0;
-      font-size:1.28rem;
-      font-weight:900;
-      color:var(--jp-primary);
-      line-height:1.1;
-    }
-
-    .mini-card-sub{
-      margin:8px 0 0;
-      color:var(--jp-muted);
-      font-size:.83rem;
-      line-height:1.35;
-    }
-
-    .toolbar{
-      display:grid;
-      grid-template-columns:minmax(220px, 280px) 1fr;
-      gap:14px;
-      align-items:center;
-      margin-bottom:20px;
-    }
-
-    .toolbar-card{
-      background:#fff;
-      border:1px solid rgba(34,58,115,.08);
-      border-radius:20px;
-      padding:14px 16px;
-      box-shadow:var(--jp-shadow);
-    }
-
-    .toolbar-title{
-      margin:0 0 4px;
-      font-size:.9rem;
-      font-weight:800;
-      color:var(--jp-primary);
-    }
-
-    .toolbar-subtitle{
-      margin:0;
-      color:var(--jp-muted);
-      font-size:.83rem;
-    }
-
-    .search-wrap{
-      position:relative;
-    }
-
-    .search-input{
-      width:100%;
-      border:none;
-      border-radius:16px;
-      padding:15px 18px 15px 46px;
-      background:#fff;
-      box-shadow:var(--jp-shadow);
-      border:1px solid rgba(34,58,115,.08);
-      font-size:.98rem;
-      outline:none;
-      transition:.18s ease;
-    }
-
-    .search-input:focus{
-      border-color:rgba(34,58,115,.28);
-      box-shadow:0 12px 24px rgba(34,58,115,.12);
-    }
-
-    .search-icon{
-      position:absolute;
-      left:16px;
-      top:50%;
-      transform:translateY(-50%);
-      color:var(--jp-muted);
-      font-size:1rem;
-      pointer-events:none;
-    }
-
-    .table-card{
-      background:#fff;
-      border-radius:24px;
-      box-shadow:var(--jp-shadow);
-      border:1px solid rgba(34,58,115,.08);
-      overflow:hidden;
-    }
-
-    .table-card-header{
-      padding:16px 18px;
-      border-bottom:1px solid rgba(34,58,115,.08);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-      background:linear-gradient(180deg, rgba(34,58,115,.03), rgba(34,58,115,.01));
-    }
-
-    .table-card-header h3{
-      margin:0;
-      font-size:1.02rem;
-      font-weight:800;
-      color:var(--jp-primary);
-    }
-
-    .table-card-header p{
-      margin:0;
-      color:var(--jp-muted);
-      font-size:.9rem;
-    }
-
-    .table-responsive{
-      margin:0;
-    }
-
-    .tabla-ventas{
-      margin:0;
-      vertical-align:middle;
-    }
-
-    .tabla-ventas thead th{
-      background:#18284b;
-      color:#fff;
-      border:none;
-      font-size:.86rem;
-      text-transform:uppercase;
-      letter-spacing:.3px;
-      padding:15px 12px;
-      white-space:nowrap;
-      text-align:center;
-    }
-
-    .tabla-ventas tbody td{
-      padding:14px 12px;
-      border-color:#eef2f8;
-      vertical-align:middle;
-      text-align:center;
-    }
-
-    .tabla-ventas tbody tr{
-      transition:background .16s ease;
-    }
-
-    .tabla-ventas tbody tr:hover{
-      background:#f9fbff;
-    }
-
-    .venta-name{
-      text-align:left !important;
-    }
-
-    .venta-name strong{
-      display:block;
-      color:#162542;
-      font-weight:800;
-      margin-bottom:2px;
-    }
-
-    .venta-name span{
-      display:block;
-      color:var(--jp-muted);
-      font-size:.83rem;
-    }
-
-    .monto-total{
-      color:var(--jp-success);
-      font-weight:900;
-      white-space:nowrap;
-    }
-
-    .monto-unitario{
-      color:var(--jp-primary);
-      font-weight:800;
-      white-space:nowrap;
-    }
-
-    .tipo-badge{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      border-radius:999px;
-      padding:7px 12px;
-      font-size:.74rem;
-      font-weight:800;
-      letter-spacing:.2px;
-      white-space:nowrap;
-      background:rgba(13,110,253,.12);
-      color:var(--jp-info);
-    }
-
-    .empty-state{
-      padding:34px 18px;
-      text-align:center;
-      color:var(--jp-muted);
-    }
+    .product-cell{ text-align:left; font-weight:700; color:#223a73; }
+    .total-cell{ color:var(--jp-success); font-weight:800; }
+    .empty{ text-align:center; padding:24px; color:var(--jp-muted); }
 
     .footer{
-      margin-top:34px;
-      background:linear-gradient(135deg, #dbe5ff, #c7d6ff);
-      color:#30415f;
-      text-align:center;
-      padding:18px 12px;
-      font-weight:600;
-      border-top:1px solid rgba(34,58,115,.08);
+      text-align:center; padding:18px 12px 28px; color:#53627f; font-weight:600;
     }
 
-    @media (max-width: 1199px){
-      .stats-grid{
-        grid-template-columns:repeat(2, minmax(0, 1fr));
-      }
-
-      .grid-two{
-        grid-template-columns:1fr;
-      }
+    @media (max-width: 950px){
+      .stats{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+      .grid-4{ grid-template-columns:1fr 1fr; }
     }
-
-    @media (max-width: 767px){
-      .header-inner{
-        padding:22px 0 20px;
-      }
-
-      .brand-wrap{
-        flex-direction:column;
-        gap:12px;
-      }
-
-      .brand-logo{
-        width:76px;
-        height:76px;
-      }
-
-      .page-wrap{
-        padding:20px 0 26px;
-      }
-
-      .hero-top,
-      .hero-body{
-        padding:18px 16px;
-      }
-
-      .hero-actions{
-        width:100%;
-      }
-
-      .hero-actions .btn-header{
-        flex:1 1 100%;
-        justify-content:center;
-      }
-
-      .stats-grid{
-        grid-template-columns:1fr;
-        gap:12px;
-      }
-
-      .summary-card{
-        min-height:auto;
-      }
-
-      .toolbar{
-        grid-template-columns:1fr;
-      }
-
-      .form-grid{
-        grid-template-columns:1fr;
-      }
-
-      .field,
-      .field.col-6,
-      .field.col-4,
-      .field.col-3{
-        grid-column:span 1;
-      }
-
-      .table-card{
-        border-radius:20px;
-      }
-
-      .table-card-header{
-        padding:14px 14px;
-      }
-
-      .tabla-ventas thead th,
-      .tabla-ventas tbody td{
-        padding:12px 10px;
-        font-size:.88rem;
-      }
-
-      .form-actions{
-        flex-direction:column;
-      }
-
-      .btn-main,
-      .btn-secondary-soft{
-        width:100%;
-      }
+    @media (max-width: 600px){
+      .head,.body{ padding:18px; }
+      .stats{ grid-template-columns:1fr; }
+      .grid-4{ grid-template-columns:1fr; }
+      .actions{ flex-direction:column; }
+      .btn-soft,.btn-main{ width:100%; }
     }
   </style>
 </head>
@@ -765,274 +135,139 @@
     const money = (n) => Number(n || 0).toFixed(2);
     const ventasLista = Array.isArray(ventas) ? ventas : [];
     const productosLista = Array.isArray(productos) ? productos : [];
-
     const totalVendidoHoy = Number(totalHoy || 0);
-    const cantidadVentas = ventasLista.length;
-    const promedioVenta = cantidadVentas > 0 ? totalVendidoHoy / cantidadVentas : 0;
-    const productosDisponibles = productosLista.length;
   %>
 
-  <header class="main-header">
-    <div class="container header-inner">
-      <div class="brand-wrap">
-        <img src="/images/logo-jp.png" alt="Logo JP" class="brand-logo">
-        <div class="brand-text">
-          <h1>JP Entrenamiento Personalizado</h1>
-          <p>Panel de ventas rápidas para el mostrador del gimnasio</p>
-        </div>
+  <header class="topbar">
+    <div class="container brand">
+      <img src="/images/logo-jp.png" alt="Logo JP">
+      <div>
+        <h1>JP Entrenamiento Personalizado</h1>
+        <p>Ventas rápidas</p>
       </div>
     </div>
   </header>
 
-  <main class="container page-wrap contenido">
-    <section class="hero-card">
-      <div class="hero-top">
-        <div class="hero-head">
-          <div>
-            <h2 class="hero-title">💰 Venta rápida de productos</h2>
-            <p class="hero-subtitle">
-              Diseñado para vender de forma simple, rápida y clara. Ideal para el dueño del gym:
-              elige el producto, cantidad, método de pago y registra la venta en segundos.
-            </p>
-          </div>
+  <main class="page wrap">
+    <section class="panel">
+      <div class="head">
+        <div>
+          <h2>💰 Venta rápida</h2>
+          <p>Registra ventas de forma simple y rápida.</p>
+        </div>
 
-          <div class="hero-actions">
-            <a href="/" class="btn-header btn-header-back">← Volver</a>
-            <a href="/productos" class="btn-header btn-header-products">📦 Ver Productos</a>
-          </div>
+        <div class="actions">
+          <a href="/" class="btn-soft">← Volver</a>
+          <a href="/productos" class="btn-soft">📦 Productos</a>
         </div>
       </div>
 
-      <div class="hero-body">
-        <div class="stats-grid">
-          <div class="summary-card card-income">
-            <div class="summary-top">
-              <p class="summary-label">Total vendido hoy</p>
-              <div class="summary-icon">💵</div>
-            </div>
-            <h3 class="summary-value">$<%= money(totalVendidoHoy) %></h3>
-            <p class="summary-note">Ingresos por ventas registradas durante el día.</p>
+      <div class="body">
+        <div class="stats">
+          <div class="stat">
+            <span>Total vendido hoy</span>
+            <strong class="success">$<%= money(totalVendidoHoy) %></strong>
           </div>
-
-          <div class="summary-card card-primary">
-            <div class="summary-top">
-              <p class="summary-label">Ventas cargadas</p>
-              <div class="summary-icon">🧾</div>
-            </div>
-            <h3 class="summary-value"><%= cantidadVentas %></h3>
-            <p class="summary-note">Cantidad de operaciones visibles en el historial.</p>
+          <div class="stat">
+            <span>Ventas registradas</span>
+            <strong><%= ventasLista.length %></strong>
           </div>
-
-          <div class="summary-card card-info">
-            <div class="summary-top">
-              <p class="summary-label">Promedio por venta</p>
-              <div class="summary-icon">📈</div>
-            </div>
-            <h3 class="summary-value">$<%= money(promedioVenta) %></h3>
-            <p class="summary-note">Promedio rápido según las ventas mostradas hoy.</p>
+          <div class="stat">
+            <span>Productos disponibles</span>
+            <strong><%= productosLista.length %></strong>
           </div>
-
-          <div class="summary-card card-warning">
-            <div class="summary-top">
-              <p class="summary-label">Productos disponibles</p>
-              <div class="summary-icon">🏷️</div>
-            </div>
-            <h3 class="summary-value"><%= productosDisponibles %></h3>
-            <p class="summary-note">Productos activos listos para vender desde este módulo.</p>
+          <div class="stat">
+            <span>Estado</span>
+            <strong>Activo</strong>
           </div>
         </div>
 
-        <div class="grid-two">
-          <section class="panel">
-            <div class="panel-header">
-              <div>
-                <h3>Registrar nueva venta</h3>
-                <p>Operación rápida, simple y cómoda para usar todos los días</p>
-              </div>
-            </div>
-
-            <div class="panel-body">
-              <form action="/ventas/nueva" method="POST">
-                <div class="form-grid">
-                  <div class="field col-6">
-                    <label for="productoId">Producto</label>
-                    <select name="productoId" id="productoId" required>
-                      <option value="">Seleccionar producto</option>
-                      <% productosLista.forEach(producto => { %>
-                        <option value="<%= producto._id %>">
-                          <%= producto.nombre %> | Stock: <%= Number(producto.stock || 0) %> | $<%= money(producto.precioVenta) %>
-                        </option>
-                      <% }) %>
-                    </select>
-                  </div>
-
-                  <div class="field col-3">
-                    <label for="cantidad">Cantidad</label>
-                    <input type="number" id="cantidad" name="cantidad" min="1" value="1" required>
-                  </div>
-
-                  <div class="field col-3">
-                    <label for="metodoPago">Método de pago</label>
-                    <select name="metodoPago" id="metodoPago">
-                      <option>Efectivo</option>
-                      <option>Transferencia</option>
-                      <option>Mercado Pago</option>
-                      <option>Otro</option>
-                    </select>
-                  </div>
-
-                  <div class="field">
-                    <label for="observacion">Observación</label>
-                    <input
-                      type="text"
-                      id="observacion"
-                      name="observacion"
-                      placeholder="Ej: promo, descuento, cliente habitual, etc."
-                    >
-                  </div>
-                </div>
-
-                <div class="form-actions">
-                  <button type="submit" class="btn-main">✅ Registrar Venta</button>
-                  <a href="/productos" class="btn-secondary-soft">📦 Revisar Stock</a>
-                </div>
-              </form>
-            </div>
-          </section>
-
-          <aside class="panel">
-            <div class="panel-header">
-              <div>
-                <h3>Resumen rápido</h3>
-                <p>Información útil para vender mejor y más rápido</p>
-              </div>
-            </div>
-
-            <div class="panel-body">
-              <div class="mini-list">
-                <div class="mini-card">
-                  <p class="mini-card-label">Caja del día</p>
-                  <h4 class="mini-card-value">$<%= money(totalVendidoHoy) %></h4>
-                  <p class="mini-card-sub">Suma total de las ventas registradas hoy.</p>
-                </div>
-
-                <div class="mini-card">
-                  <p class="mini-card-label">Ventas realizadas</p>
-                  <h4 class="mini-card-value"><%= cantidadVentas %></h4>
-                  <p class="mini-card-sub">Operaciones registradas visibles en esta pantalla.</p>
-                </div>
-
-                <div class="mini-card">
-                  <p class="mini-card-label">Modo de uso ideal</p>
-                  <h4 class="mini-card-value">Simple y rápido</h4>
-                  <p class="mini-card-sub">
-                    Elegir producto, poner cantidad, marcar forma de pago y guardar.
-                  </p>
-                </div>
-
-                <div class="mini-card">
-                  <p class="mini-card-label">Consejo</p>
-                  <h4 class="mini-card-value">Control diario</h4>
-                  <p class="mini-card-sub">
-                    Revisa seguido el módulo de productos para evitar vender con stock bajo.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </aside>
-        </div>
-
-        <div class="toolbar">
-          <div class="toolbar-card">
-            <h3 class="toolbar-title">Historial de ventas</h3>
-            <p class="toolbar-subtitle">Busca por producto, forma de pago o texto cargado.</p>
-          </div>
-
-          <div class="search-wrap">
-            <span class="search-icon">🔎</span>
-            <input
-              type="text"
-              id="buscadorVentas"
-              class="search-input"
-              placeholder="Buscar en el historial de ventas..."
-              autocomplete="off"
-            >
-          </div>
-        </div>
-
-        <div class="table-card">
-          <div class="table-card-header">
-            <div>
-              <h3>Últimas ventas registradas</h3>
-              <p>Detalle visual de producto, cantidad, monto y método de pago</p>
-            </div>
-          </div>
-
-          <div class="table-responsive">
-            <table class="table tabla-ventas bg-white" id="tablaVentas">
-              <thead>
-                <tr>
-                  <th>Fecha</th>
-                  <th>Producto</th>
-                  <th>Cantidad</th>
-                  <th>P. Unitario</th>
-                  <th>Total</th>
-                  <th>Pago</th>
-                  <th>Obs.</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                <% if (ventasLista.length > 0) { %>
-                  <% ventasLista.forEach(venta => { %>
-                    <tr>
-                      <td>
-                        <strong><%= new Date(venta.fecha).toLocaleDateString('es-AR') %></strong>
-                      </td>
-
-                      <td class="venta-name">
-                        <strong><%= venta.nombreProducto %></strong>
-                        <span>Venta registrada en el sistema</span>
-                      </td>
-
-                      <td>
-                        <strong><%= Number(venta.cantidad || 0) %></strong>
-                      </td>
-
-                      <td class="monto-unitario">
-                        $<%= money(venta.precioUnitario) %>
-                      </td>
-
-                      <td class="monto-total">
-                        $<%= money(venta.total) %>
-                      </td>
-
-                      <td>
-                        <span class="tipo-badge"><%= venta.metodoPago || 'No especificado' %></span>
-                      </td>
-
-                      <td>
-                        <%= venta.observacion && venta.observacion.trim() ? venta.observacion : '-' %>
-                      </td>
-                    </tr>
+        <div class="sale-box">
+          <form action="/ventas/nueva" method="POST">
+            <div class="grid-4">
+              <div class="field">
+                <label for="productoId">Producto</label>
+                <select name="productoId" id="productoId" required>
+                  <option value="">Seleccionar producto</option>
+                  <% productosLista.forEach(producto => { %>
+                    <option value="<%= producto._id %>">
+                      <%= producto.nombre %> | Stock: <%= Number(producto.stock || 0) %> | $<%= money(producto.precioVenta) %>
+                    </option>
                   <% }) %>
-                <% } else { %>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="cantidad">Cantidad</label>
+                <input type="number" id="cantidad" name="cantidad" min="1" value="1" required>
+              </div>
+
+              <div class="field">
+                <label for="metodoPago">Método de pago</label>
+                <select name="metodoPago" id="metodoPago">
+                  <option>Efectivo</option>
+                  <option>Transferencia</option>
+                  <option>Mercado Pago</option>
+                  <option>Otro</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="observacion">Observación</label>
+                <input type="text" id="observacion" name="observacion" placeholder="Opcional">
+              </div>
+            </div>
+
+            <div style="margin-top:16px;">
+              <button type="submit" class="btn-main">✅ Registrar Venta</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="search">
+          <input type="text" id="buscadorVentas" placeholder="Buscar en el historial de ventas...">
+        </div>
+
+        <div class="table-wrap">
+          <table id="tablaVentas">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>P. Unitario</th>
+                <th>Total</th>
+                <th>Pago</th>
+                <th>Obs.</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (ventasLista.length > 0) { %>
+                <% ventasLista.forEach(venta => { %>
                   <tr>
-                    <td colspan="7" class="empty-state">
-                      Todavía no hay ventas registradas.
-                    </td>
+                    <td><%= new Date(venta.fecha).toLocaleDateString('es-AR') %></td>
+                    <td class="product-cell"><%= venta.nombreProducto %></td>
+                    <td><%= Number(venta.cantidad || 0) %></td>
+                    <td>$<%= money(venta.precioUnitario) %></td>
+                    <td class="total-cell">$<%= money(venta.total) %></td>
+                    <td><%= venta.metodoPago || '-' %></td>
+                    <td><%= venta.observacion && venta.observacion.trim() ? venta.observacion : '-' %></td>
                   </tr>
-                <% } %>
-              </tbody>
-            </table>
-          </div>
+                <% }) %>
+              <% } else { %>
+                <tr>
+                  <td colspan="7" class="empty">Todavía no hay ventas registradas.</td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
         </div>
       </div>
     </section>
   </main>
 
   <footer class="footer">
-    Todos los derechos reservados - Levi Prog.
+    Todos los derechos reservados - M.L DESARROLLOS WEB.
   </footer>
 
   <script>
@@ -1042,10 +277,9 @@
     if (buscadorVentas) {
       buscadorVentas.addEventListener('input', () => {
         const texto = buscadorVentas.value.toLowerCase().trim();
-
         filasVentas.forEach(fila => {
-          const textoFila = fila.textContent.toLowerCase();
-          fila.style.display = textoFila.includes(texto) ? '' : 'none';
+          const contenido = fila.textContent.toLowerCase();
+          fila.style.display = contenido.includes(texto) ? '' : 'none';
         });
       });
     }
