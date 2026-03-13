@@ -2,145 +2,1071 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Reporte de Ingresos</title>
+  <title>JP Entrenamiento | Reportes Financieros</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
   <style>
-    body {
-      background-color: #f8f9fa;
-      font-family: 'Segoe UI', sans-serif;
-      position: relative;
+    :root{
+      --jp-primary:#223a73;
+      --jp-primary-2:#2f4f9a;
+      --jp-accent:#7ea7ff;
+      --jp-soft:#dfe8ff;
+      --jp-bg:#f4f7fc;
+      --jp-card:#ffffff;
+      --jp-text:#1f2937;
+      --jp-muted:#6b7280;
+      --jp-success:#159447;
+      --jp-danger:#d62839;
+      --jp-warning:#d4a017;
+      --jp-info:#0d6efd;
+      --jp-shadow:0 10px 30px rgba(27,47,95,.10);
+      --jp-shadow-strong:0 20px 40px rgba(27,47,95,.14);
+      --jp-radius:22px;
     }
 
-    /* Fondo con logos en marca de agua */
-    body::before {
-      content: "";
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-image: url('/images/logo-jp.png');
-      background-repeat: repeat;
-      background-size: 120px;
-      opacity: 0.05;
-      z-index: 0;
+    *{
+      box-sizing:border-box;
     }
 
-    header, .container, .footer {
-      position: relative;
-      z-index: 1;
+    body{
+      margin:0;
+      min-height:100vh;
+      color:var(--jp-text);
+      font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(126,167,255,.15), transparent 26%),
+        radial-gradient(circle at top right, rgba(34,58,115,.12), transparent 28%),
+        linear-gradient(180deg, #f8fbff 0%, var(--jp-bg) 100%);
+      position:relative;
     }
 
-    header {
-      background-color: #b2bcdd;
-      padding: 1rem;
-      text-align: center;
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      background-image:url('/images/logo-jp.png');
+      background-repeat:repeat;
+      background-size:110px;
+      opacity:.035;
+      z-index:0;
+      pointer-events:none;
     }
 
-    header img {
-      width: 80px;
-      border-radius: 50%;
-      margin-bottom: 0.5rem;
+    .contenido,
+    .footer,
+    .main-header{
+      position:relative;
+      z-index:1;
     }
 
-    .resumen-total {
-      font-size: 1.3rem;
+    .main-header{
+      background:linear-gradient(135deg, var(--jp-primary) 0%, var(--jp-primary-2) 100%);
+      color:#fff;
+      overflow:hidden;
+      box-shadow:0 12px 28px rgba(34,58,115,.18);
     }
 
-    .footer {
-      background-color: #b2bcdd;
-      color: #302d2d;
-      text-align: center;
-      padding: 0.8rem 0;
-      margin-top: 3rem;
+    .main-header::before{
+      content:'';
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(circle at 12% 20%, rgba(255,255,255,.18), transparent 18%),
+        radial-gradient(circle at 88% 16%, rgba(255,255,255,.12), transparent 18%),
+        radial-gradient(circle at 65% 75%, rgba(255,255,255,.09), transparent 18%);
+      pointer-events:none;
     }
 
-    #rangoFechas {
-      max-width: 300px;
-      margin: 0 auto;
-      border: 2px solid #0d6efd;
-      border-radius: 8px;
-      padding: 8px 16px;
-      font-weight: bold;
-      color: #0d6efd;
-      text-align: center;
-      background-color: white;
+    .header-inner{
+      position:relative;
+      z-index:2;
+      padding:28px 0 24px;
     }
 
-    .table thead th {
-      background-color: #212529;
-      color: white;
+    .brand-wrap{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:16px;
+      flex-wrap:wrap;
+      text-align:center;
+    }
+
+    .brand-logo{
+      width:84px;
+      height:84px;
+      object-fit:cover;
+      border-radius:50%;
+      border:3px solid rgba(255,255,255,.85);
+      background:#fff;
+      box-shadow:0 10px 25px rgba(0,0,0,.18);
+      flex-shrink:0;
+    }
+
+    .brand-text h1{
+      margin:0;
+      font-size:clamp(1.45rem, 3vw, 2.1rem);
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+
+    .brand-text p{
+      margin:.35rem 0 0;
+      color:rgba(255,255,255,.86);
+      font-size:.98rem;
+    }
+
+    .page-wrap{
+      padding:28px 0 36px;
+    }
+
+    .hero-card{
+      background:rgba(255,255,255,.88);
+      border:1px solid rgba(34,58,115,.08);
+      border-radius:28px;
+      box-shadow:var(--jp-shadow-strong);
+      backdrop-filter:blur(10px);
+      overflow:hidden;
+    }
+
+    .hero-top{
+      padding:24px 24px 18px;
+      border-bottom:1px solid rgba(34,58,115,.08);
+      background:linear-gradient(180deg, rgba(34,58,115,.05), rgba(34,58,115,.015));
+    }
+
+    .hero-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+
+    .hero-title{
+      margin:0;
+      font-size:clamp(1.4rem, 2.4vw, 2rem);
+      font-weight:800;
+      color:var(--jp-primary);
+    }
+
+    .hero-subtitle{
+      margin:.4rem 0 0;
+      color:var(--jp-muted);
+      font-size:.98rem;
+      max-width:780px;
+    }
+
+    .btn-back{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      text-decoration:none;
+      border:none;
+      border-radius:999px;
+      padding:11px 18px;
+      font-weight:700;
+      background:#fff;
+      color:var(--jp-primary);
+      box-shadow:0 10px 20px rgba(34,58,115,.10);
+      transition:.18s ease;
+      white-space:nowrap;
+    }
+
+    .btn-back:hover{
+      transform:translateY(-1px);
+      color:var(--jp-primary);
+      background:#f3f6ff;
+    }
+
+    .hero-body{
+      padding:22px 24px 24px;
+    }
+
+    .filter-bar{
+      display:grid;
+      grid-template-columns:minmax(260px, 360px) 1fr;
+      gap:16px;
+      align-items:stretch;
+      margin-bottom:22px;
+    }
+
+    .filter-card{
+      background:#fff;
+      border:1px solid rgba(34,58,115,.08);
+      border-radius:20px;
+      padding:16px;
+      box-shadow:var(--jp-shadow);
+    }
+
+    .filter-label{
+      display:block;
+      font-size:.85rem;
+      color:var(--jp-muted);
+      font-weight:700;
+      margin-bottom:8px;
+    }
+
+    #rangoFechas{
+      width:100%;
+      border:1px solid rgba(34,58,115,.14);
+      border-radius:14px;
+      padding:13px 16px;
+      font-weight:700;
+      color:var(--jp-primary);
+      background:#f8fbff;
+      text-align:center;
+      outline:none;
+      transition:.18s ease;
+      box-shadow:none;
+    }
+
+    #rangoFechas:focus{
+      border-color:rgba(34,58,115,.28);
+      background:#fff;
+    }
+
+    .headline-box{
+      background:linear-gradient(135deg, rgba(34,58,115,.05), rgba(126,167,255,.08));
+      border:1px solid rgba(34,58,115,.08);
+      border-radius:22px;
+      padding:18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      box-shadow:var(--jp-shadow);
+      flex-wrap:wrap;
+      min-height:100%;
+    }
+
+    .headline-box-text h2{
+      margin:0;
+      font-size:1.05rem;
+      font-weight:800;
+      color:var(--jp-primary);
+    }
+
+    .headline-box-text p{
+      margin:6px 0 0;
+      color:var(--jp-muted);
+      font-size:.92rem;
+    }
+
+    .headline-amount{
+      font-size:1.9rem;
+      font-weight:900;
+      color:var(--jp-success);
+      line-height:1;
+      white-space:nowrap;
+    }
+
+    .dashboard-grid{
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0, 1fr));
+      gap:16px;
+      margin-bottom:22px;
+    }
+
+    .summary-card{
+      background:#fff;
+      border-radius:22px;
+      border:1px solid rgba(34,58,115,.08);
+      box-shadow:var(--jp-shadow);
+      padding:18px;
+      position:relative;
+      overflow:hidden;
+      min-height:146px;
+    }
+
+    .summary-card::after{
+      content:'';
+      position:absolute;
+      right:-18px;
+      top:-18px;
+      width:82px;
+      height:82px;
+      border-radius:50%;
+      background:rgba(34,58,115,.05);
+    }
+
+    .summary-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+      margin-bottom:14px;
+      position:relative;
+      z-index:1;
+    }
+
+    .summary-label{
+      margin:0;
+      font-size:.88rem;
+      color:var(--jp-muted);
+      font-weight:700;
+    }
+
+    .summary-icon{
+      width:44px;
+      height:44px;
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:1.15rem;
+      font-weight:800;
+      flex-shrink:0;
+    }
+
+    .summary-value{
+      margin:0 0 8px;
+      font-size:1.65rem;
+      line-height:1.05;
+      font-weight:900;
+      color:var(--jp-text);
+      position:relative;
+      z-index:1;
+      word-break:break-word;
+    }
+
+    .summary-note{
+      margin:0;
+      color:var(--jp-muted);
+      font-size:.84rem;
+      position:relative;
+      z-index:1;
+    }
+
+    .card-income .summary-icon{
+      background:rgba(21,148,71,.12);
+      color:var(--jp-success);
+    }
+
+    .card-expense .summary-icon{
+      background:rgba(214,40,57,.12);
+      color:var(--jp-danger);
+    }
+
+    .card-balance .summary-icon{
+      background:rgba(13,110,253,.12);
+      color:var(--jp-info);
+    }
+
+    .card-count .summary-icon{
+      background:rgba(34,58,115,.10);
+      color:var(--jp-primary);
+    }
+
+    .grid-two{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:18px;
+      margin-bottom:22px;
+    }
+
+    .panel{
+      background:#fff;
+      border:1px solid rgba(34,58,115,.08);
+      border-radius:24px;
+      box-shadow:var(--jp-shadow);
+      overflow:hidden;
+    }
+
+    .panel-header{
+      padding:18px 20px;
+      border-bottom:1px solid rgba(34,58,115,.08);
+      background:linear-gradient(180deg, rgba(34,58,115,.04), rgba(34,58,115,.01));
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .panel-header h3{
+      margin:0;
+      font-size:1rem;
+      font-weight:800;
+      color:var(--jp-primary);
+    }
+
+    .panel-header p{
+      margin:4px 0 0;
+      color:var(--jp-muted);
+      font-size:.9rem;
+    }
+
+    .panel-body{
+      padding:18px;
+    }
+
+    .mini-stat-list{
+      display:grid;
+      gap:14px;
+    }
+
+    .mini-stat{
+      background:linear-gradient(135deg, rgba(34,58,115,.03), rgba(126,167,255,.06));
+      border:1px solid rgba(34,58,115,.08);
+      border-radius:18px;
+      padding:16px;
+    }
+
+    .mini-stat-label{
+      margin:0 0 8px;
+      color:var(--jp-muted);
+      font-size:.84rem;
+      font-weight:700;
+    }
+
+    .mini-stat-value{
+      margin:0;
+      font-size:1.3rem;
+      font-weight:900;
+      color:var(--jp-primary);
+      line-height:1.1;
+    }
+
+    .mini-stat-sub{
+      margin:8px 0 0;
+      color:var(--jp-muted);
+      font-size:.83rem;
+      line-height:1.35;
+    }
+
+    .positive{
+      color:var(--jp-success) !important;
+    }
+
+    .negative{
+      color:var(--jp-danger) !important;
+    }
+
+    .table-wrap{
+      overflow:auto;
+    }
+
+    .report-table{
+      margin:0;
+      vertical-align:middle;
+    }
+
+    .report-table thead th{
+      background:#18284b;
+      color:#fff;
+      border:none;
+      font-size:.86rem;
+      text-transform:uppercase;
+      letter-spacing:.3px;
+      padding:15px 12px;
+      white-space:nowrap;
+    }
+
+    .report-table tbody td{
+      padding:14px 12px;
+      border-color:#eef2f8;
+      vertical-align:middle;
+    }
+
+    .report-table tbody tr{
+      transition:background .15s ease;
+    }
+
+    .report-table tbody tr:hover{
+      background:#f9fbff;
+    }
+
+    .td-name strong{
+      display:block;
+      color:#162542;
+      font-weight:800;
+    }
+
+    .td-name span{
+      display:block;
+      color:var(--jp-muted);
+      font-size:.83rem;
+    }
+
+    .td-date{
+      font-weight:700;
+      color:#31415f;
+      white-space:nowrap;
+    }
+
+    .td-amount{
+      font-weight:900;
+      white-space:nowrap;
+    }
+
+    .monto-ingreso{
+      color:var(--jp-success);
+    }
+
+    .monto-gasto{
+      color:var(--jp-danger);
+    }
+
+    .tipo-badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:999px;
+      padding:7px 12px;
+      font-size:.74rem;
+      font-weight:800;
+      letter-spacing:.2px;
+      white-space:nowrap;
+    }
+
+    .tipo-cuota{
+      background:rgba(21,148,71,.12);
+      color:var(--jp-success);
+    }
+
+    .tipo-venta{
+      background:rgba(13,110,253,.12);
+      color:var(--jp-info);
+    }
+
+    .tipo-gasto{
+      background:rgba(214,40,57,.12);
+      color:var(--jp-danger);
+    }
+
+    .list-group-clean{
+      display:grid;
+      gap:12px;
+    }
+
+    .product-rank{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      background:linear-gradient(135deg, rgba(34,58,115,.03), rgba(126,167,255,.06));
+      border:1px solid rgba(34,58,115,.08);
+      border-radius:18px;
+      padding:14px 16px;
+    }
+
+    .product-rank-left strong{
+      display:block;
+      color:#162542;
+      font-weight:800;
+    }
+
+    .product-rank-left span{
+      display:block;
+      color:var(--jp-muted);
+      font-size:.83rem;
+      margin-top:3px;
+    }
+
+    .product-rank-right{
+      text-align:right;
+      white-space:nowrap;
+    }
+
+    .product-rank-right strong{
+      display:block;
+      color:var(--jp-primary);
+      font-size:1rem;
+      font-weight:900;
+    }
+
+    .product-rank-right span{
+      display:block;
+      color:var(--jp-muted);
+      font-size:.8rem;
+      margin-top:3px;
+    }
+
+    .empty-state{
+      padding:32px 20px;
+      text-align:center;
+      color:var(--jp-muted);
+    }
+
+    .footer{
+      margin-top:34px;
+      background:linear-gradient(135deg, #dbe5ff, #c7d6ff);
+      color:#30415f;
+      text-align:center;
+      padding:18px 12px;
+      font-weight:600;
+      border-top:1px solid rgba(34,58,115,.08);
+    }
+
+    .daterangepicker{
+      border:none !important;
+      border-radius:18px !important;
+      box-shadow:0 20px 45px rgba(27,47,95,.16) !important;
+      overflow:hidden;
+    }
+
+    .daterangepicker td.active,
+    .daterangepicker td.active:hover{
+      background-color:var(--jp-primary) !important;
+    }
+
+    .daterangepicker .ranges li.active{
+      background-color:var(--jp-primary) !important;
+    }
+
+    @media (max-width: 1199px){
+      .dashboard-grid{
+        grid-template-columns:repeat(2, minmax(0, 1fr));
+      }
+
+      .grid-two{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media (max-width: 767px){
+      .header-inner{
+        padding:22px 0 20px;
+      }
+
+      .brand-wrap{
+        flex-direction:column;
+        gap:12px;
+      }
+
+      .brand-logo{
+        width:76px;
+        height:76px;
+      }
+
+      .page-wrap{
+        padding:20px 0 26px;
+      }
+
+      .hero-top,
+      .hero-body{
+        padding:18px 16px;
+      }
+
+      .filter-bar{
+        grid-template-columns:1fr;
+      }
+
+      .headline-box{
+        padding:16px;
+      }
+
+      .headline-amount{
+        font-size:1.45rem;
+      }
+
+      .dashboard-grid{
+        grid-template-columns:1fr;
+        gap:12px;
+      }
+
+      .summary-card{
+        min-height:auto;
+      }
+
+      .panel-header,
+      .panel-body{
+        padding:16px;
+      }
+
+      .report-table thead th,
+      .report-table tbody td{
+        padding:12px 10px;
+        font-size:.88rem;
+      }
+
+      .product-rank{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .product-rank-right{
+        text-align:left;
+      }
     }
   </style>
 </head>
 <body>
-  <header>
-    <img src="/images/logo-jp.png" alt="Logo JP">
-    <h2 class="fw-bold">JP Entrenamiento Personalizado</h2>
-  </header>
+  <%
+    const money = (n) => Number(n || 0).toFixed(2);
 
-  <div class="container py-4">
-    <div class="text-center mb-4">
-      <a href="/" class="btn btn-outline-dark mb-3">&larr; Volver al Inicio</a>
-      <h3 class="fw-bold text-primary">📊 Reporte de Ingresos</h3>
-    </div>
+    const totalIngresosPeriodo = Number(totalIngresos || 0);
+    const totalCuotasPeriodo = Number(totalCuotas || 0);
+    const totalVentasPeriodo = Number(totalVentas || 0);
+    const totalGastosPeriodo = Number(totalGastos || 0);
+    const gananciaNetaPeriodo = Number(gananciaNeta || 0);
 
-    <div class="row justify-content-center mb-4">
-      <div class="col-auto">
-        <input type="text" id="rangoFechas" class="form-control" placeholder="Seleccionar rango de fechas">
+    const totalCuotasMesActual = Number(totalCuotasMes || 0);
+    const totalVentasMesActual = Number(totalVentasMes || 0);
+    const totalGastosMesActual = Number(totalGastosMes || 0);
+    const gananciaNetaMesActual = Number(gananciaNetaMes || 0);
+
+    const pagosCount = Number(cantidadPagos || 0);
+    const ventasCount = Number(cantidadVentas || 0);
+    const gastosCount = Number(cantidadGastos || 0);
+    const movimientosCount = Number(cantidadMovimientos || 0);
+
+    const promedioMovimiento = movimientosCount > 0 ? totalIngresosPeriodo / (pagosCount + ventasCount || 1) : 0;
+
+    const hoy = new Date();
+    const mesActual = hoy.toLocaleDateString('es-AR', { month: 'long' });
+    const anioActual = hoy.getFullYear();
+
+    const desdeDate = desde ? new Date(`${desde}T00:00:00`) : null;
+    const hastaDate = hasta ? new Date(`${hasta}T00:00:00`) : null;
+
+    let diasRango = 0;
+    if (desdeDate && hastaDate && !isNaN(desdeDate) && !isNaN(hastaDate)) {
+      diasRango = Math.floor((hastaDate - desdeDate) / (1000 * 60 * 60 * 24)) + 1;
+    }
+
+    const nombrePeriodo = (desde && hasta)
+      ? `${desde.split('-').reverse().join('/')} al ${hasta.split('-').reverse().join('/')}`
+      : 'Período actual';
+
+    const productosTop = Array.isArray(productosMasVendidos) ? productosMasVendidos : [];
+    const listaMovimientos = Array.isArray(movimientos) ? movimientos : [];
+  %>
+
+  <header class="main-header">
+    <div class="container header-inner">
+      <div class="brand-wrap">
+        <img src="/images/logo-jp.png" alt="Logo JP" class="brand-logo">
+        <div class="brand-text">
+          <h1>JP Entrenamiento Personalizado</h1>
+          <p>Centro de reportes, ingresos, egresos, ventas y rendimiento económico del gimnasio</p>
+        </div>
       </div>
     </div>
+  </header>
 
-    <div class="text-center mb-4">
-      <h5 class="resumen-total">
-        Total Ingresos: <span class="text-success">$<span id="totalFiltro"><%= total.toFixed(2) %></span></span>
-      </h5>
-    </div>
+  <main class="container page-wrap contenido">
+    <section class="hero-card">
+      <div class="hero-top">
+        <div class="hero-head">
+          <div>
+            <h2 class="hero-title">📊 Reporte financiero premium</h2>
+            <p class="hero-subtitle">
+              Aquí el dueño del gimnasio puede ver con claridad cuánto ingresó por cuotas,
+              cuánto se vendió en productos, cuánto se gastó y cuál fue la ganancia neta real.
+            </p>
+          </div>
 
-    <div class="table-responsive">
-      <table class="table table-bordered text-center align-middle">
-        <thead>
-          <tr>
-            <th>Cliente</th>
-            <th>Fecha</th>
-            <th>Monto</th>
-          </tr>
-        </thead>
-        <tbody id="tablaPagos">
-          <% pagos.forEach(pago => { %>
-            <tr>
-              <td><%= pago.nombre %></td>
-              <td><%= pago.fecha.toLocaleDateString() %></td>
-              <td>$<%= pago.monto.toFixed(2) %></td>
-            </tr>
-          <% }) %>
-        </tbody>
-      </table>
-    </div>
-  </div>
+          <a href="/" class="btn-back">← Volver al inicio</a>
+        </div>
+      </div>
 
-  <div class="footer">
+      <div class="hero-body">
+        <div class="filter-bar">
+          <div class="filter-card">
+            <label for="rangoFechas" class="filter-label">Filtrar por rango de fechas</label>
+            <input
+              type="text"
+              id="rangoFechas"
+              class="form-control"
+              placeholder="Seleccionar rango de fechas"
+              autocomplete="off"
+            >
+          </div>
+
+          <div class="headline-box">
+            <div class="headline-box-text">
+              <h2>Total de ingresos del período</h2>
+              <p><strong><%= nombrePeriodo %></strong></p>
+            </div>
+
+            <div class="headline-amount">
+              $<span id="totalFiltro"><%= money(totalIngresosPeriodo) %></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <div class="summary-card card-income">
+            <div class="summary-top">
+              <p class="summary-label">Ingresos totales</p>
+              <div class="summary-icon">💵</div>
+            </div>
+            <h3 class="summary-value">$<%= money(totalIngresosPeriodo) %></h3>
+            <p class="summary-note">Cuotas cobradas + ventas de productos en el rango.</p>
+          </div>
+
+          <div class="summary-card card-income">
+            <div class="summary-top">
+              <p class="summary-label">Cuotas</p>
+              <div class="summary-icon">🏋️</div>
+            </div>
+            <h3 class="summary-value">$<%= money(totalCuotasPeriodo) %></h3>
+            <p class="summary-note">Ingresos generados por pagos de alumnos.</p>
+          </div>
+
+          <div class="summary-card card-balance">
+            <div class="summary-top">
+              <p class="summary-label">Ventas de productos</p>
+              <div class="summary-icon">🛍️</div>
+            </div>
+            <h3 class="summary-value">$<%= money(totalVentasPeriodo) %></h3>
+            <p class="summary-note">Suplementos y productos vendidos en el período.</p>
+          </div>
+
+          <div class="summary-card card-expense">
+            <div class="summary-top">
+              <p class="summary-label">Gastos</p>
+              <div class="summary-icon">💸</div>
+            </div>
+            <h3 class="summary-value">$<%= money(totalGastosPeriodo) %></h3>
+            <p class="summary-note">Egresos cargados: alquiler, servicios, mercadería, etc.</p>
+          </div>
+
+          <div class="summary-card card-balance">
+            <div class="summary-top">
+              <p class="summary-label">Ganancia neta</p>
+              <div class="summary-icon">📈</div>
+            </div>
+            <h3 class="summary-value <%= gananciaNetaPeriodo >= 0 ? 'positive' : 'negative' %>">
+              $<%= money(gananciaNetaPeriodo) %>
+            </h3>
+            <p class="summary-note">Ingresos totales menos gastos del rango seleccionado.</p>
+          </div>
+
+          <div class="summary-card card-count">
+            <div class="summary-top">
+              <p class="summary-label">Movimientos</p>
+              <div class="summary-icon">🧾</div>
+            </div>
+            <h3 class="summary-value"><%= movimientosCount %></h3>
+            <p class="summary-note">Pagos, ventas y gastos encontrados en el rango.</p>
+          </div>
+
+          <div class="summary-card card-count">
+            <div class="summary-top">
+              <p class="summary-label">Promedio por ingreso</p>
+              <div class="summary-icon">⭐</div>
+            </div>
+            <h3 class="summary-value">$<%= money(promedioMovimiento) %></h3>
+            <p class="summary-note">Promedio considerando cuotas y ventas.</p>
+          </div>
+
+          <div class="summary-card card-count">
+            <div class="summary-top">
+              <p class="summary-label">Días analizados</p>
+              <div class="summary-icon">📅</div>
+            </div>
+            <h3 class="summary-value"><%= diasRango > 0 ? diasRango : 0 %></h3>
+            <p class="summary-note">Período exacto usado para el informe.</p>
+          </div>
+        </div>
+
+        <div class="grid-two">
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h3>Resumen mensual actual</h3>
+                <p>Vista rápida del mes de <span class="text-capitalize"><%= mesActual %></span> <%= anioActual %></p>
+              </div>
+            </div>
+
+            <div class="panel-body">
+              <div class="mini-stat-list">
+                <div class="mini-stat">
+                  <p class="mini-stat-label">Cuotas del mes</p>
+                  <h4 class="mini-stat-value positive">$<%= money(totalCuotasMesActual) %></h4>
+                  <p class="mini-stat-sub">Total generado por pagos de alumnos en el mes actual.</p>
+                </div>
+
+                <div class="mini-stat">
+                  <p class="mini-stat-label">Ventas del mes</p>
+                  <h4 class="mini-stat-value">$<%= money(totalVentasMesActual) %></h4>
+                  <p class="mini-stat-sub">Ingreso total por ventas de productos del gimnasio.</p>
+                </div>
+
+                <div class="mini-stat">
+                  <p class="mini-stat-label">Gastos del mes</p>
+                  <h4 class="mini-stat-value negative">$<%= money(totalGastosMesActual) %></h4>
+                  <p class="mini-stat-sub">Egresos acumulados durante el mes actual.</p>
+                </div>
+
+                <div class="mini-stat">
+                  <p class="mini-stat-label">Ganancia neta mensual</p>
+                  <h4 class="mini-stat-value <%= gananciaNetaMesActual >= 0 ? 'positive' : 'negative' %>">
+                    $<%= money(gananciaNetaMesActual) %>
+                  </h4>
+                  <p class="mini-stat-sub">Resultado real del mes: cuotas + ventas - gastos.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h3>Productos más vendidos</h3>
+                <p>Top de productos vendidos en el rango seleccionado</p>
+              </div>
+            </div>
+
+            <div class="panel-body">
+              <% if (productosTop.length > 0) { %>
+                <div class="list-group-clean">
+                  <% productosTop.forEach((producto, index) => { %>
+                    <div class="product-rank">
+                      <div class="product-rank-left">
+                        <strong><%= index + 1 %>. <%= producto.nombre %></strong>
+                        <span><%= Number(producto.cantidad || 0) %> unidades vendidas</span>
+                      </div>
+                      <div class="product-rank-right">
+                        <strong>$<%= money(producto.total) %></strong>
+                        <span>Total generado</span>
+                      </div>
+                    </div>
+                  <% }) %>
+                </div>
+              <% } else { %>
+                <div class="empty-state">
+                  No hay productos vendidos en el período seleccionado.
+                </div>
+              <% } %>
+            </div>
+          </section>
+        </div>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Detalle completo de movimientos</h3>
+              <p>Pagos de cuotas, ventas de productos y gastos en una sola vista</p>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table class="table report-table text-center align-middle">
+              <thead>
+                <tr>
+                  <th>Tipo</th>
+                  <th>Detalle</th>
+                  <th>Fecha</th>
+                  <th>Monto</th>
+                </tr>
+              </thead>
+
+              <tbody id="tablaMovimientos">
+                <% if (listaMovimientos.length > 0) { %>
+                  <% listaMovimientos.forEach(item => { %>
+                    <tr>
+                      <td>
+                        <% if (item.tipo === 'Cuota') { %>
+                          <span class="tipo-badge tipo-cuota">CUOTA</span>
+                        <% } else if (item.tipo === 'Venta') { %>
+                          <span class="tipo-badge tipo-venta">VENTA</span>
+                        <% } else { %>
+                          <span class="tipo-badge tipo-gasto">GASTO</span>
+                        <% } %>
+                      </td>
+
+                      <td class="td-name text-start">
+                        <strong><%= item.nombre %></strong>
+
+                        <% if (item.tipo === 'Cuota') { %>
+                          <span>Pago de alumno registrado</span>
+                        <% } else if (item.tipo === 'Venta') { %>
+                          <span>
+                            Venta de producto
+                            <% if (item.cantidad) { %>
+                              · <%= item.cantidad %> unidad(es)
+                            <% } %>
+                            <% if (item.metodoPago) { %>
+                              · <%= item.metodoPago %>
+                            <% } %>
+                          </span>
+                        <% } else { %>
+                          <span>
+                            Gasto del negocio
+                            <% if (item.categoria) { %>
+                              · <%= item.categoria %>
+                            <% } %>
+                            <% if (item.metodoPago) { %>
+                              · <%= item.metodoPago %>
+                            <% } %>
+                          </span>
+                        <% } %>
+                      </td>
+
+                      <td class="td-date">
+                        <%= new Date(item.fecha).toLocaleDateString('es-AR') %>
+                      </td>
+
+                      <td class="td-amount <%= item.tipo === 'Gasto' ? 'monto-gasto' : 'monto-ingreso' %>">
+                        <% if (item.tipo === 'Gasto') { %>
+                          - $<%= money(item.monto) %>
+                        <% } else { %>
+                          + $<%= money(item.monto) %>
+                        <% } %>
+                      </td>
+                    </tr>
+                  <% }) %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="4" class="empty-state">
+                      No hay movimientos registrados en el período seleccionado.
+                    </td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
     Todos los derechos reservados - Levi Prog.
-  </div>
+  </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
   <script>
     $(function () {
       $('#rangoFechas').daterangepicker({
         startDate: moment("<%= desde %>"),
         endDate: moment("<%= hasta %>"),
+        autoUpdateInput: true,
+        alwaysShowCalendars: true,
         locale: {
           format: 'YYYY-MM-DD',
           separator: ' al ',
           applyLabel: 'Aplicar',
           cancelLabel: 'Cancelar',
+          customRangeLabel: 'Personalizado',
+          weekLabel: 'S',
           daysOfWeek: ['Do','Lu','Ma','Mi','Ju','Vi','Sa'],
-          monthNames: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
+          monthNames: [
+            'Enero','Febrero','Marzo','Abril','Mayo','Junio',
+            'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'
+          ],
           firstDay: 1
+        },
+        ranges: {
+          'Hoy': [moment(), moment()],
+          'Últimos 7 días': [moment().subtract(6, 'days'), moment()],
+          'Últimos 30 días': [moment().subtract(29, 'days'), moment()],
+          'Este mes': [moment().startOf('month'), moment().endOf('month')],
+          'Mes pasado': [
+            moment().subtract(1, 'month').startOf('month'),
+            moment().subtract(1, 'month').endOf('month')
+          ]
         }
       }, function(start, end) {
         const url = `/reportes?desde=${start.format('YYYY-MM-DD')}&hasta=${end.format('YYYY-MM-DD')}`;

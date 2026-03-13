@@ -2,273 +2,1006 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>ALUMNOS JP</title>
+  <title>JP Entrenamiento | Panel Principal</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
   <style>
-    body {
-      background-color: #f8f9fa;
-      font-family: 'Segoe UI', sans-serif;
-      position: relative;
+    :root{
+      --jp-primary:#223a73;
+      --jp-primary-2:#2f4f9a;
+      --jp-accent:#7ea7ff;
+      --jp-soft:#dfe8ff;
+      --jp-bg:#f4f7fc;
+      --jp-card:#ffffff;
+      --jp-text:#1f2937;
+      --jp-muted:#6b7280;
+      --jp-success:#159447;
+      --jp-danger:#d62839;
+      --jp-warning:#d4a017;
+      --jp-info:#0d6efd;
+      --jp-shadow:0 10px 30px rgba(27, 47, 95, 0.10);
+      --jp-radius:20px;
     }
 
-    header {
-      background-color: #b2bcdd;
-      padding: 1rem 0;
-      text-align: center;
-      color: rgb(48, 45, 45);
+    *{
+      box-sizing:border-box;
     }
 
-    header img {
-      width: 80px;
-      border-radius: 50%;
-      margin-bottom: 0.5rem;
+    body{
+      margin:0;
+      background:
+        radial-gradient(circle at top left, rgba(126,167,255,.14), transparent 25%),
+        radial-gradient(circle at top right, rgba(34,58,115,.10), transparent 30%),
+        linear-gradient(180deg, #f8fbff 0%, var(--jp-bg) 100%);
+      color:var(--jp-text);
+      font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height:100vh;
+      position:relative;
     }
 
-    .resumen-box {
-      border-radius: 1rem;
-      padding: 1rem;
-      box-shadow: 0 0 10px rgba(0,0,0,0.08);
-      background: white;
+    .fondo-logo{
+      position:fixed;
+      inset:0;
+      z-index:0;
+      background-image:url('/images/logo-jp.png');
+      background-repeat:repeat;
+      background-size:82px;
+      opacity:.03;
+      pointer-events:none;
     }
 
-    .tabla-clientes th {
-      background-color: #212529;
-      color: white;
+    .contenido{
+      position:relative;
+      z-index:1;
     }
 
-    .tabla-clientes {
-      background-color: white;
-      border-radius: 0.5rem;
-      overflow: hidden;
-      box-shadow: 0 0 12px rgba(0,0,0,0.05);
+    .main-header{
+      position:relative;
+      overflow:hidden;
+      background:linear-gradient(135deg, var(--jp-primary) 0%, var(--jp-primary-2) 100%);
+      color:#fff;
+      padding:26px 0 22px;
+      box-shadow:0 8px 24px rgba(34,58,115,.18);
     }
 
-    .btn-primary {
-      background-color: #0033cc;
-      border: none;
+    .main-header::before{
+      content:'';
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(circle at 10% 20%, rgba(255,255,255,.18), transparent 18%),
+        radial-gradient(circle at 85% 25%, rgba(255,255,255,.12), transparent 20%),
+        radial-gradient(circle at 60% 80%, rgba(255,255,255,.10), transparent 18%);
+      pointer-events:none;
     }
 
-    .btn-danger {
-      background-color: #d9534f;
+    .header-inner{
+      position:relative;
+      z-index:2;
     }
 
-    .footer {
-      background-color: #b2bcdd;
-      color: rgb(48, 45, 45);
-      text-align: center;
-      padding: 0.8rem 0;
-      margin-top: 3rem;
+    .brand-wrap{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:16px;
+      flex-wrap:wrap;
+      text-align:center;
     }
 
-    .vencido {
-      color: red;
-      font-weight: bold;
+    .brand-logo{
+      width:84px;
+      height:84px;
+      object-fit:cover;
+      border-radius:50%;
+      border:3px solid rgba(255,255,255,.85);
+      background:#fff;
+      box-shadow:0 10px 25px rgba(0,0,0,.18);
+      flex-shrink:0;
     }
 
-    .aldia {
-      color: green;
-      font-weight: bold;
+    .brand-text h1{
+      margin:0;
+      font-size:clamp(1.5rem, 3vw, 2.1rem);
+      font-weight:800;
+      letter-spacing:.2px;
     }
 
-    .fondo-logo {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-      background-image: url('/images/logo-jp.png');
-      background-repeat: repeat;
-      background-size: 80px;
-      opacity: 0.03;
-      pointer-events: none;
+    .brand-text p{
+      margin:.35rem 0 0;
+      color:rgba(255,255,255,.86);
+      font-size:.98rem;
     }
 
-    .contenido {
-      position: relative;
-      z-index: 1;
+    .top-actions{
+      margin-top:18px;
+      display:flex;
+      justify-content:center;
+      gap:12px;
+      flex-wrap:wrap;
     }
 
-    .ventana-cumple {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #fff8dc;
-      color: #333;
-      border: 2px solid #ffc107;
-      padding: 1rem 1.2rem;
-      z-index: 9999;
-      border-radius: 12px;
-      max-width: 300px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.2);
-      animation: entrada 0.4s ease;
+    .btn-top{
+      border:none;
+      border-radius:999px;
+      padding:10px 18px;
+      font-weight:600;
+      text-decoration:none;
+      transition:.22s ease;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      box-shadow:0 8px 18px rgba(0,0,0,.10);
     }
 
-    .ventana-proximos {
-      position: fixed;
-      top: 140px;
-      right: 20px;
-      background: #e6f3ff;
-      color: #004085;
-      border: 2px solid #66b0ff;
-      padding: 1rem 1.2rem;
-      z-index: 9998;
-      border-radius: 12px;
-      max-width: 300px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.15);
-      animation: entrada 0.4s ease;
+    .btn-top-light{
+      background:#fff;
+      color:var(--jp-primary);
     }
 
-    .btn-cerrar {
-      position: absolute;
-      top: 5px;
-      right: 8px;
-      background: transparent;
-      border: none;
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: #444;
-      cursor: pointer;
+    .btn-top-light:hover{
+      transform:translateY(-1px);
+      background:#f3f6ff;
+      color:var(--jp-primary);
     }
 
-    @keyframes entrada {
-      from { opacity: 0; transform: translateY(-20px); }
-      to { opacity: 1; transform: translateY(0); }
+    .btn-top-danger{
+      background:rgba(255,255,255,.14);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.22);
+      backdrop-filter:blur(6px);
+    }
+
+    .btn-top-danger:hover{
+      background:rgba(255,255,255,.22);
+      color:#fff;
+      transform:translateY(-1px);
+    }
+
+    .page-wrap{
+      padding:28px 0 36px;
+    }
+
+    .section-title{
+      font-size:1.1rem;
+      font-weight:800;
+      margin-bottom:16px;
+      color:var(--jp-primary);
+    }
+
+    .dashboard-grid{
+      display:grid;
+      grid-template-columns:repeat(4, minmax(0, 1fr));
+      gap:16px;
+    }
+
+    .summary-card{
+      background:var(--jp-card);
+      border-radius:var(--jp-radius);
+      box-shadow:var(--jp-shadow);
+      padding:18px 18px 16px;
+      border:1px solid rgba(34,58,115,.06);
+      position:relative;
+      overflow:hidden;
+      min-height:132px;
+      transition:.18s ease;
+    }
+
+    .summary-card:hover{
+      transform:translateY(-2px);
+    }
+
+    .summary-card::after{
+      content:'';
+      position:absolute;
+      right:-18px;
+      top:-18px;
+      width:78px;
+      height:78px;
+      border-radius:50%;
+      background:rgba(34,58,115,.05);
+    }
+
+    .summary-top{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:14px;
+      position:relative;
+      z-index:1;
+    }
+
+    .summary-label{
+      font-size:.88rem;
+      color:var(--jp-muted);
+      font-weight:700;
+      margin:0;
+    }
+
+    .summary-icon{
+      width:42px;
+      height:42px;
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:1.15rem;
+      font-weight:800;
+      flex-shrink:0;
+    }
+
+    .summary-value{
+      font-size:1.72rem;
+      line-height:1;
+      font-weight:800;
+      margin:0 0 8px;
+      position:relative;
+      z-index:1;
+      word-break:break-word;
+    }
+
+    .summary-note{
+      font-size:.84rem;
+      color:var(--jp-muted);
+      margin:0;
+      position:relative;
+      z-index:1;
+    }
+
+    .card-neutral .summary-icon{
+      background:rgba(34,58,115,.10);
+      color:var(--jp-primary);
+    }
+
+    .card-success .summary-icon{
+      background:rgba(21,148,71,.12);
+      color:var(--jp-success);
+    }
+
+    .card-danger .summary-icon{
+      background:rgba(214,40,57,.12);
+      color:var(--jp-danger);
+    }
+
+    .card-info .summary-icon{
+      background:rgba(13,110,253,.12);
+      color:var(--jp-info);
+    }
+
+    .card-warning .summary-icon{
+      background:rgba(212,160,23,.14);
+      color:var(--jp-warning);
+    }
+
+    .card-dark .summary-icon{
+      background:rgba(31,41,55,.10);
+      color:#111827;
+    }
+
+    .quick-panel{
+      margin-top:22px;
+      background:rgba(255,255,255,.88);
+      border:1px solid rgba(34,58,115,.08);
+      border-radius:24px;
+      padding:18px;
+      box-shadow:var(--jp-shadow);
+      backdrop-filter:blur(8px);
+    }
+
+    .quick-actions{
+      display:grid;
+      grid-template-columns:repeat(5, minmax(0, 1fr));
+      gap:14px;
+    }
+
+    .quick-btn{
+      text-decoration:none;
+      background:#fff;
+      border:1px solid rgba(34,58,115,.08);
+      border-radius:18px;
+      padding:16px 14px;
+      color:var(--jp-text);
+      box-shadow:0 8px 20px rgba(20,35,79,.06);
+      transition:.18s ease;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-height:82px;
+    }
+
+    .quick-btn:hover{
+      transform:translateY(-2px);
+      border-color:rgba(34,58,115,.18);
+      color:var(--jp-primary);
+      background:#f9fbff;
+    }
+
+    .quick-icon{
+      width:46px;
+      height:46px;
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:1.2rem;
+      font-weight:800;
+      flex-shrink:0;
+      background:linear-gradient(135deg, rgba(34,58,115,.12), rgba(126,167,255,.16));
+      color:var(--jp-primary);
+    }
+
+    .quick-text strong{
+      display:block;
+      font-size:.98rem;
+      margin-bottom:2px;
+    }
+
+    .quick-text span{
+      display:block;
+      color:var(--jp-muted);
+      font-size:.84rem;
+      line-height:1.2;
+    }
+
+    .toolbar{
+      margin-top:24px;
+      display:grid;
+      grid-template-columns:220px 1fr;
+      gap:14px;
+      align-items:center;
+    }
+
+    .btn-main{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      background:linear-gradient(135deg, var(--jp-success), #20b45a);
+      color:#fff;
+      border:none;
+      border-radius:16px;
+      padding:14px 18px;
+      font-weight:700;
+      text-decoration:none;
+      box-shadow:0 10px 22px rgba(21,148,71,.18);
+      transition:.18s ease;
+      width:100%;
+    }
+
+    .btn-main:hover{
+      color:#fff;
+      transform:translateY(-1px);
+      filter:brightness(1.03);
+    }
+
+    .search-wrap{
+      position:relative;
+    }
+
+    .search-input{
+      width:100%;
+      border:none;
+      border-radius:16px;
+      padding:15px 18px 15px 46px;
+      background:#fff;
+      box-shadow:var(--jp-shadow);
+      border:1px solid rgba(34,58,115,.08);
+      font-size:.98rem;
+      outline:none;
+      transition:.18s ease;
+    }
+
+    .search-input:focus{
+      border-color:rgba(34,58,115,.28);
+      box-shadow:0 12px 24px rgba(34,58,115,.12);
+    }
+
+    .search-icon{
+      position:absolute;
+      left:16px;
+      top:50%;
+      transform:translateY(-50%);
+      color:var(--jp-muted);
+      font-size:1rem;
+      pointer-events:none;
+    }
+
+    .table-card{
+      margin-top:20px;
+      background:#fff;
+      border-radius:24px;
+      box-shadow:var(--jp-shadow);
+      border:1px solid rgba(34,58,115,.08);
+      overflow:hidden;
+    }
+
+    .table-card-header{
+      padding:16px 18px;
+      border-bottom:1px solid rgba(34,58,115,.08);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      background:linear-gradient(180deg, rgba(34,58,115,.03), rgba(34,58,115,.01));
+    }
+
+    .table-card-header h3{
+      margin:0;
+      font-size:1.02rem;
+      font-weight:800;
+      color:var(--jp-primary);
+    }
+
+    .table-card-header p{
+      margin:0;
+      color:var(--jp-muted);
+      font-size:.9rem;
+    }
+
+    .table-responsive{
+      margin:0;
+    }
+
+    .tabla-clientes{
+      margin:0;
+      vertical-align:middle;
+    }
+
+    .tabla-clientes thead th{
+      background:#18284b;
+      color:#fff;
+      border:none;
+      font-size:.88rem;
+      text-transform:uppercase;
+      letter-spacing:.3px;
+      white-space:nowrap;
+      padding:15px 12px;
+    }
+
+    .tabla-clientes tbody td{
+      padding:14px 12px;
+      border-color:#eef2f8;
+      vertical-align:middle;
+    }
+
+    .tabla-clientes tbody tr{
+      transition:background .16s ease;
+    }
+
+    .tabla-clientes tbody tr:hover{
+      background:#f9fbff;
+    }
+
+    .fila-vencida{
+      background:rgba(214,40,57,.05);
+    }
+
+    .alumno-nombre{
+      font-weight:800;
+      color:#162542;
+      margin:0 0 2px;
+    }
+
+    .alumno-sub{
+      margin:0;
+      color:var(--jp-muted);
+      font-size:.83rem;
+    }
+
+    .estado-texto{
+      font-weight:800;
+      font-size:.92rem;
+    }
+
+    .vencido{
+      color:var(--jp-danger);
+    }
+
+    .aldia{
+      color:var(--jp-success);
+    }
+
+    .badge-estado{
+      border-radius:999px;
+      padding:8px 12px;
+      font-size:.76rem;
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+
+    .badge.bg-success{
+      background:var(--jp-success)!important;
+    }
+
+    .badge.bg-danger{
+      background:var(--jp-danger)!important;
+    }
+
+    .action-group{
+      display:flex;
+      justify-content:center;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .btn-action{
+      border:none;
+      border-radius:12px;
+      padding:9px 12px;
+      font-weight:700;
+      font-size:.84rem;
+      text-decoration:none;
+      transition:.18s ease;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+    }
+
+    .btn-view{
+      background:linear-gradient(135deg, #234eb3, #1d3f92);
+      color:#fff;
+    }
+
+    .btn-view:hover{
+      color:#fff;
+      transform:translateY(-1px);
+      filter:brightness(1.03);
+    }
+
+    .btn-delete{
+      background:#fff1f2;
+      color:var(--jp-danger);
+      border:1px solid rgba(214,40,57,.14);
+    }
+
+    .btn-delete:hover{
+      background:#ffe4e8;
+      color:#b61f2f;
+    }
+
+    .ventana-cumple,
+    .ventana-proximos{
+      position:fixed;
+      right:18px;
+      z-index:9999;
+      border:none;
+      border-radius:18px;
+      padding:16px 18px;
+      max-width:320px;
+      box-shadow:0 18px 35px rgba(25,40,79,.18);
+      animation:entrada .35s ease;
+    }
+
+    .ventana-cumple{
+      top:18px;
+      background:linear-gradient(135deg, #fff7dd, #fff3bf);
+      color:#6b4e00;
+      border-left:6px solid #f0b400;
+    }
+
+    .ventana-proximos{
+      top:142px;
+      background:linear-gradient(135deg, #e9f3ff, #d9ecff);
+      color:#0c4a75;
+      border-left:6px solid #4ea0ff;
+      z-index:9998;
+    }
+
+    .btn-cerrar{
+      position:absolute;
+      top:8px;
+      right:10px;
+      background:transparent;
+      border:none;
+      font-size:1.2rem;
+      font-weight:bold;
+      color:inherit;
+      cursor:pointer;
+      line-height:1;
+    }
+
+    .footer{
+      margin-top:34px;
+      background:linear-gradient(135deg, #dbe5ff, #c7d6ff);
+      color:#30415f;
+      text-align:center;
+      padding:18px 12px;
+      font-weight:600;
+      border-top:1px solid rgba(34,58,115,.08);
+      position:relative;
+      z-index:1;
+    }
+
+    .empty-state{
+      padding:30px 18px;
+      text-align:center;
+      color:var(--jp-muted);
+    }
+
+    @keyframes entrada{
+      from{ opacity:0; transform:translateY(-16px); }
+      to{ opacity:1; transform:translateY(0); }
+    }
+
+    @media (max-width: 1199px){
+      .dashboard-grid{
+        grid-template-columns:repeat(2, minmax(0, 1fr));
+      }
+
+      .quick-actions{
+        grid-template-columns:repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 767px){
+      .main-header{
+        padding:22px 0 20px;
+      }
+
+      .brand-wrap{
+        flex-direction:column;
+        gap:12px;
+      }
+
+      .brand-logo{
+        width:76px;
+        height:76px;
+      }
+
+      .page-wrap{
+        padding:20px 0 26px;
+      }
+
+      .dashboard-grid{
+        grid-template-columns:1fr;
+        gap:12px;
+      }
+
+      .quick-actions{
+        grid-template-columns:1fr;
+      }
+
+      .toolbar{
+        grid-template-columns:1fr;
+      }
+
+      .quick-panel{
+        padding:14px;
+        border-radius:20px;
+      }
+
+      .summary-card{
+        min-height:auto;
+      }
+
+      .table-card{
+        border-radius:20px;
+      }
+
+      .table-card-header{
+        padding:14px 14px;
+      }
+
+      .tabla-clientes thead th,
+      .tabla-clientes tbody td{
+        font-size:.88rem;
+        padding:12px 10px;
+      }
+
+      .ventana-cumple,
+      .ventana-proximos{
+        left:12px;
+        right:12px;
+        max-width:none;
+      }
+
+      .ventana-proximos{
+        top:135px;
+      }
     }
   </style>
 </head>
 <body>
   <div class="fondo-logo"></div>
 
+  <% const money = (n) => Number(n || 0).toFixed(2); %>
+
   <% if (cumpleañeros && cumpleañeros.length > 0) { %>
-    <div id="ventanaCumple" class="ventana-cumple alert alert-warning shadow">
-      <button class="btn-cerrar" onclick="cerrarCumple()">×</button>
-      <h5 class="mb-2">🎉 ¡Cumpleaños de Hoy!</h5>
-      <p><%= cumpleañeros.join(', ') %></p>
-      <p class="mb-0">¡No te olvides de saludar! 🎂</p>
+    <div id="ventanaCumple" class="ventana-cumple">
+      <button type="button" class="btn-cerrar" onclick="cerrarCumple()">×</button>
+      <h5 class="mb-2 fw-bold">🎉 ¡Cumpleaños de Hoy!</h5>
+      <p class="mb-2"><%= cumpleañeros.join(', ') %></p>
+      <p class="mb-0 fw-semibold">¡No te olvides de saludar! 🎂</p>
     </div>
   <% } %>
 
   <% if (proximosCumples && proximosCumples.length > 0) { %>
-    <div id="ventanaProximos" class="ventana-proximos alert alert-info shadow">
-      <button class="btn-cerrar" onclick="cerrarProximos()">×</button>
-      <h5 class="mb-2">🎁 Próximos Cumpleaños</h5>
-      <ul class="mb-1 ps-3">
+    <div id="ventanaProximos" class="ventana-proximos">
+      <button type="button" class="btn-cerrar" onclick="cerrarProximos()">×</button>
+      <h5 class="mb-2 fw-bold">🎁 Próximos Cumpleaños</h5>
+      <ul class="mb-2 ps-3">
         <% proximosCumples.forEach(cumple => { %>
-          <li>🎈 <%= cumple %></li>
+          <li class="mb-1">🎈 <%= cumple %></li>
         <% }) %>
       </ul>
-      <p class="mb-0">¡Prepará los saludos y sorpresas! 🥳</p>
+      <p class="mb-0 fw-semibold">¡Prepará los saludos y sorpresas! 🥳</p>
     </div>
   <% } %>
 
-  <header>
-    <img src="/images/logo-jp.png" alt="Logo JP">
-    <h2 class="fw-bold">JP Entrenamiento Personalizado</h2>
+  <header class="main-header">
+    <div class="container header-inner">
+      <div class="brand-wrap">
+        <img src="/images/logo-jp.png" alt="Logo JP" class="brand-logo">
+        <div class="brand-text">
+          <h1>JP Entrenamiento Personalizado</h1>
+          <p>Panel principal de alumnos, pagos, ventas, stock y gastos</p>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <a href="/reportes" class="btn-top btn-top-light">📊 Reportes</a>
+        <a href="/logout" class="btn-top btn-top-danger">🚪 Cerrar sesión</a>
+      </div>
+    </div>
   </header>
 
-  <div class="container my-4 contenido">
-    <div class="row text-center mb-4">
-      <div class="col-md-3">
-        <div class="resumen-box">
-          <h6>Total Clientes</h6>
-          <h4><%= resumen.totalClientes %></h4>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="resumen-box border-success">
-          <h6 class="text-success">Al Día</h6>
-          <h4 class="text-success"><%= resumen.alDia %></h4>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="resumen-box border-danger">
-          <h6 class="text-danger">Vencidos</h6>
-          <h4 class="text-danger"><%= resumen.vencidos %></h4>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="resumen-box border-info">
-          <h6 class="text-info">Total Ingresos</h6>
-          <h4 class="text-info">$<%= resumen.totalRecaudado.toFixed(2) %></h4>
-        </div>
-      </div>
-    </div>
+  <main class="container page-wrap contenido">
+    <section>
+      <div class="section-title">Resumen general del día</div>
 
-    <div class="text-center my-4">
-      <a href="/reportes" class="btn btn-outline-dark">📊 Ver Reportes</a>
-    </div>
+      <div class="dashboard-grid">
+        <div class="summary-card card-neutral">
+          <div class="summary-top">
+            <p class="summary-label">Total Clientes</p>
+            <div class="summary-icon">👥</div>
+          </div>
+          <h2 class="summary-value"><%= resumen.totalClientes || 0 %></h2>
+          <p class="summary-note">Alumnos registrados actualmente</p>
+        </div>
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <a href="/nueva" class="btn btn-success">➕ Nuevo Alumno</a>
-      <input type="text" id="buscador" class="form-control w-50" placeholder="Buscar por nombre o apellido...">
-    </div>
+        <div class="summary-card card-success">
+          <div class="summary-top">
+            <p class="summary-label">Al Día</p>
+            <div class="summary-icon">✅</div>
+          </div>
+          <h2 class="summary-value"><%= resumen.alDia || 0 %></h2>
+          <p class="summary-note">Clientes con cuota vigente</p>
+        </div>
 
-    <div class="table-responsive">
-      <table class="table table-bordered text-center align-middle tabla-clientes" id="tablaClientes">
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Edad</th>
-            <th>Celular</th>
-            <th>Plan</th>
-            <th>Inicio</th>
-            <th>Pago</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% clientes.forEach(cliente => { %>
-            <tr class="<%= cliente.estadoPago === 'vencido' ? 'table-danger' : '' %>">
-              <td><%= cliente.nombre %> <%= cliente.apellido %></td>
-              <td><%= cliente.edad %></td>
-              <td><%= cliente.celular %></td>
-              <td><%= cliente.plan %></td>
-              <td><%= new Date(cliente.fechaInicio).toLocaleDateString() %></td>
-              <td class="<%= cliente.estadoPago === 'vencido' ? 'vencido' : 'aldia' %>">
-                <% if (cliente.pagos.length > 0) { %>
-                  <%= new Date(cliente.pagos[cliente.pagos.length - 1].fecha).toLocaleDateString() %>
-                <% } else { %>
-                  -
-                <% } %>
-              </td>
-              <td>
-                <% if (cliente.estadoPago === 'vencido') { %>
-                  <span class="badge bg-danger">VENCIDO</span>
-                <% } else { %>
-                  <span class="badge bg-success">AL DÍA</span>
-                <% } %>
-              </td>
-              <td>
-                <a href="/editar/<%= cliente._id %>" class="btn btn-sm btn-primary">Ver Alumno</a>
-                <form action="/eliminar/<%= cliente._id %>" method="POST" class="d-inline">
-                  <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar cliente?')">Eliminar</button>
-                </form>
-              </td>
+        <div class="summary-card card-danger">
+          <div class="summary-top">
+            <p class="summary-label">Vencidos</p>
+            <div class="summary-icon">⚠️</div>
+          </div>
+          <h2 class="summary-value"><%= resumen.vencidos || 0 %></h2>
+          <p class="summary-note">Requieren seguimiento de pago</p>
+        </div>
+
+        <div class="summary-card card-info">
+          <div class="summary-top">
+            <p class="summary-label">Cuotas de Hoy</p>
+            <div class="summary-icon">💵</div>
+          </div>
+          <h2 class="summary-value">$<%= money(resumen.totalRecaudado) %></h2>
+          <p class="summary-note">Pagos registrados hoy</p>
+        </div>
+
+        <div class="summary-card card-info">
+          <div class="summary-top">
+            <p class="summary-label">Ventas de Hoy</p>
+            <div class="summary-icon">🛍️</div>
+          </div>
+          <h2 class="summary-value">$<%= money(resumen.ventasHoy) %></h2>
+          <p class="summary-note">Productos vendidos en el día</p>
+        </div>
+
+        <div class="summary-card card-warning">
+          <div class="summary-top">
+            <p class="summary-label">Gastos de Hoy</p>
+            <div class="summary-icon">💸</div>
+          </div>
+          <h2 class="summary-value">$<%= money(resumen.gastosHoy) %></h2>
+          <p class="summary-note">Egresos cargados hoy</p>
+        </div>
+
+        <div class="summary-card card-dark">
+          <div class="summary-top">
+            <p class="summary-label">Ganancia Neta</p>
+            <div class="summary-icon">📈</div>
+          </div>
+          <h2 class="summary-value">$<%= money(resumen.gananciaNetaHoy) %></h2>
+          <p class="summary-note">Cuotas + ventas - gastos</p>
+        </div>
+
+        <div class="summary-card card-danger">
+          <div class="summary-top">
+            <p class="summary-label">Stock Bajo</p>
+            <div class="summary-icon">📦</div>
+          </div>
+          <h2 class="summary-value"><%= resumen.stockBajo || 0 %></h2>
+          <p class="summary-note">Productos para reponer pronto</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="quick-panel">
+      <div class="section-title mb-3">Accesos rápidos</div>
+
+      <div class="quick-actions">
+        <a href="/nueva" class="quick-btn">
+          <div class="quick-icon">➕</div>
+          <div class="quick-text">
+            <strong>Nuevo Alumno</strong>
+            <span>Cargar cliente nuevo al sistema</span>
+          </div>
+        </a>
+
+        <a href="/productos" class="quick-btn">
+          <div class="quick-icon">📦</div>
+          <div class="quick-text">
+            <strong>Productos</strong>
+            <span>Stock, precios y control</span>
+          </div>
+        </a>
+
+        <a href="/ventas" class="quick-btn">
+          <div class="quick-icon">💰</div>
+          <div class="quick-text">
+            <strong>Vender</strong>
+            <span>Registrar ventas rápidas</span>
+          </div>
+        </a>
+
+        <a href="/gastos" class="quick-btn">
+          <div class="quick-icon">🧾</div>
+          <div class="quick-text">
+            <strong>Gastos</strong>
+            <span>Cargar egresos del gimnasio</span>
+          </div>
+        </a>
+
+        <a href="/reportes" class="quick-btn">
+          <div class="quick-icon">📊</div>
+          <div class="quick-text">
+            <strong>Reportes</strong>
+            <span>Ver ingresos y movimientos</span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <section class="toolbar">
+      <a href="/nueva" class="btn-main">➕ Nuevo Alumno</a>
+
+      <div class="search-wrap">
+        <span class="search-icon">🔎</span>
+        <input
+          type="text"
+          id="buscador"
+          class="search-input"
+          placeholder="Buscar por nombre o apellido del alumno..."
+          autocomplete="off"
+        >
+      </div>
+    </section>
+
+    <section class="table-card">
+      <div class="table-card-header">
+        <div>
+          <h3>Listado de alumnos</h3>
+          <p>Visual rápido del estado de cada cliente del gimnasio</p>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table tabla-clientes text-center align-middle" id="tablaClientes">
+          <thead>
+            <tr>
+              <th>Alumno</th>
+              <th>Edad</th>
+              <th>Celular</th>
+              <th>Plan</th>
+              <th>Inicio</th>
+              <th>Último Pago</th>
+              <th>Estado</th>
+              <th>Acciones</th>
             </tr>
-          <% }) %>
-        </tbody>
-      </table>
-    </div>
-  </div>
+          </thead>
 
-  <div class="footer">
+          <tbody>
+            <% if (clientes && clientes.length > 0) { %>
+              <% clientes.forEach(cliente => { %>
+                <tr class="<%= cliente.estadoPago === 'vencido' ? 'fila-vencida' : '' %>">
+                  <td>
+                    <p class="alumno-nombre mb-0"><%= cliente.nombre %> <%= cliente.apellido %></p>
+                    <p class="alumno-sub">Cliente activo del sistema</p>
+                  </td>
+
+                  <td><strong><%= cliente.edad %></strong></td>
+
+                  <td>
+                    <span><%= cliente.celular %></span>
+                  </td>
+
+                  <td>
+                    <span class="badge text-bg-light border px-3 py-2"><%= cliente.plan %></span>
+                  </td>
+
+                  <td>
+                    <%= cliente.fechaInicio ? new Date(cliente.fechaInicio).toLocaleDateString() : '-' %>
+                  </td>
+
+                  <td class="<%= cliente.estadoPago === 'vencido' ? 'vencido estado-texto' : 'aldia estado-texto' %>">
+                    <% if (cliente.pagos && cliente.pagos.length > 0) { %>
+                      <%= new Date(cliente.pagos[cliente.pagos.length - 1].fecha).toLocaleDateString() %>
+                    <% } else { %>
+                      -
+                    <% } %>
+                  </td>
+
+                  <td>
+                    <% if (cliente.estadoPago === 'vencido') { %>
+                      <span class="badge badge-estado bg-danger">VENCIDO</span>
+                    <% } else { %>
+                      <span class="badge badge-estado bg-success">AL DÍA</span>
+                    <% } %>
+                  </td>
+
+                  <td>
+                    <div class="action-group">
+                      <a href="/editar/<%= cliente._id %>" class="btn-action btn-view">👁 Ver Alumno</a>
+
+                      <form action="/eliminar/<%= cliente._id %>" method="POST" class="d-inline">
+                        <button
+                          type="submit"
+                          class="btn-action btn-delete"
+                          onclick="return confirm('¿Eliminar cliente?')"
+                        >
+                          🗑 Eliminar
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="8" class="empty-state">
+                  No hay alumnos cargados todavía.
+                </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
     Todos los derechos reservados - Levi Prog.
-  </div>
+  </footer>
 
   <script>
     const buscador = document.getElementById('buscador');
     const filas = document.querySelectorAll('#tablaClientes tbody tr');
 
-    buscador.addEventListener('input', () => {
-      const texto = buscador.value.toLowerCase();
-      filas.forEach(fila => {
-        const nombre = fila.children[0].textContent.toLowerCase();
-        fila.style.display = nombre.includes(texto) ? '' : 'none';
+    if (buscador) {
+      buscador.addEventListener('input', () => {
+        const texto = buscador.value.toLowerCase().trim();
+
+        filas.forEach(fila => {
+          const primeraCelda = fila.children[0];
+          if (!primeraCelda) return;
+
+          const nombre = primeraCelda.textContent.toLowerCase();
+          fila.style.display = nombre.includes(texto) ? '' : 'none';
+        });
       });
-    });
+    }
 
     function cerrarCumple() {
       const aviso = document.getElementById('ventanaCumple');

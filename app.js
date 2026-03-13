@@ -3,7 +3,11 @@ const mongoose = require('mongoose');
 const path = require('path');
 const dotenv = require('dotenv');
 const session = require('express-session');
+
 const clientesRoutes = require('./routes/clientes');
+const productosRoutes = require('./routes/productos');
+const ventasRoutes = require('./routes/ventas');
+const gastosRoutes = require('./routes/gastos');
 
 dotenv.config();
 
@@ -29,18 +33,17 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Configurar sesión
 app.use(session({
-  secret: 'jp-entrenamiento',
+  secret: process.env.SESSION_SECRET || 'jp-entrenamiento',
   resave: false,
   saveUninitialized: false
 }));
 
 // Middleware para proteger rutas
 function verificarLogin(req, res, next) {
-  if (req.session.usuario) {
-    next();
-  } else {
-    res.redirect('/login');
+  if (req.session && req.session.usuario) {
+    return next();
   }
+  return res.redirect('/login');
 }
 
 // Rutas públicas
@@ -49,25 +52,37 @@ app.get('/login', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  const { usuario, contrasena } = req.body;
+  try {
+    const { usuario, contrasena } = req.body;
 
-  // Usuario y contraseña fijos (podés luego conectarlo con MongoDB)
-  if (usuario === 'jpentrenamiento' && contrasena === 'burack123') {
-    req.session.usuario = usuario;
-    res.redirect('/');
-  } else {
-    res.send('Usuario o contraseña incorrectos');
+    // Usuario y contraseña fijos
+    if (usuario === 'jpentrenamiento' && contrasena === 'burack123') {
+      req.session.usuario = usuario;
+      return res.redirect('/');
+    }
+
+    return res.status(401).send('Usuario o contraseña incorrectos');
+  } catch (error) {
+    console.error('❌ Error en login:', error);
+    return res.status(500).send('Error al iniciar sesión');
   }
 });
 
 app.get('/logout', (req, res) => {
-  req.session.destroy(() => {
-    res.redirect('/login');
+  req.session.destroy((error) => {
+    if (error) {
+      console.error('❌ Error al cerrar sesión:', error);
+      return res.status(500).send('Error al cerrar sesión');
+    }
+    return res.redirect('/login');
   });
 });
 
 // Rutas protegidas
 app.use('/', verificarLogin, clientesRoutes);
+app.use('/productos', verificarLogin, productosRoutes);
+app.use('/ventas', verificarLogin, ventasRoutes);
+app.use('/gastos', verificarLogin, gastosRoutes);
 
 // Iniciar servidor
 app.listen(PORT, () => {
