@@ -4,23 +4,46 @@ const Venta = require('../models/Venta');
 const Gasto = require('../models/Gasto');
 const whatsappClient = require('../services/whatsapp');
 
+function getArgentinaDateParts(date = new Date()) {
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Argentina/Buenos_Aires',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  });
+
+  const parts = formatter.formatToParts(date);
+  const year = parts.find((p) => p.type === 'year').value;
+  const month = parts.find((p) => p.type === 'month').value;
+  const day = parts.find((p) => p.type === 'day').value;
+
+  return { year, month, day };
+}
+
+function getArgentinaDateString(date = new Date()) {
+  const { year, month, day } = getArgentinaDateParts(date);
+  return `${year}-${month}-${day}`;
+}
+
+function startOfArgentinaDay(dateStr) {
+  return new Date(`${dateStr}T00:00:00.000-03:00`);
+}
+
+function endOfArgentinaDay(dateStr) {
+  return new Date(`${dateStr}T23:59:59.999-03:00`);
+}
+
 // Mostrar todos los clientes con resumen real de pagos + ventas + gastos + stock
 exports.listarClientes = async (req, res) => {
   try {
     const clientes = await Cliente.find().sort({ creadoEn: -1 });
 
-    // Día actual en horario Argentina
-    const ahora = new Date();
-    const ahoraArgentina = new Date(
-      ahora.toLocaleString('en-US', { timeZone: 'America/Argentina/Buenos_Aires' })
-    );
-
-    const hoySinHora = new Date(ahoraArgentina);
-    hoySinHora.setHours(0, 0, 0, 0);
-
+    const hoyArgentinaStr = getArgentinaDateString(new Date());
+    const hoySinHora = startOfArgentinaDay(hoyArgentinaStr);
     const manana = new Date(hoySinHora);
     manana.setDate(manana.getDate() + 1);
 
+    const ahoraArgentina = new Date(`${hoyArgentinaStr}T12:00:00-03:00`);
     const diaHoy = ahoraArgentina.getDate();
     const mesHoy = ahoraArgentina.getMonth();
 
@@ -41,17 +64,15 @@ exports.listarClientes = async (req, res) => {
 
         cliente.pagos.forEach((p) => {
           const fechaPago = new Date(p.fecha);
-          fechaPago.setHours(0, 0, 0, 0);
 
-          if (fechaPago.getTime() === hoySinHora.getTime()) {
+          if (fechaPago >= hoySinHora && fechaPago < manana) {
             totalRecaudadoHoy += Number(p.monto || 0);
           }
         });
       }
 
-      const hace34Dias = new Date(ahoraArgentina);
+      const hace34Dias = new Date(hoySinHora);
       hace34Dias.setDate(hace34Dias.getDate() - 34);
-      hace34Dias.setHours(0, 0, 0, 0);
 
       if (ultimoPago && new Date(ultimoPago.fecha) >= hace34Dias) {
         alDia++;
@@ -87,14 +108,13 @@ exports.listarClientes = async (req, res) => {
         }
       }
 
-      // Cumpleaños
       if (cliente.fechaNacimiento) {
         const cumple = new Date(cliente.fechaNacimiento);
         const diaCumple = cumple.getDate();
         const mesCumple = cumple.getMonth();
 
         if (diaCumple === diaHoy && mesCumple === mesHoy) {
-          cumpleañeros.push(cliente.nombre + ' ' + cliente.apellido);
+          cumpleañeros.push(`${cliente.nombre} ${cliente.apellido}`);
         } else {
           const esteAño = new Date(ahoraArgentina.getFullYear(), mesCumple, diaCumple);
           esteAño.setHours(0, 0, 0, 0);
@@ -110,14 +130,12 @@ exports.listarClientes = async (req, res) => {
       }
     }
 
-    // Ordenar: vencidos primero
     clientes.sort((a, b) => {
       if (a.estadoPago === 'vencido' && b.estadoPago !== 'vencido') return -1;
       if (a.estadoPago !== 'vencido' && b.estadoPago === 'vencido') return 1;
       return 0;
     });
 
-    // Ventas, gastos y productos
     const [ventasHoy, gastosHoy, productos] = await Promise.all([
       Venta.find({ fecha: { $gte: hoySinHora, $lt: manana } }),
       Gasto.find({ fecha: { $gte: hoySinHora, $lt: manana } }),
@@ -127,6 +145,7 @@ exports.listarClientes = async (req, res) => {
     const totalVentasHoy = ventasHoy.reduce((acc, venta) => acc + Number(venta.total || 0), 0);
     const totalGastosHoy = gastosHoy.reduce((acc, gasto) => acc + Number(gasto.monto || 0), 0);
     const gananciaNetaHoy = totalRecaudadoHoy + totalVentasHoy - totalGastosHoy;
+
     const stockBajo = productos.filter(
       (p) => Number(p.stock || 0) <= Number(p.stockMinimo || 0)
     ).length;
@@ -254,24 +273,18 @@ exports.reportePagos = async (req, res) => {
   try {
     const clientes = await Cliente.find();
 
-    const hoy = new Date();
-    hoy.setHours(23, 59, 59, 999);
+    const hoyArgentinaStr = getArgentinaDateString(new Date());
+    const hoyFin = endOfArgentinaDay(hoyArgentinaStr);
 
-    const hace30Dias = new Date();
-    hace30Dias.setDate(hoy.getDate() - 29);
-    hace30Dias.setHours(0, 0, 0, 0);
+    const hace30DiasBase = startOfArgentinaDay(hoyArgentinaStr);
+    hace30DiasBase.setDate(hace30DiasBase.getDate() - 29);
 
-    const desde = req.query.desde
-      ? new Date(`${req.query.desde}T00:00:00.000Z`)
-      : hace30Dias;
+    const desdeStr = req.query.desde || getArgentinaDateString(hace30DiasBase);
+    const hastaStr = req.query.hasta || hoyArgentinaStr;
 
-    const hasta = req.query.hasta
-      ? new Date(`${req.query.hasta}T23:59:59.999Z`)
-      : hoy;
+    const desde = startOfArgentinaDay(desdeStr);
+    const hasta = endOfArgentinaDay(hastaStr);
 
-    // =========================
-    // PAGOS DE CUOTAS
-    // =========================
     let pagosFiltrados = [];
 
     clientes.forEach((cliente) => {
@@ -290,9 +303,6 @@ exports.reportePagos = async (req, res) => {
       });
     });
 
-    // =========================
-    // VENTAS DE PRODUCTOS
-    // =========================
     const ventasFiltradas = await Venta.find({
       fecha: { $gte: desde, $lte: hasta }
     }).sort({ fecha: -1 });
@@ -306,9 +316,6 @@ exports.reportePagos = async (req, res) => {
       cantidad: Number(venta.cantidad || 0)
     }));
 
-    // =========================
-    // GASTOS
-    // =========================
     const gastosFiltrados = await Gasto.find({
       fecha: { $gte: desde, $lte: hasta }
     }).sort({ fecha: -1 });
@@ -322,29 +329,28 @@ exports.reportePagos = async (req, res) => {
       metodoPago: gasto.metodoPago || 'No especificado'
     }));
 
-    // =========================
-    // TOTALES
-    // =========================
     const totalCuotas = pagosFiltrados.reduce((acc, item) => acc + Number(item.monto || 0), 0);
     const totalVentas = ventasDetalle.reduce((acc, item) => acc + Number(item.monto || 0), 0);
     const totalGastos = gastosDetalle.reduce((acc, item) => acc + Number(item.monto || 0), 0);
     const totalIngresos = totalCuotas + totalVentas;
     const gananciaNeta = totalIngresos - totalGastos;
 
-    // =========================
-    // MOVIMIENTOS COMBINADOS
-    // =========================
     const movimientos = [
       ...pagosFiltrados,
       ...ventasDetalle,
       ...gastosDetalle
     ].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
-    // =========================
-    // RESUMEN MENSUAL DEL MES ACTUAL
-    // =========================
-    const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1, 0, 0, 0, 0);
-    const finMes = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0, 23, 59, 59, 999);
+    const partesHoy = getArgentinaDateParts(new Date());
+    const inicioMesStr = `${partesHoy.year}-${partesHoy.month}-01`;
+    const inicioMes = startOfArgentinaDay(inicioMesStr);
+
+    const siguienteMesStr =
+      Number(partesHoy.month) === 12
+        ? `${Number(partesHoy.year) + 1}-01-01`
+        : `${partesHoy.year}-${String(Number(partesHoy.month) + 1).padStart(2, '0')}-01`;
+
+    const finMes = new Date(startOfArgentinaDay(siguienteMesStr).getTime() - 1);
 
     let pagosMes = [];
     clientes.forEach((cliente) => {
@@ -371,13 +377,11 @@ exports.reportePagos = async (req, res) => {
     const totalGastosMes = gastosMes.reduce((acc, gasto) => acc + Number(gasto.monto || 0), 0);
     const gananciaNetaMes = totalCuotasMes + totalVentasMes - totalGastosMes;
 
-    // =========================
-    // PRODUCTOS MÁS VENDIDOS
-    // =========================
     const mapaProductos = {};
 
     ventasFiltradas.forEach((venta) => {
       const nombre = venta.nombreProducto || 'Producto';
+
       if (!mapaProductos[nombre]) {
         mapaProductos[nombre] = {
           nombre,
@@ -394,16 +398,14 @@ exports.reportePagos = async (req, res) => {
       .sort((a, b) => b.cantidad - a.cantidad)
       .slice(0, 5);
 
-    // =========================
-    // RENDER
-    // =========================
     res.render('reportes', {
       pagos: pagosFiltrados,
       ventas: ventasDetalle,
       gastos: gastosDetalle,
       movimientos,
 
-total: totalIngresos,      totalCuotas,
+      total: totalIngresos,
+      totalCuotas,
       totalVentas,
       totalGastos,
       totalIngresos,
@@ -421,8 +423,8 @@ total: totalIngresos,      totalCuotas,
 
       productosMasVendidos,
 
-      desde: desde.toISOString().split('T')[0],
-      hasta: hasta.toISOString().split('T')[0]
+      desde: desdeStr,
+      hasta: hastaStr
     });
   } catch (error) {
     console.error('Error en reportePagos:', error);
