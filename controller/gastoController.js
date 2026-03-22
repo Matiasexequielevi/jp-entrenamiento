@@ -25,39 +25,58 @@ function startOfArgentinaDay(dateStr) {
   return new Date(`${dateStr}T00:00:00.000-03:00`);
 }
 
-function endOfArgentinaDay(dateStr) {
-  return new Date(`${dateStr}T23:59:59.999-03:00`);
+function normalizeGastoDateForCompare(fecha) {
+  return getArgentinaDateString(new Date(fecha));
 }
 
 exports.listarGastos = async (req, res) => {
   try {
     const { desde, hasta } = req.query;
 
-    let filtro = {};
-
+    // Traemos más margen para evitar que registros viejos con distinta zona horaria queden afuera
+    let consulta = {};
     if (desde || hasta) {
-      filtro.fecha = {};
+      consulta.fecha = {};
 
       if (desde) {
-        filtro.fecha.$gte = startOfArgentinaDay(desde);
+        const inicioAmplio = new Date(`${desde}T00:00:00.000Z`);
+        consulta.fecha.$gte = inicioAmplio;
       }
 
       if (hasta) {
-        filtro.fecha.$lte = endOfArgentinaDay(hasta);
+        const finAmplio = new Date(`${hasta}T23:59:59.999Z`);
+        consulta.fecha.$lte = finAmplio;
       }
     }
 
-    const gastos = await Gasto.find(filtro).sort({ fecha: -1 }).limit(100);
+    let gastos = await Gasto.find(consulta).sort({ fecha: -1 }).limit(300);
+
+    // Filtro final por fecha argentina visible
+    if (desde || hasta) {
+      gastos = gastos.filter((gasto) => {
+        const fechaArgentina = normalizeGastoDateForCompare(gasto.fecha);
+
+        if (desde && fechaArgentina < desde) return false;
+        if (hasta && fechaArgentina > hasta) return false;
+
+        return true;
+      });
+    }
 
     const totalFiltrado = gastos.reduce((acc, g) => acc + Number(g.monto || 0), 0);
 
     const hoyArgentinaStr = getArgentinaDateString(new Date());
-    const inicioHoy = startOfArgentinaDay(hoyArgentinaStr);
-    const finHoy = endOfArgentinaDay(hoyArgentinaStr);
 
-    const gastosHoy = await Gasto.find({
-      fecha: { $gte: inicioHoy, $lte: finHoy }
-    });
+    const gastosHoyRaw = await Gasto.find({
+      fecha: {
+        $gte: new Date(`${hoyArgentinaStr}T00:00:00.000Z`),
+        $lte: new Date(`${hoyArgentinaStr}T23:59:59.999Z`)
+      }
+    }).limit(300);
+
+    const gastosHoy = gastosHoyRaw.filter(
+      (g) => normalizeGastoDateForCompare(g.fecha) === hoyArgentinaStr
+    );
 
     const totalHoy = gastosHoy.reduce((acc, g) => acc + Number(g.monto || 0), 0);
 
