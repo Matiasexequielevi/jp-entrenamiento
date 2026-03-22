@@ -17,6 +17,8 @@
       --jp-danger:#d62839;
       --jp-border:#d9e2f1;
       --jp-shadow:0 10px 30px rgba(27,47,95,.10);
+      --jp-success:#1f9d55;
+      --jp-soft:#eef4ff;
     }
     *{ box-sizing:border-box; }
     body{
@@ -51,12 +53,14 @@
     .head p{ margin:6px 0 0; color:var(--jp-muted); }
     .actions{ display:flex; gap:10px; flex-wrap:wrap; }
 
-    .btn-soft,.btn-main{
+    .btn-soft,.btn-main,.btn-filter,.btn-clear{
       border:none; border-radius:999px; padding:12px 18px; font-weight:700; text-decoration:none;
       display:inline-flex; align-items:center; justify-content:center; gap:8px;
     }
     .btn-soft{ background:#fff; color:var(--jp-primary); box-shadow:0 8px 18px rgba(34,58,115,.10); }
     .btn-main{ background:linear-gradient(135deg, var(--jp-danger), #ef4c5d); color:#fff; box-shadow:0 10px 20px rgba(214,40,57,.18); }
+    .btn-filter{ background:linear-gradient(135deg, var(--jp-primary), var(--jp-primary-2)); color:#fff; box-shadow:0 10px 20px rgba(34,58,115,.18); }
+    .btn-clear{ background:#eef2f9; color:var(--jp-primary); }
 
     .body{ padding:24px 28px 28px; }
     .stats{
@@ -68,14 +72,22 @@
     .stat span{ display:block; font-size:.84rem; color:var(--jp-muted); font-weight:700; margin-bottom:8px; }
     .stat strong{ font-size:1.35rem; font-weight:800; color:var(--jp-primary); }
     .stat .danger{ color:var(--jp-danger); }
+    .stat .success{ color:var(--jp-success); }
 
-    .form-box{
+    .form-box, .filter-box{
       background:#fff; border:1px solid var(--jp-border); border-radius:20px; padding:20px; margin-bottom:20px;
     }
+
     form{ display:grid; gap:18px; }
+
     .grid-5{
       display:grid; grid-template-columns:2fr 1fr 1.2fr 1.2fr 1.2fr; gap:16px;
     }
+
+    .grid-filter{
+      display:grid; grid-template-columns:1.2fr 1.2fr auto; gap:16px; align-items:end;
+    }
+
     .field{ display:flex; flex-direction:column; gap:7px; }
     .field label{ font-size:.92rem; font-weight:700; color:#43506a; }
     .field input,.field select{
@@ -84,6 +96,20 @@
     }
     .field input:focus,.field select:focus{
       border-color:#7ea7ff; box-shadow:0 0 0 4px rgba(126,167,255,.14);
+    }
+
+    .filter-actions{
+      display:flex; gap:10px; flex-wrap:wrap;
+    }
+
+    .filter-info{
+      margin-top:12px;
+      padding:12px 14px;
+      border-radius:14px;
+      background:var(--jp-soft);
+      border:1px solid var(--jp-border);
+      color:var(--jp-primary);
+      font-weight:600;
     }
 
     .search{ margin:0 0 18px; }
@@ -114,13 +140,16 @@
     @media (max-width: 950px){
       .stats{ grid-template-columns:repeat(2, minmax(0,1fr)); }
       .grid-5{ grid-template-columns:1fr 1fr; }
+      .grid-filter{ grid-template-columns:1fr 1fr; }
     }
     @media (max-width: 600px){
       .head,.body{ padding:18px; }
       .stats{ grid-template-columns:1fr; }
       .grid-5{ grid-template-columns:1fr; }
+      .grid-filter{ grid-template-columns:1fr; }
       .actions{ flex-direction:column; }
-      .btn-soft,.btn-main{ width:100%; }
+      .filter-actions{ flex-direction:column; }
+      .btn-soft,.btn-main,.btn-filter,.btn-clear{ width:100%; }
     }
   </style>
 </head>
@@ -129,6 +158,12 @@
     const money = (n) => Number(n || 0).toFixed(2);
     const gastosLista = Array.isArray(gastos) ? gastos : [];
     const totalGastadoHoy = Number(totalHoy || 0);
+    const totalPeriodo = Number(totalFiltrado || 0);
+    const fechaDesde = typeof desde !== 'undefined' ? desde : '';
+    const fechaHasta = typeof hasta !== 'undefined' ? hasta : '';
+    const hayFiltro = !!(fechaDesde || fechaHasta);
+    const promedioPeriodo = gastosLista.length > 0 ? (totalPeriodo / gastosLista.length) : 0;
+    const fechaHoyInput = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
   %>
 
   <header class="topbar">
@@ -162,16 +197,20 @@
             <strong class="danger">$<%= money(totalGastadoHoy) %></strong>
           </div>
           <div class="stat">
-            <span>Gastos cargados</span>
+            <span><%= hayFiltro ? 'Gastos del período' : 'Gastos cargados' %></span>
             <strong><%= gastosLista.length %></strong>
           </div>
           <div class="stat">
-            <span>Promedio</span>
-            <strong>$<%= gastosLista.length > 0 ? money(totalGastadoHoy / gastosLista.length) : '0.00' %></strong>
+            <span><%= hayFiltro ? 'Total del período' : 'Promedio' %></span>
+            <strong class="<%= hayFiltro ? 'danger' : '' %>">
+              $<%= hayFiltro ? money(totalPeriodo) : money(promedioPeriodo) %>
+            </strong>
           </div>
           <div class="stat">
-            <span>Estado</span>
-            <strong>Activo</strong>
+            <span><%= hayFiltro ? 'Promedio del período' : 'Estado' %></span>
+            <strong class="<%= hayFiltro ? 'success' : '' %>">
+              <%= hayFiltro ? ('$' + money(promedioPeriodo)) : 'Activo' %>
+            </strong>
           </div>
         </div>
 
@@ -214,13 +253,14 @@
 
               <div class="field">
                 <label for="fecha">Fecha</label>
-<input
-  type="date"
-  id="fecha"
-  name="fecha"
-  required
-  value="<%= new Date().toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' }) %>"
->              </div>
+                <input
+                  type="date"
+                  id="fecha"
+                  name="fecha"
+                  required
+                  value="<%= fechaHoyInput %>"
+                >
+              </div>
             </div>
 
             <div class="field">
@@ -230,6 +270,43 @@
 
             <div>
               <button type="submit" class="btn-main">✅ Guardar Gasto</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="filter-box">
+          <form action="/gastos" method="GET">
+            <div class="grid-filter">
+              <div class="field">
+                <label for="desde">Desde</label>
+                <input type="date" id="desde" name="desde" value="<%= fechaDesde %>">
+              </div>
+
+              <div class="field">
+                <label for="hasta">Hasta</label>
+                <input type="date" id="hasta" name="hasta" value="<%= fechaHasta %>">
+              </div>
+
+              <div class="filter-actions">
+                <button type="submit" class="btn-filter">🔎 Filtrar</button>
+                <a href="/gastos" class="btn-clear">Limpiar</a>
+              </div>
+            </div>
+
+            <div class="filter-info">
+              <% if (hayFiltro) { %>
+                Mostrando gastos del período
+                <strong>
+                  <%= fechaDesde ? fechaDesde : 'el inicio' %>
+                </strong>
+                al
+                <strong>
+                  <%= fechaHasta ? fechaHasta : 'día actual' %>
+                </strong>.
+                Total filtrado: <strong>$<%= money(totalPeriodo) %></strong>
+              <% } else { %>
+                Sin filtro aplicado. Se muestran los gastos más recientes.
+              <% } %>
             </div>
           </form>
         </div>
@@ -264,7 +341,9 @@
                 <% }) %>
               <% } else { %>
                 <tr>
-                  <td colspan="6" class="empty">Todavía no hay gastos registrados.</td>
+                  <td colspan="6" class="empty">
+                    No hay gastos registrados para el período seleccionado.
+                  </td>
                 </tr>
               <% } %>
             </tbody>
@@ -285,6 +364,7 @@
     if (buscadorGastos) {
       buscadorGastos.addEventListener('input', () => {
         const texto = buscadorGastos.value.toLowerCase().trim();
+
         filasGastos.forEach(fila => {
           const contenido = fila.textContent.toLowerCase();
           fila.style.display = contenido.includes(texto) ? '' : 'none';

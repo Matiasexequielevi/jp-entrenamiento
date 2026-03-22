@@ -31,7 +31,25 @@ function endOfArgentinaDay(dateStr) {
 
 exports.listarGastos = async (req, res) => {
   try {
-    const gastos = await Gasto.find().sort({ fecha: -1 }).limit(100);
+    const { desde, hasta } = req.query;
+
+    let filtro = {};
+
+    if (desde || hasta) {
+      filtro.fecha = {};
+
+      if (desde) {
+        filtro.fecha.$gte = startOfArgentinaDay(desde);
+      }
+
+      if (hasta) {
+        filtro.fecha.$lte = endOfArgentinaDay(hasta);
+      }
+    }
+
+    const gastos = await Gasto.find(filtro).sort({ fecha: -1 }).limit(100);
+
+    const totalFiltrado = gastos.reduce((acc, g) => acc + Number(g.monto || 0), 0);
 
     const hoyArgentinaStr = getArgentinaDateString(new Date());
     const inicioHoy = startOfArgentinaDay(hoyArgentinaStr);
@@ -45,7 +63,10 @@ exports.listarGastos = async (req, res) => {
 
     res.render('gastos', {
       gastos,
-      totalHoy
+      totalHoy,
+      totalFiltrado,
+      desde: desde || '',
+      hasta: hasta || ''
     });
   } catch (error) {
     console.error('Error al listar gastos:', error);
