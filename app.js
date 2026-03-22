@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const path = require('path');
 const dotenv = require('dotenv');
 const session = require('express-session');
+const MongoStore = require('connect-mongo');
 
 const clientesRoutes = require('./routes/clientes');
 const productosRoutes = require('./routes/productos');
@@ -15,12 +16,9 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 
 // Conexión a MongoDB
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log('✅ Conectado a MongoDB'))
-.catch(err => console.error('❌ Error al conectar a MongoDB:', err));
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('✅ Conectado a MongoDB'))
+  .catch(err => console.error('❌ Error al conectar a MongoDB:', err));
 
 // Configuración de vistas
 app.set('view engine', 'ejs');
@@ -31,11 +29,26 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Si usás Render u otro proxy en producción
+app.set('trust proxy', 1);
+
 // Configurar sesión
 app.use(session({
   secret: process.env.SESSION_SECRET || 'jp-entrenamiento',
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  rolling: true,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI,
+    collectionName: 'sessions',
+    ttl: 60 * 60 * 24 * 30 // 30 días
+  }),
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24 * 30, // 30 días
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production', // true en producción con https
+    sameSite: 'lax'
+  }
 }));
 
 // Middleware para proteger rutas
@@ -48,6 +61,9 @@ function verificarLogin(req, res, next) {
 
 // Rutas públicas
 app.get('/login', (req, res) => {
+  if (req.session && req.session.usuario) {
+    return res.redirect('/');
+  }
   res.render('login');
 });
 
@@ -58,7 +74,16 @@ app.post('/login', (req, res) => {
     // Usuario y contraseña fijos
     if (usuario === 'jpentrenamiento' && contrasena === 'burack123') {
       req.session.usuario = usuario;
-      return res.redirect('/');
+
+      req.session.save((err) => {
+        if (err) {
+          console.error('❌ Error al guardar sesión:', err);
+          return res.status(500).send('Error al guardar la sesión');
+        }
+        return res.redirect('/');
+      });
+
+      return;
     }
 
     return res.status(401).send('Usuario o contraseña incorrectos');
@@ -74,6 +99,8 @@ app.get('/logout', (req, res) => {
       console.error('❌ Error al cerrar sesión:', error);
       return res.status(500).send('Error al cerrar sesión');
     }
+
+    res.clearCookie('connect.sid');
     return res.redirect('/login');
   });
 });
