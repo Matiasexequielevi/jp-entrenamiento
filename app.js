@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const path = require('path');
 const dotenv = require('dotenv');
 const session = require('express-session');
-const MongoStore = require('connect-mongo');
 
 const clientesRoutes = require('./routes/clientes');
 const productosRoutes = require('./routes/productos');
@@ -29,27 +28,45 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Si usás Render u otro proxy en producción
+// Si usás Render
 app.set('trust proxy', 1);
 
-// Configurar sesión
-app.use(session({
+// =========================
+// Configuración de sesión
+// =========================
+let sessionConfig = {
   secret: process.env.SESSION_SECRET || 'jp-entrenamiento',
   resave: false,
   saveUninitialized: false,
   rolling: true,
-  store: MongoStore.create({
-    mongoUrl: process.env.MONGODB_URI,
-    collectionName: 'sessions',
-    ttl: 60 * 60 * 24 * 30 // 30 días
-  }),
   cookie: {
     maxAge: 1000 * 60 * 60 * 24 * 30, // 30 días
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', // true en producción con https
+    secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax'
   }
-}));
+};
+
+// Intentar usar connect-mongo solo si está bien disponible
+try {
+  const MongoStoreModule = require('connect-mongo');
+  const MongoStore = MongoStoreModule.default || MongoStoreModule;
+
+  if (MongoStore && typeof MongoStore.create === 'function') {
+    sessionConfig.store = MongoStore.create({
+      mongoUrl: process.env.MONGODB_URI,
+      collectionName: 'sessions',
+      ttl: 60 * 60 * 24 * 30
+    });
+    console.log('✅ Sesiones guardadas en MongoDB');
+  } else {
+    console.log('⚠️ connect-mongo no soporta create(). Se usará sesión en memoria temporalmente.');
+  }
+} catch (error) {
+  console.log('⚠️ connect-mongo no disponible. Se usará sesión en memoria temporalmente.');
+}
+
+app.use(session(sessionConfig));
 
 // Middleware para proteger rutas
 function verificarLogin(req, res, next) {
@@ -71,7 +88,6 @@ app.post('/login', (req, res) => {
   try {
     const { usuario, contrasena } = req.body;
 
-    // Usuario y contraseña fijos
     if (usuario === 'jpentrenamiento' && contrasena === 'burack123') {
       req.session.usuario = usuario;
 
