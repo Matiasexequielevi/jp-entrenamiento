@@ -9,28 +9,89 @@ function getArgentinaDateParts(date = new Date()) {
     timeZone: 'America/Argentina/Buenos_Aires',
     year: 'numeric',
     month: '2-digit',
-    day: '2-digit'
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
   });
 
   const parts = formatter.formatToParts(date);
-  const year = parts.find((p) => p.type === 'year').value;
-  const month = parts.find((p) => p.type === 'month').value;
-  const day = parts.find((p) => p.type === 'day').value;
+  const map = {};
 
-  return { year, month, day };
+  for (const part of parts) {
+    if (part.type !== 'literal') {
+      map[part.type] = part.value;
+    }
+  }
+
+  return {
+    year: map.year,
+    month: map.month,
+    day: map.day,
+    hour: map.hour,
+    minute: map.minute,
+    second: map.second,
+    date: `${map.year}-${map.month}-${map.day}`,
+    datetime: `${map.year}-${map.month}-${map.day} ${map.hour}:${map.minute}:${map.second}`
+  };
 }
 
 function getArgentinaDateString(date = new Date()) {
-  const { year, month, day } = getArgentinaDateParts(date);
-  return `${year}-${month}-${day}`;
+  return getArgentinaDateParts(date).date;
 }
 
 function startOfArgentinaDay(dateStr) {
-  return new Date(`${dateStr}T00:00:00.000-03:00`);
+  const [year, month, day] = String(dateStr).split('-').map(Number);
+  return new Date(Date.UTC(year, month - 1, day, 3, 0, 0, 0));
 }
 
 function endOfArgentinaDay(dateStr) {
-  return new Date(`${dateStr}T23:59:59.999-03:00`);
+  const [year, month, day] = String(dateStr).split('-').map(Number);
+  return new Date(Date.UTC(year, month - 1, day + 1, 2, 59, 59, 999));
+}
+
+function getArgentinaDayRange(date = new Date()) {
+  const dateStr = getArgentinaDateString(date);
+  return {
+    start: startOfArgentinaDay(dateStr),
+    end: new Date(Date.UTC(
+      Number(dateStr.slice(0, 4)),
+      Number(dateStr.slice(5, 7)) - 1,
+      Number(dateStr.slice(8, 10)) + 1,
+      3, 0, 0, 0
+    ))
+  };
+}
+
+function getArgentinaDateStringFromStoredDate(dateValue) {
+  if (!dateValue) return '';
+  return getArgentinaDateString(new Date(dateValue));
+}
+
+function addDaysToArgentinaDate(dateStr, days) {
+  const base = startOfArgentinaDay(dateStr);
+  base.setUTCDate(base.getUTCDate() + days);
+  return getArgentinaDateString(base);
+}
+
+function getMonthRangeArgentina(date = new Date()) {
+  const parts = getArgentinaDateParts(date);
+  const inicioMesStr = `${parts.year}-${parts.month}-01`;
+
+  const nextMonth =
+    Number(parts.month) === 12
+      ? `${String(Number(parts.year) + 1)}-01-01`
+      : `${parts.year}-${String(Number(parts.month) + 1).padStart(2, '0')}-01`;
+
+  const inicioMes = startOfArgentinaDay(inicioMesStr);
+  const finMesExclusivo = startOfArgentinaDay(nextMonth);
+
+  return {
+    inicioMes,
+    finMes: new Date(finMesExclusivo.getTime() - 1),
+    inicioMesStr
+  };
 }
 
 // Mostrar todos los clientes con resumen real de pagos + ventas + gastos + stock
@@ -38,10 +99,9 @@ exports.listarClientes = async (req, res) => {
   try {
     const clientes = await Cliente.find().sort({ creadoEn: -1 });
 
-    const hoyArgentinaStr = getArgentinaDateString(new Date());
+    const hoyArgentinaStr = getArgentinaDateString();
     const hoySinHora = startOfArgentinaDay(hoyArgentinaStr);
-    const manana = new Date(hoySinHora);
-    manana.setDate(manana.getDate() + 1);
+    const manana = startOfArgentinaDay(addDaysToArgentinaDate(hoyArgentinaStr, 1));
 
     const ahoraArgentina = new Date(`${hoyArgentinaStr}T12:00:00-03:00`);
     const diaHoy = ahoraArgentina.getDate();
@@ -72,7 +132,7 @@ exports.listarClientes = async (req, res) => {
       }
 
       const hace34Dias = new Date(hoySinHora);
-      hace34Dias.setDate(hace34Dias.getDate() - 34);
+      hace34Dias.setUTCDate(hace34Dias.getUTCDate() - 34);
 
       if (ultimoPago && new Date(ultimoPago.fecha) >= hace34Dias) {
         alDia++;
@@ -138,7 +198,7 @@ exports.listarClientes = async (req, res) => {
 
     const [ventasHoy, gastosHoy, productos] = await Promise.all([
       Venta.find({ fecha: { $gte: hoySinHora, $lt: manana } }),
-      Gasto.find({ fecha: { $gte: hoySinHora, $lt: manana } }),
+      Gasto.find({ fechaLocal: hoyArgentinaStr }),
       Producto.find()
     ]);
 
@@ -239,8 +299,11 @@ exports.agregarPago = async (req, res) => {
       return res.status(404).send('Cliente no encontrado');
     }
 
+    const fechaLocal = fecha || getArgentinaDateString();
+    const fechaFinal = startOfArgentinaDay(fechaLocal);
+
     cliente.pagos.push({
-      fecha,
+      fecha: fechaFinal,
       monto: Number(monto || 0)
     });
 
@@ -273,13 +336,12 @@ exports.reportePagos = async (req, res) => {
   try {
     const clientes = await Cliente.find();
 
-    const hoyArgentinaStr = getArgentinaDateString(new Date());
+    const hoyArgentinaStr = getArgentinaDateString();
     const hoyFin = endOfArgentinaDay(hoyArgentinaStr);
 
-    const hace30DiasBase = startOfArgentinaDay(hoyArgentinaStr);
-    hace30DiasBase.setDate(hace30DiasBase.getDate() - 29);
+    const hace30DiasStr = addDaysToArgentinaDate(hoyArgentinaStr, -29);
 
-    const desdeStr = req.query.desde || getArgentinaDateString(hace30DiasBase);
+    const desdeStr = req.query.desde || hace30DiasStr;
     const hastaStr = req.query.hasta || hoyArgentinaStr;
 
     const desde = startOfArgentinaDay(desdeStr);
@@ -298,7 +360,8 @@ exports.reportePagos = async (req, res) => {
           tipo: 'Cuota',
           nombre: `${cliente.nombre} ${cliente.apellido}`,
           fecha: new Date(p.fecha),
-          monto: Number(p.monto || 0)
+          monto: Number(p.monto || 0),
+          fechaLocal: getArgentinaDateStringFromStoredDate(p.fecha)
         });
       });
     });
@@ -317,13 +380,14 @@ exports.reportePagos = async (req, res) => {
     }));
 
     const gastosFiltrados = await Gasto.find({
-      fecha: { $gte: desde, $lte: hasta }
+      fechaLocal: { $gte: desdeStr, $lte: hastaStr }
     }).sort({ fecha: -1 });
 
     const gastosDetalle = gastosFiltrados.map((gasto) => ({
       tipo: 'Gasto',
       nombre: gasto.descripcion || 'Gasto',
       fecha: new Date(gasto.fecha),
+      fechaLocal: gasto.fechaLocal || '',
       monto: Number(gasto.monto || 0),
       categoria: gasto.categoria || 'Otros',
       metodoPago: gasto.metodoPago || 'No especificado'
@@ -341,16 +405,7 @@ exports.reportePagos = async (req, res) => {
       ...gastosDetalle
     ].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
-    const partesHoy = getArgentinaDateParts(new Date());
-    const inicioMesStr = `${partesHoy.year}-${partesHoy.month}-01`;
-    const inicioMes = startOfArgentinaDay(inicioMesStr);
-
-    const siguienteMesStr =
-      Number(partesHoy.month) === 12
-        ? `${Number(partesHoy.year) + 1}-01-01`
-        : `${partesHoy.year}-${String(Number(partesHoy.month) + 1).padStart(2, '0')}-01`;
-
-    const finMes = new Date(startOfArgentinaDay(siguienteMesStr).getTime() - 1);
+    const { inicioMes, finMes } = getMonthRangeArgentina();
 
     let pagosMes = [];
     clientes.forEach((cliente) => {
@@ -369,7 +424,10 @@ exports.reportePagos = async (req, res) => {
     });
 
     const gastosMes = await Gasto.find({
-      fecha: { $gte: inicioMes, $lte: finMes }
+      fechaLocal: {
+        $gte: getArgentinaDateString(inicioMes),
+        $lte: getArgentinaDateString(finMes)
+      }
     });
 
     const totalCuotasMes = pagosMes.reduce((acc, monto) => acc + Number(monto || 0), 0);

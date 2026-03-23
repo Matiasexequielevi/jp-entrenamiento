@@ -716,22 +716,74 @@
     const gastosCount = Number(cantidadGastos || 0);
     const movimientosCount = Number(cantidadMovimientos || 0);
 
-    const promedioMovimiento = movimientosCount > 0 ? totalIngresosPeriodo / (pagosCount + ventasCount || 1) : 0;
+    const totalIngresosCount = pagosCount + ventasCount;
+    const promedioMovimiento = totalIngresosCount > 0 ? (totalIngresosPeriodo / totalIngresosCount) : 0;
 
-    const hoy = new Date();
-    const mesActual = hoy.toLocaleDateString('es-AR', { month: 'long' });
-    const anioActual = hoy.getFullYear();
+    const ahoraAR = new Date();
+    const mesActual = new Intl.DateTimeFormat('es-AR', {
+      timeZone: 'America/Argentina/Buenos_Aires',
+      month: 'long'
+    }).format(ahoraAR);
 
-    const desdeDate = desde ? new Date(`${desde}T00:00:00`) : null;
-    const hastaDate = hasta ? new Date(`${hasta}T00:00:00`) : null;
+    const anioActual = Number(new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Argentina/Buenos_Aires',
+      year: 'numeric'
+    }).format(ahoraAR));
+
+    const fechaDesde = typeof desde === 'string' ? desde : '';
+    const fechaHasta = typeof hasta === 'string' ? hasta : '';
+
+    const parseDateOnly = (dateStr) => {
+      if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(String(dateStr))) return null;
+      const [year, month, day] = String(dateStr).split('-').map(Number);
+      return { year, month, day };
+    };
+
+    const formatDateOnlyAR = (dateStr) => {
+      const parsed = parseDateOnly(dateStr);
+      if (!parsed) return '';
+      return `${String(parsed.day).padStart(2, '0')}/${String(parsed.month).padStart(2, '0')}/${parsed.year}`;
+    };
+
+    const formatFechaHoraAR = (fecha) => {
+      if (!fecha) return '-';
+
+      return new Intl.DateTimeFormat('es-AR', {
+        timeZone: 'America/Argentina/Buenos_Aires',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      }).format(new Date(fecha));
+    };
+
+    const formatMovimientoFecha = (item) => {
+      if (item && item.tipo === 'Gasto' && item.fechaLocal) {
+        return formatDateOnlyAR(item.fechaLocal);
+      }
+
+      if (item && item.fechaLocal && /^\d{4}-\d{2}-\d{2}$/.test(String(item.fechaLocal))) {
+        return formatDateOnlyAR(item.fechaLocal);
+      }
+
+      return formatFechaHoraAR(item?.fecha);
+    };
 
     let diasRango = 0;
-    if (desdeDate && hastaDate && !isNaN(desdeDate) && !isNaN(hastaDate)) {
-      diasRango = Math.floor((hastaDate - desdeDate) / (1000 * 60 * 60 * 24)) + 1;
+    const parsedDesde = parseDateOnly(fechaDesde);
+    const parsedHasta = parseDateOnly(fechaHasta);
+
+    if (parsedDesde && parsedHasta) {
+      const inicioUTC = Date.UTC(parsedDesde.year, parsedDesde.month - 1, parsedDesde.day);
+      const finUTC = Date.UTC(parsedHasta.year, parsedHasta.month - 1, parsedHasta.day);
+      diasRango = Math.floor((finUTC - inicioUTC) / (1000 * 60 * 60 * 24)) + 1;
     }
 
-    const nombrePeriodo = (desde && hasta)
-      ? `${desde.split('-').reverse().join('/')} al ${hasta.split('-').reverse().join('/')}`
+    const nombrePeriodo = (fechaDesde && fechaHasta)
+      ? `${formatDateOnlyAR(fechaDesde)} al ${formatDateOnlyAR(fechaHasta)}`
       : 'Período actual';
 
     const productosTop = Array.isArray(productosMasVendidos) ? productosMasVendidos : [];
@@ -1002,7 +1054,7 @@
                       </td>
 
                       <td class="td-date">
-                        <%= new Date(item.fecha).toLocaleDateString('es-AR') %>
+                        <%= formatMovimientoFecha(item) %>
                       </td>
 
                       <td class="td-amount <%= item.tipo === 'Gasto' ? 'monto-gasto' : 'monto-ingreso' %>">
@@ -1039,9 +1091,20 @@
 
   <script>
     $(function () {
+      const desde = "<%= fechaDesde %>";
+      const hasta = "<%= fechaHasta %>";
+
+      const start = (desde && moment(desde, 'YYYY-MM-DD', true).isValid())
+        ? moment(desde, 'YYYY-MM-DD')
+        : moment();
+
+      const end = (hasta && moment(hasta, 'YYYY-MM-DD', true).isValid())
+        ? moment(hasta, 'YYYY-MM-DD')
+        : moment();
+
       $('#rangoFechas').daterangepicker({
-        startDate: moment("<%= desde %>"),
-        endDate: moment("<%= hasta %>"),
+        startDate: start,
+        endDate: end,
         autoUpdateInput: true,
         alwaysShowCalendars: true,
         locale: {

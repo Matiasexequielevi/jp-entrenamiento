@@ -163,7 +163,29 @@
     const fechaHasta = typeof hasta !== 'undefined' ? hasta : '';
     const hayFiltro = !!(fechaDesde || fechaHasta);
     const promedioPeriodo = gastosLista.length > 0 ? (totalPeriodo / gastosLista.length) : 0;
-    const fechaHoyInput = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
+    const fechaHoyInput = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Argentina/Buenos_Aires',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).format(new Date());
+
+    const formatFechaLocal = (fechaLocal, fecha) => {
+      if (fechaLocal && /^\d{4}-\d{2}-\d{2}$/.test(String(fechaLocal))) {
+        const [year, month, day] = String(fechaLocal).split('-');
+        return `${day}/${month}/${year}`;
+      }
+
+      if (!fecha) return '-';
+
+      return new Intl.DateTimeFormat('es-AR', {
+        timeZone: 'America/Argentina/Buenos_Aires',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour12: false
+      }).format(new Date(fecha));
+    };
   %>
 
   <header class="topbar">
@@ -296,13 +318,9 @@
             <div class="filter-info">
               <% if (hayFiltro) { %>
                 Mostrando gastos del período
-                <strong>
-                  <%= fechaDesde ? fechaDesde : 'el inicio' %>
-                </strong>
+                <strong><%= fechaDesde ? formatFechaLocal(fechaDesde) : 'el inicio' %></strong>
                 al
-                <strong>
-                  <%= fechaHasta ? fechaHasta : 'día actual' %>
-                </strong>.
+                <strong><%= fechaHasta ? formatFechaLocal(fechaHasta) : 'día actual' %></strong>.
                 Total filtrado: <strong>$<%= money(totalPeriodo) %></strong>
               <% } else { %>
                 Sin filtro aplicado. Se muestran los gastos más recientes.
@@ -331,7 +349,7 @@
               <% if (gastosLista.length > 0) { %>
                 <% gastosLista.forEach(gasto => { %>
                   <tr>
-                    <td><%= new Date(gasto.fecha).toLocaleDateString('es-AR') %></td>
+                    <td><%= formatFechaLocal(gasto.fechaLocal, gasto.fecha) %></td>
                     <td class="desc-cell"><%= gasto.descripcion %></td>
                     <td><%= gasto.categoria || 'Otros' %></td>
                     <td class="amount-cell">$<%= money(gasto.monto) %></td>

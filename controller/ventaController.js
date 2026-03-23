@@ -1,19 +1,57 @@
 const Venta = require('../models/Venta');
 const Producto = require('../models/Producto');
 
+function getArgentinaDateParts(date = new Date()) {
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Argentina/Buenos_Aires',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  });
+
+  const parts = formatter.formatToParts(date);
+  const map = {};
+
+  for (const part of parts) {
+    if (part.type !== 'literal') {
+      map[part.type] = part.value;
+    }
+  }
+
+  return {
+    year: Number(map.year),
+    month: Number(map.month),
+    day: Number(map.day),
+    hour: Number(map.hour),
+    minute: Number(map.minute),
+    second: Number(map.second),
+    date: `${map.year}-${map.month}-${map.day}`,
+    datetime: `${map.year}-${map.month}-${map.day} ${map.hour}:${map.minute}:${map.second}`
+  };
+}
+
+function getArgentinaDayRange(date = new Date()) {
+  const ar = getArgentinaDateParts(date);
+
+  const start = new Date(Date.UTC(ar.year, ar.month - 1, ar.day, 3, 0, 0, 0));
+  const end = new Date(Date.UTC(ar.year, ar.month - 1, ar.day + 1, 3, 0, 0, 0));
+
+  return { start, end };
+}
+
 exports.listarVentas = async (req, res) => {
   try {
     const productos = await Producto.find({ activo: true }).sort({ nombre: 1 });
     const ventas = await Venta.find().sort({ fecha: -1 }).limit(50);
 
-    const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
-
-    const manana = new Date(hoy);
-    manana.setDate(manana.getDate() + 1);
+    const { start, end } = getArgentinaDayRange();
 
     const ventasHoy = await Venta.find({
-      fecha: { $gte: hoy, $lt: manana }
+      fecha: { $gte: start, $lt: end }
     });
 
     const totalHoy = ventasHoy.reduce((acc, v) => acc + Number(v.total || 0), 0);
@@ -58,7 +96,8 @@ exports.guardarVenta = async (req, res) => {
       precioUnitario,
       total,
       metodoPago,
-      observacion
+      observacion,
+      fecha: new Date()
     });
 
     await nuevaVenta.save();

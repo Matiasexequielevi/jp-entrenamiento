@@ -5,24 +5,41 @@ function getArgentinaDateParts(date = new Date()) {
     timeZone: 'America/Argentina/Buenos_Aires',
     year: 'numeric',
     month: '2-digit',
-    day: '2-digit'
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
   });
 
   const parts = formatter.formatToParts(date);
-  const year = parts.find((p) => p.type === 'year')?.value;
-  const month = parts.find((p) => p.type === 'month')?.value;
-  const day = parts.find((p) => p.type === 'day')?.value;
+  const map = {};
 
-  return { year, month, day };
+  for (const part of parts) {
+    if (part.type !== 'literal') {
+      map[part.type] = part.value;
+    }
+  }
+
+  return {
+    year: map.year,
+    month: map.month,
+    day: map.day,
+    hour: map.hour,
+    minute: map.minute,
+    second: map.second,
+    date: `${map.year}-${map.month}-${map.day}`,
+    datetime: `${map.year}-${map.month}-${map.day} ${map.hour}:${map.minute}:${map.second}`
+  };
 }
 
 function getArgentinaDateString(date = new Date()) {
-  const { year, month, day } = getArgentinaDateParts(date);
-  return `${year}-${month}-${day}`;
+  return getArgentinaDateParts(date).date;
 }
 
 function startOfArgentinaDay(dateStr) {
-  return new Date(`${dateStr}T00:00:00.000-03:00`);
+  const [year, month, day] = String(dateStr).split('-').map(Number);
+  return new Date(Date.UTC(year, month - 1, day, 3, 0, 0, 0));
 }
 
 async function migrarFechaLocalSiFalta() {
@@ -49,7 +66,6 @@ exports.listarGastos = async (req, res) => {
     await migrarFechaLocalSiFalta();
 
     const { desde, hasta } = req.query;
-
     const filtro = {};
 
     if (desde || hasta) {
@@ -62,7 +78,7 @@ exports.listarGastos = async (req, res) => {
 
     const totalFiltrado = gastos.reduce((acc, g) => acc + Number(g.monto || 0), 0);
 
-    const hoyArgentinaStr = getArgentinaDateString(new Date());
+    const hoyArgentinaStr = getArgentinaDateString();
     const gastosHoy = await Gasto.find({ fechaLocal: hoyArgentinaStr });
     const totalHoy = gastosHoy.reduce((acc, g) => acc + Number(g.monto || 0), 0);
 
@@ -90,7 +106,7 @@ exports.guardarGasto = async (req, res) => {
       fecha
     } = req.body;
 
-    const fechaLocal = fecha || getArgentinaDateString(new Date());
+    const fechaLocal = fecha || getArgentinaDateString();
     const fechaFinal = startOfArgentinaDay(fechaLocal);
 
     const nuevoGasto = new Gasto({

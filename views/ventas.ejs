@@ -136,6 +136,21 @@
     const ventasLista = Array.isArray(ventas) ? ventas : [];
     const productosLista = Array.isArray(productos) ? productos : [];
     const totalVendidoHoy = Number(totalHoy || 0);
+
+    const formatFechaHoraAR = (fecha) => {
+      if (!fecha) return '-';
+
+      return new Intl.DateTimeFormat('es-AR', {
+        timeZone: 'America/Argentina/Buenos_Aires',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      }).format(new Date(fecha));
+    };
   %>
 
   <header class="topbar">
@@ -232,7 +247,7 @@
           <table id="tablaVentas">
             <thead>
               <tr>
-                <th>Fecha</th>
+                <th>Fecha y hora</th>
                 <th>Producto</th>
                 <th>Cantidad</th>
                 <th>P. Unitario</th>
@@ -245,7 +260,7 @@
               <% if (ventasLista.length > 0) { %>
                 <% ventasLista.forEach(venta => { %>
                   <tr>
-                    <td><%= new Date(venta.fecha).toLocaleDateString('es-AR') %></td>
+                    <td><%= formatFechaHoraAR(venta.fecha) %></td>
                     <td class="product-cell"><%= venta.nombreProducto %></td>
                     <td><%= Number(venta.cantidad || 0) %></td>
                     <td>$<%= money(venta.precioUnitario) %></td>
