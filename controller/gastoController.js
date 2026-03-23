@@ -25,40 +25,45 @@ function startOfArgentinaDay(dateStr) {
   return new Date(`${dateStr}T00:00:00.000-03:00`);
 }
 
-function toArgentinaDateString(fecha) {
-  if (!fecha) return '';
-  return getArgentinaDateString(new Date(fecha));
+async function migrarFechaLocalSiFalta() {
+  const gastosSinFechaLocal = await Gasto.find({
+    $or: [
+      { fechaLocal: { $exists: false } },
+      { fechaLocal: null },
+      { fechaLocal: '' }
+    ]
+  });
+
+  if (!gastosSinFechaLocal.length) return;
+
+  for (const gasto of gastosSinFechaLocal) {
+    gasto.fechaLocal = getArgentinaDateString(new Date(gasto.fecha));
+    await gasto.save();
+  }
+
+  console.log(`✅ Gastos migrados automáticamente: ${gastosSinFechaLocal.length}`);
 }
 
 exports.listarGastos = async (req, res) => {
   try {
+    await migrarFechaLocalSiFalta();
+
     const { desde, hasta } = req.query;
 
-    // Traemos suficientes registros y filtramos nosotros por fecha Argentina visible
-    const gastosRaw = await Gasto.find().sort({ fecha: -1 }).limit(500);
-
-    let gastos = gastosRaw;
+    const filtro = {};
 
     if (desde || hasta) {
-      gastos = gastosRaw.filter((gasto) => {
-        const fechaArg = toArgentinaDateString(gasto.fecha);
-
-        if (desde && fechaArg < desde) return false;
-        if (hasta && fechaArg > hasta) return false;
-
-        return true;
-      });
+      filtro.fechaLocal = {};
+      if (desde) filtro.fechaLocal.$gte = desde;
+      if (hasta) filtro.fechaLocal.$lte = hasta;
     }
+
+    const gastos = await Gasto.find(filtro).sort({ fecha: -1 }).limit(500);
 
     const totalFiltrado = gastos.reduce((acc, g) => acc + Number(g.monto || 0), 0);
 
     const hoyArgentinaStr = getArgentinaDateString(new Date());
-
-    const gastosHoy = gastosRaw.filter((gasto) => {
-      const fechaArg = toArgentinaDateString(gasto.fecha);
-      return fechaArg === hoyArgentinaStr;
-    });
-
+    const gastosHoy = await Gasto.find({ fechaLocal: hoyArgentinaStr });
     const totalHoy = gastosHoy.reduce((acc, g) => acc + Number(g.monto || 0), 0);
 
     res.render('gastos', {
@@ -85,9 +90,8 @@ exports.guardarGasto = async (req, res) => {
       fecha
     } = req.body;
 
-    const fechaFinal = fecha
-      ? startOfArgentinaDay(fecha)
-      : startOfArgentinaDay(getArgentinaDateString(new Date()));
+    const fechaLocal = fecha || getArgentinaDateString(new Date());
+    const fechaFinal = startOfArgentinaDay(fechaLocal);
 
     const nuevoGasto = new Gasto({
       descripcion,
@@ -95,7 +99,8 @@ exports.guardarGasto = async (req, res) => {
       monto: Number(monto || 0),
       metodoPago,
       observacion,
-      fecha: fechaFinal
+      fecha: fechaFinal,
+      fechaLocal
     });
 
     await nuevoGasto.save();

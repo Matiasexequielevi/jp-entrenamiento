@@ -1,7 +1,11 @@
 const mongoose = require('mongoose');
 
 const gastoSchema = new mongoose.Schema({
-  descripcion: { type: String, required: true, trim: true },
+  descripcion: { 
+    type: String, 
+    required: true, 
+    trim: true 
+  },
 
   categoria: {
     type: String,
@@ -9,7 +13,11 @@ const gastoSchema = new mongoose.Schema({
     default: 'Otros'
   },
 
-  monto: { type: Number, required: true, min: 0 },
+  monto: { 
+    type: Number, 
+    required: true, 
+    min: 0 
+  },
 
   metodoPago: {
     type: String,
@@ -17,9 +25,25 @@ const gastoSchema = new mongoose.Schema({
     default: 'Efectivo'
   },
 
-  observacion: { type: String, default: '', trim: true },
+  observacion: { 
+    type: String, 
+    default: '', 
+    trim: true 
+  },
 
-  fecha: { type: Date, default: Date.now }
+  fecha: { 
+    type: Date, 
+    required: true 
+  },
+
+  // 🔥 CLAVE PARA SOLUCIONAR TODO
+  fechaLocal: {
+    type: String,
+    required: true
+  }
+
+}, {
+  timestamps: true
 });
 
 module.exports = mongoose.model('Gasto', gastoSchema);
