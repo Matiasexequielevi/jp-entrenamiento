@@ -9,9 +9,9 @@ function getArgentinaDateParts(date = new Date()) {
   });
 
   const parts = formatter.formatToParts(date);
-  const year = parts.find((p) => p.type === 'year').value;
-  const month = parts.find((p) => p.type === 'month').value;
-  const day = parts.find((p) => p.type === 'day').value;
+  const year = parts.find((p) => p.type === 'year')?.value;
+  const month = parts.find((p) => p.type === 'month')?.value;
+  const day = parts.find((p) => p.type === 'day')?.value;
 
   return { year, month, day };
 }
@@ -25,7 +25,8 @@ function startOfArgentinaDay(dateStr) {
   return new Date(`${dateStr}T00:00:00.000-03:00`);
 }
 
-function normalizeGastoDateForCompare(fecha) {
+function toArgentinaDateString(fecha) {
+  if (!fecha) return '';
   return getArgentinaDateString(new Date(fecha));
 }
 
@@ -33,31 +34,17 @@ exports.listarGastos = async (req, res) => {
   try {
     const { desde, hasta } = req.query;
 
-    // Traemos más margen para evitar que registros viejos con distinta zona horaria queden afuera
-    let consulta = {};
+    // Traemos suficientes registros y filtramos nosotros por fecha Argentina visible
+    const gastosRaw = await Gasto.find().sort({ fecha: -1 }).limit(500);
+
+    let gastos = gastosRaw;
+
     if (desde || hasta) {
-      consulta.fecha = {};
+      gastos = gastosRaw.filter((gasto) => {
+        const fechaArg = toArgentinaDateString(gasto.fecha);
 
-      if (desde) {
-        const inicioAmplio = new Date(`${desde}T00:00:00.000Z`);
-        consulta.fecha.$gte = inicioAmplio;
-      }
-
-      if (hasta) {
-        const finAmplio = new Date(`${hasta}T23:59:59.999Z`);
-        consulta.fecha.$lte = finAmplio;
-      }
-    }
-
-    let gastos = await Gasto.find(consulta).sort({ fecha: -1 }).limit(300);
-
-    // Filtro final por fecha argentina visible
-    if (desde || hasta) {
-      gastos = gastos.filter((gasto) => {
-        const fechaArgentina = normalizeGastoDateForCompare(gasto.fecha);
-
-        if (desde && fechaArgentina < desde) return false;
-        if (hasta && fechaArgentina > hasta) return false;
+        if (desde && fechaArg < desde) return false;
+        if (hasta && fechaArg > hasta) return false;
 
         return true;
       });
@@ -67,16 +54,10 @@ exports.listarGastos = async (req, res) => {
 
     const hoyArgentinaStr = getArgentinaDateString(new Date());
 
-    const gastosHoyRaw = await Gasto.find({
-      fecha: {
-        $gte: new Date(`${hoyArgentinaStr}T00:00:00.000Z`),
-        $lte: new Date(`${hoyArgentinaStr}T23:59:59.999Z`)
-      }
-    }).limit(300);
-
-    const gastosHoy = gastosHoyRaw.filter(
-      (g) => normalizeGastoDateForCompare(g.fecha) === hoyArgentinaStr
-    );
+    const gastosHoy = gastosRaw.filter((gasto) => {
+      const fechaArg = toArgentinaDateString(gasto.fecha);
+      return fechaArg === hoyArgentinaStr;
+    });
 
     const totalHoy = gastosHoy.reduce((acc, g) => acc + Number(g.monto || 0), 0);
 
