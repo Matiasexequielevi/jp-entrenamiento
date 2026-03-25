@@ -131,7 +131,11 @@ app.use('/gastos', verificarLogin, gastosRoutes);
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
 
-  if (process.env.WHATSAPP_ENABLED === 'true') {
+  const whatsappEnabled = String(process.env.WHATSAPP_ENABLED || '')
+    .trim()
+    .toLowerCase() === 'true';
+
+  if (whatsappEnabled) {
     console.log('🟢 Iniciando módulo de WhatsApp...');
     try {
       iniciarWhatsApp();
@@ -140,5 +144,6 @@ app.listen(PORT, () => {
     }
   } else {
     console.log('⚪ WhatsApp desactivado desde .env');
+    console.log('Valor detectado:', process.env.WHATSAPP_ENABLED);
   }
 });
