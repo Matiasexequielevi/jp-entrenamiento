@@ -133,7 +133,11 @@ app.listen(PORT, () => {
 
   if (process.env.WHATSAPP_ENABLED === 'true') {
     console.log('🟢 Iniciando módulo de WhatsApp...');
-    iniciarWhatsApp();
+    try {
+      iniciarWhatsApp();
+    } catch (error) {
+      console.error('❌ Error al iniciar WhatsApp:', error.message);
+    }
   } else {
     console.log('⚪ WhatsApp desactivado desde .env');
   }
