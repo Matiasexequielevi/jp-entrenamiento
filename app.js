@@ -8,6 +8,7 @@ const clientesRoutes = require('./routes/clientes');
 const productosRoutes = require('./routes/productos');
 const ventasRoutes = require('./routes/ventas');
 const gastosRoutes = require('./routes/gastos');
+const { iniciarWhatsApp } = require('./services/whatsapp');
 
 dotenv.config();
 
@@ -40,14 +41,13 @@ let sessionConfig = {
   saveUninitialized: false,
   rolling: true,
   cookie: {
-    maxAge: 1000 * 60 * 60 * 24 * 30, // 30 días
+    maxAge: 1000 * 60 * 60 * 24 * 30,
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax'
   }
 };
 
-// Intentar usar connect-mongo solo si está bien disponible
 try {
   const MongoStoreModule = require('connect-mongo');
   const MongoStore = MongoStoreModule.default || MongoStoreModule;
@@ -130,4 +130,11 @@ app.use('/gastos', verificarLogin, gastosRoutes);
 // Iniciar servidor
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+
+  if (process.env.WHATSAPP_ENABLED === 'true') {
+    console.log('🟢 Iniciando módulo de WhatsApp...');
+    iniciarWhatsApp();
+  } else {
+    console.log('⚪ WhatsApp desactivado desde .env');
+  }
 });

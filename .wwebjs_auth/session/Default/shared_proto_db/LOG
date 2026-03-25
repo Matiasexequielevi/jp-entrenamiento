@@ -1,2 +1,3 @@
-2025/08/20-18:53:20.924 828 Creating DB C:\Users\mati_\OneDrive\Desktop\jp-entrenamiento\.wwebjs_auth\session\Default\shared_proto_db since it was missing.
-2025/08/20-18:53:20.935 828 Reusing MANIFEST C:\Users\mati_\OneDrive\Desktop\jp-entrenamiento\.wwebjs_auth\session\Default\shared_proto_db/MANIFEST-000001
+2026/03/24-22:47:10.865 4358 Reusing MANIFEST C:\Users\mati_\OneDrive\Desktop\ML DESARROLLOS WEB\jp-entrenamiento\.wwebjs_auth\session\Default\shared_proto_db/MANIFEST-000001
+2026/03/24-22:47:10.866 4358 Recovering log #3
+2026/03/24-22:47:10.868 4358 Reusing old log C:\Users\mati_\OneDrive\Desktop\ML DESARROLLOS WEB\jp-entrenamiento\.wwebjs_auth\session\Default\shared_proto_db/000003.log 
