@@ -101,17 +101,17 @@ function iniciarWhatsApp() {
     authStrategy: new LocalAuth({
       clientId: 'jp-entrenamiento'
     }),
-  puppeteer: {
-    headless: true,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--no-first-run',
-      '--no-zygote',
-      '--single-process'
-    ]
-  }
+    puppeteer: {
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process'
+      ]
+    }
   });
 
   client.on('qr', (qr) => {

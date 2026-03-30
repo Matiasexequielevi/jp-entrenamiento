@@ -15,27 +15,25 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// Conexión a MongoDB
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('✅ Conectado a MongoDB'))
-  .catch(err => console.error('❌ Error al conectar a MongoDB:', err));
-
-// Configuración de vistas
+/* =========================
+   Configuración general
+   ========================= */
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Middlewares
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Si usás Render
+/* =========================
+   Trust proxy para Render
+   ========================= */
 app.set('trust proxy', 1);
 
-// =========================
-// Configuración de sesión
-// =========================
-let sessionConfig = {
+/* =========================
+   Configuración de sesión
+   ========================= */
+const sessionConfig = {
   secret: process.env.SESSION_SECRET || 'jp-entrenamiento',
   resave: false,
   saveUninitialized: false,
@@ -68,7 +66,9 @@ try {
 
 app.use(session(sessionConfig));
 
-// Middleware para proteger rutas
+/* =========================
+   Middleware de login
+   ========================= */
 function verificarLogin(req, res, next) {
   if (req.session && req.session.usuario) {
     return next();
@@ -76,12 +76,14 @@ function verificarLogin(req, res, next) {
   return res.redirect('/login');
 }
 
-// Rutas públicas
+/* =========================
+   Rutas públicas
+   ========================= */
 app.get('/login', (req, res) => {
   if (req.session && req.session.usuario) {
     return res.redirect('/');
   }
-  res.render('login');
+  return res.render('login');
 });
 
 app.post('/login', (req, res) => {
@@ -91,15 +93,14 @@ app.post('/login', (req, res) => {
     if (usuario === 'jpentrenamiento' && contrasena === 'burack123') {
       req.session.usuario = usuario;
 
-      req.session.save((err) => {
+      return req.session.save((err) => {
         if (err) {
           console.error('❌ Error al guardar sesión:', err);
           return res.status(500).send('Error al guardar la sesión');
         }
+
         return res.redirect('/');
       });
-
-      return;
     }
 
     return res.status(401).send('Usuario o contraseña incorrectos');
@@ -121,29 +122,48 @@ app.get('/logout', (req, res) => {
   });
 });
 
-// Rutas protegidas
+/* =========================
+   Rutas protegidas
+   ========================= */
 app.use('/', verificarLogin, clientesRoutes);
 app.use('/productos', verificarLogin, productosRoutes);
 app.use('/ventas', verificarLogin, ventasRoutes);
 app.use('/gastos', verificarLogin, gastosRoutes);
 
-// Iniciar servidor
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
-
-  const whatsappEnabled = String(process.env.WHATSAPP_ENABLED || '')
-    .trim()
-    .toLowerCase() === 'true';
-
-  if (whatsappEnabled) {
-    console.log('🟢 Iniciando módulo de WhatsApp...');
-    try {
-      iniciarWhatsApp();
-    } catch (error) {
-      console.error('❌ Error al iniciar WhatsApp:', error.message);
+/* =========================
+   Conexión a MongoDB + inicio servidor
+   ========================= */
+async function iniciarServidor() {
+  try {
+    if (!process.env.MONGODB_URI) {
+      throw new Error('Falta la variable MONGODB_URI en el entorno');
     }
-  } else {
-    console.log('⚪ WhatsApp desactivado desde .env');
-    console.log('Valor detectado:', process.env.WHATSAPP_ENABLED);
+
+    await mongoose.connect(process.env.MONGODB_URI);
+    console.log('✅ Conectado a MongoDB');
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+
+      const whatsappEnabled =
+        String(process.env.WHATSAPP_ENABLED || '').trim().toLowerCase() === 'true';
+
+      if (whatsappEnabled) {
+        console.log('🟢 Iniciando módulo de WhatsApp...');
+        try {
+          iniciarWhatsApp();
+        } catch (error) {
+          console.error('❌ Error al iniciar WhatsApp:', error.message);
+        }
+      } else {
+        console.log('⚪ WhatsApp desactivado desde .env');
+        console.log('Valor detectado:', process.env.WHATSAPP_ENABLED);
+      }
+    });
+  } catch (error) {
+    console.error('❌ Error al conectar a MongoDB:', error.message);
+    process.exit(1);
   }
-});
+}
+
+iniciarServidor();
