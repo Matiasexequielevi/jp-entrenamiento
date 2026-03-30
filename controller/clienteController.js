@@ -2,7 +2,6 @@ const Cliente = require('../models/cliente');
 const Producto = require('../models/Producto');
 const Venta = require('../models/Venta');
 const Gasto = require('../models/Gasto');
-const whatsappClient = require('../services/whatsapp');
 
 function getArgentinaDateParts(date = new Date()) {
   const formatter = new Intl.DateTimeFormat('en-CA', {
@@ -49,19 +48,6 @@ function startOfArgentinaDay(dateStr) {
 function endOfArgentinaDay(dateStr) {
   const [year, month, day] = String(dateStr).split('-').map(Number);
   return new Date(Date.UTC(year, month - 1, day + 1, 2, 59, 59, 999));
-}
-
-function getArgentinaDayRange(date = new Date()) {
-  const dateStr = getArgentinaDateString(date);
-  return {
-    start: startOfArgentinaDay(dateStr),
-    end: new Date(Date.UTC(
-      Number(dateStr.slice(0, 4)),
-      Number(dateStr.slice(5, 7)) - 1,
-      Number(dateStr.slice(8, 10)) + 1,
-      3, 0, 0, 0
-    ))
-  };
 }
 
 function getArgentinaDateStringFromStoredDate(dateValue) {
@@ -140,32 +126,6 @@ exports.listarClientes = async (req, res) => {
       } else {
         vencidos++;
         cliente.estadoPago = 'vencido';
-
-        if (
-          whatsappClient &&
-          whatsappClient.client &&
-          whatsappClient.client.clientReady &&
-          cliente.celular &&
-          !cliente.notificado &&
-          ultimoPago &&
-          new Date(ultimoPago.fecha) < hace34Dias
-        ) {
-          const mensaje = `Hola ${cliente.nombre}, te recordamos que tu último pago fue hace más de 30 días. ¡Ponete al día con tu entrenamiento en JP Entrenamiento! 💪`;
-
-          try {
-            let numero = String(cliente.celular).replace(/\D/g, '');
-            if (!numero.startsWith('549')) {
-              numero = '549' + numero;
-            }
-
-            await whatsappClient.sendMessage(numero, mensaje);
-            console.log(`📤 Mensaje enviado a ${cliente.nombre}`);
-            cliente.notificado = true;
-            await cliente.save();
-          } catch (error) {
-            console.error(`❌ Error al enviar mensaje a ${cliente.nombre}:`, error.message);
-          }
-        }
       }
 
       if (cliente.fechaNacimiento) {
@@ -307,7 +267,10 @@ exports.agregarPago = async (req, res) => {
       monto: Number(monto || 0)
     });
 
+    cliente.fechaPago = fechaFinal;
     cliente.notificado = false;
+    cliente.ultimoRecordatorioEnviado = null;
+
     await cliente.save();
 
     res.redirect('/editar/' + req.params.id);
@@ -337,8 +300,6 @@ exports.reportePagos = async (req, res) => {
     const clientes = await Cliente.find();
 
     const hoyArgentinaStr = getArgentinaDateString();
-    const hoyFin = endOfArgentinaDay(hoyArgentinaStr);
-
     const hace30DiasStr = addDaysToArgentinaDate(hoyArgentinaStr, -29);
 
     const desdeStr = req.query.desde || hace30DiasStr;

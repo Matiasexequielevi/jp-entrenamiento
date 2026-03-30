@@ -39,9 +39,10 @@ const clienteSchema = new mongoose.Schema({
   planJueves: { type: String, default: '' },
   planViernes: { type: String, default: '' },
 
-  notificado: { type: Boolean, default: false },
+ notificado: { type: Boolean, default: false },
+ultimoRecordatorioEnviado: { type: Date, default: null },
 
-  creadoEn: { type: Date, default: Date.now }
+creadoEn: { type: Date, default: Date.now }
 });
 
 module.exports = mongoose.model('Cliente', clienteSchema);
