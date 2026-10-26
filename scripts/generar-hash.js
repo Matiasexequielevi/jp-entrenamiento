@@ -1,0 +1,1 @@
+const bcrypt=require('bcryptjs');const pw=process.argv[2];if(!pw||pw.length<12){console.error('Uso: node scripts/generar-hash.js "contraseña-de-al-menos-12-caracteres"');process.exit(1)}console.log(bcrypt.hashSync(pw,12));

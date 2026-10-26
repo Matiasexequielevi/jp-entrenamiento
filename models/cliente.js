@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const clienteSchema = new mongoose.Schema({
+  dni: { type: String, trim: true, sparse: true, unique: true, set: v => v ? String(v).trim() : undefined },
+  passwordHash: { type: String, select: false },
+  cambiarClave: { type: Boolean, default: false },
+  accesoApp: { type: Boolean, default: false },
   nombre: { type: String, required: true },
   apellido: { type: String, required: true },
   edad: { type: Number, required: true },
@@ -38,9 +42,6 @@ const clienteSchema = new mongoose.Schema({
   planMiercoles: { type: String, default: '' },
   planJueves: { type: String, default: '' },
   planViernes: { type: String, default: '' },
-
- notificado: { type: Boolean, default: false },
-ultimoRecordatorioEnviado: { type: Date, default: null },
 
 creadoEn: { type: Date, default: Date.now }
 });

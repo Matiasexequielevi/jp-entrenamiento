@@ -51,7 +51,7 @@ exports.listarVentas = async (req, res) => {
     const { start, end } = getArgentinaDayRange();
 
     const ventasHoy = await Venta.find({
-      fecha: { $gte: start, $lt: end }
+      fecha: { $gte: start, $lt: end }, aCuenta: { $ne: true }
     });
 
     const totalHoy = ventasHoy.reduce((acc, v) => acc + Number(v.total || 0), 0);

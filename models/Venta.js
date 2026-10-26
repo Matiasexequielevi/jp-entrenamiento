@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 
 const ventaSchema = new mongoose.Schema({
+  alumno: { type: mongoose.Schema.Types.ObjectId, ref: 'Cliente' },
+  aCuenta: { type: Boolean, default: false },
+  actor: { type: String, default: '' },
   producto: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Producto',

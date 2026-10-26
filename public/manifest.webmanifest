@@ -1,0 +1,1 @@
+{"name": "JP Entrenamiento", "short_name": "JP Gym", "start_url": "/mi-app", "scope": "/", "display": "standalone", "background_color": "#101b35", "theme_color": "#101b35", "icons": [{"src": "/images/logo-jp.png", "sizes": "any", "type": "image/png", "purpose": "any"}]}

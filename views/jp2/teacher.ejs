@@ -1,0 +1,1238 @@
+<%- include('partials/head', { title: 'Panel del profesor' }) %>
+
+<style>
+  /* ==========================================
+     JP ENTRENAMIENTO 2.0
+     PANEL DEL PROFESOR
+  ========================================== */
+
+  .jp-teacher,
+  .jp-teacher * {
+    box-sizing: border-box;
+  }
+
+  .jp-teacher {
+    --tp-primary: #244b91;
+    --tp-blue: #3867c8;
+    --tp-text: #172b4c;
+    --tp-muted: #72819a;
+    --tp-border: #e4eaf4;
+
+    color: var(--tp-text);
+    padding-bottom: 35px;
+  }
+
+  .jp-teacher-header {
+    background: linear-gradient(125deg, #182f58, #345ca9);
+    border-radius: 23px;
+    padding: 29px 30px;
+    color: white;
+    margin-bottom: 22px;
+  }
+
+  .jp-teacher-header h1 {
+    color: white;
+    font-size: clamp(25px, 3vw, 34px);
+    font-weight: 800;
+    margin: 0 0 8px;
+  }
+
+  .jp-teacher-header p {
+    margin: 0;
+    color: #dce7ff;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .jp-teacher-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+
+  .jp-teacher-tab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-width: 0;
+    padding: 17px 10px;
+    background: white;
+    border: 1px solid var(--tp-border);
+    border-radius: 15px;
+    color: #526682;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background .2s, border-color .2s, color .2s;
+  }
+
+  .jp-teacher-tab:hover {
+    background: #f2f6ff;
+  }
+
+  .jp-teacher-tab.active {
+    color: #2855aa;
+    background: #edf3ff;
+    border-color: #a8c1f2;
+    box-shadow: 0 3px 12px rgba(40, 85, 170, .07);
+  }
+
+  .jp-teacher-tab .tab-icon {
+    font-size: 19px;
+  }
+
+  .jp-teacher-panel {
+    display: none;
+  }
+
+  .jp-teacher-panel.active {
+    display: block;
+    animation: jpPanelAppear .2s ease;
+  }
+
+  @keyframes jpPanelAppear {
+    from {
+      opacity: .5;
+      transform: translateY(5px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .jp-teacher-card {
+    background: white;
+    border: 1px solid var(--tp-border);
+    border-radius: 22px;
+    padding: 26px;
+    box-shadow: 0 8px 30px rgba(26, 47, 83, .035);
+  }
+
+  .jp-teacher-card h2 {
+    color: #172b4c;
+    font-size: 21px;
+    font-weight: 800;
+    margin: 0 0 8px;
+  }
+
+  .jp-teacher-description {
+    color: var(--tp-muted);
+    font-size: 13px;
+    line-height: 1.7;
+    margin: 0 0 24px;
+  }
+
+  .jp-teacher label {
+    display: block;
+    font-size: 12px;
+    font-weight: 800;
+    color: #233958;
+    margin: 15px 0 8px;
+  }
+
+  .jp-teacher select,
+  .jp-teacher input:not([type="checkbox"]),
+  .jp-teacher textarea:not([hidden]) {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    border: 1px solid #dce5f2;
+    border-radius: 13px;
+    background: #fff;
+    padding: 13px 14px;
+    color: #263c5d;
+    font-size: 14px;
+    outline: none;
+  }
+
+  .jp-teacher select:focus,
+  .jp-teacher input:focus,
+  .jp-teacher textarea:focus {
+    border-color: #527ed4;
+    box-shadow: 0 0 0 3px rgba(56, 103, 200, .11);
+  }
+
+  .jp-teacher textarea {
+    resize: vertical;
+  }
+
+  .jp-teacher .btn {
+    border-radius: 12px;
+    font-weight: 800;
+    padding: 13px 18px;
+  }
+
+  .jp-teacher .btn:disabled {
+    opacity: .6;
+    cursor: wait;
+  }
+
+  .jp-teacher-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 15px;
+  }
+
+  .jp-teacher-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 19px;
+  }
+
+  .jp-teacher-info {
+    padding: 15px 17px;
+    background: #f0f5ff;
+    border: 1px solid #e0eaff;
+    border-radius: 14px;
+    color: #42618f;
+    font-size: 13px;
+    line-height: 1.7;
+    margin: 17px 0;
+  }
+
+  .jp-teacher-warning {
+    background: #fff8e9;
+    border: 1px solid #f4e2b5;
+    color: #86611a;
+  }
+
+  .jp-teacher-empty {
+    text-align: center;
+    background: #f7f9fd;
+    border: 1px dashed #dce5f1;
+    border-radius: 16px;
+    padding: 34px 20px;
+    color: #77869c;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+
+  .jp-teacher-empty .icon {
+    display: block;
+    font-size: 34px;
+    margin-bottom: 10px;
+  }
+
+  /* SEGUIMIENTO */
+
+  .jp-follow-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 13px;
+  }
+
+  .jp-follow-controls label {
+    margin-top: 0;
+  }
+
+  .jp-follow-controls .btn {
+    min-height: 47px;
+  }
+
+  .jp-follow-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin: 23px 0;
+  }
+
+  .jp-follow-stat {
+    padding: 19px;
+    border: 1px solid #e6ebf3;
+    border-radius: 16px;
+    background: #f8faff;
+  }
+
+  .jp-follow-stat small {
+    display: block;
+    color: #7b899f;
+    font-size: 12px;
+    margin-bottom: 9px;
+  }
+
+  .jp-follow-stat strong {
+    display: block;
+    color: #193b75;
+    font-size: 24px;
+    font-weight: 800;
+  }
+
+  .jp-history-heading {
+    font-size: 15px;
+    font-weight: 800;
+    margin: 23px 0 13px;
+  }
+
+  .jp-session {
+    border: 1px solid #e4eaf3;
+    border-radius: 15px;
+    overflow: hidden;
+    margin-bottom: 11px;
+    background: white;
+  }
+
+  .jp-session summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+    padding: 17px;
+    list-style: none;
+  }
+
+  .jp-session summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .jp-session summary::after {
+    content: '⌄';
+    font-size: 22px;
+    color: #7b8aa0;
+    flex-shrink: 0;
+  }
+
+  .jp-session[open] summary::after {
+    content: '⌃';
+  }
+
+  .jp-session-title {
+    min-width: 0;
+  }
+
+  .jp-session-title strong {
+    display: block;
+    color: #213653;
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
+
+  .jp-session-title small {
+    color: #7a8aa1;
+    font-size: 12px;
+  }
+
+  .jp-session-percent {
+    background: #e6f7ee;
+    color: #13834b;
+    border-radius: 20px;
+    padding: 7px 11px;
+    font-size: 12px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+
+  .jp-session-percent.partial {
+    background: #fff4df;
+    color: #a66b13;
+  }
+
+  .jp-session-percent.zero {
+    background: #eef1f6;
+    color: #718097;
+  }
+
+  .jp-session-body {
+    padding: 0 17px 17px;
+    border-top: 1px solid #edf0f6;
+  }
+
+  .jp-session-progress {
+    height: 8px;
+    background: #e7ecf4;
+    border-radius: 20px;
+    overflow: hidden;
+    margin: 16px 0;
+  }
+
+  .jp-session-fill {
+    height: 100%;
+    background: #23a36a;
+    border-radius: inherit;
+  }
+
+  .jp-session-exercise {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 9px 0;
+    font-size: 13px;
+    color: #53647c;
+    border-bottom: 1px solid #f0f2f6;
+  }
+
+  .jp-session-exercise:last-child {
+    border-bottom: 0;
+  }
+
+  .jp-session-exercise .check {
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+
+  /* RUTINAS */
+
+  .jp-routine-editor-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 23px 0 15px;
+  }
+
+  .jp-routine-editor-heading h3 {
+    font-size: 17px;
+    margin: 0;
+  }
+
+  .jp-teacher #ejerciciosEditor {
+    margin-bottom: 14px;
+  }
+
+  .jp-teacher #ejerciciosEditor input,
+  .jp-teacher #ejerciciosEditor textarea {
+    background: white;
+  }
+
+  .jp-teacher #ejerciciosPayload {
+    display: none !important;
+  }
+
+  /* EXCEL */
+
+  .jp-excel-box {
+    padding: 24px;
+    border: 1px dashed #b9ccef;
+    border-radius: 17px;
+    background: #f8faff;
+    margin: 15px 0;
+  }
+
+  .jp-excel-box input[type="file"] {
+    background: white;
+  }
+
+  /* RESPONSIVE */
+
+  @media (max-width: 850px) {
+    .jp-teacher-tabs {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 560px) {
+    .jp-teacher-header {
+      padding: 24px 20px;
+      border-radius: 18px;
+    }
+
+    .jp-teacher-card {
+      padding: 18px;
+      border-radius: 18px;
+    }
+
+    .jp-teacher-tabs {
+      gap: 8px;
+    }
+
+    .jp-teacher-tab {
+      padding: 14px 7px;
+      font-size: 11px;
+      gap: 5px;
+    }
+
+    .jp-teacher-tab .tab-icon {
+      font-size: 17px;
+    }
+
+    .jp-teacher-fields,
+    .jp-follow-controls {
+      grid-template-columns: 1fr;
+    }
+
+    .jp-follow-controls .btn {
+      width: 100%;
+    }
+
+    .jp-follow-summary {
+      gap: 8px;
+    }
+
+    .jp-follow-stat {
+      padding: 12px 10px;
+    }
+
+    .jp-follow-stat small {
+      font-size: 10px;
+    }
+
+    .jp-follow-stat strong {
+      font-size: 19px;
+    }
+  }
+</style>
+
+<div class="shell">
+
+  <%- include('partials/nav') %>
+
+  <main class="main">
+
+    <div class="jp-teacher">
+
+      <!-- ENCABEZADO -->
+
+      <header class="jp-teacher-header">
+        <h1>Panel del profesor</h1>
+        <p>
+          Gestioná entrenamientos, seguí el progreso de tus alumnos
+          y enviá recordatorios desde un solo lugar.
+        </p>
+      </header>
+
+      <% if (typeof importado !== 'undefined' && importado) { %>
+        <div class="jp-success" role="status">
+          ✓ Se importaron <%= importado %> ejercicios correctamente.
+        </div>
+      <% } %>
+
+      <% if (typeof mensajeEnviado !== 'undefined' && mensajeEnviado) { %>
+        <div class="jp-success" role="status">
+          ✓ Mensaje enviado correctamente.
+        </div>
+      <% } %>
+
+      <!-- NAVEGACIÓN -->
+
+      <div class="jp-teacher-tabs" role="tablist" aria-label="Funciones del profesor">
+
+        <button
+          type="button"
+          class="jp-teacher-tab active"
+          data-teacher-tab="seguimiento"
+          role="tab"
+          aria-selected="true"
+        >
+          <span class="tab-icon">📊</span>
+          <span>Seguimiento</span>
+        </button>
+
+        <button
+          type="button"
+          class="jp-teacher-tab"
+          data-teacher-tab="rutina"
+          role="tab"
+          aria-selected="false"
+        >
+          <span class="tab-icon">🏋️</span>
+          <span>Crear rutina</span>
+        </button>
+
+        <button
+          type="button"
+          class="jp-teacher-tab"
+          data-teacher-tab="excel"
+          role="tab"
+          aria-selected="false"
+        >
+          <span class="tab-icon">📥</span>
+          <span>Importar Excel</span>
+        </button>
+
+        <button
+          type="button"
+          class="jp-teacher-tab"
+          data-teacher-tab="mensajes"
+          role="tab"
+          aria-selected="false"
+        >
+          <span class="tab-icon">🔔</span>
+          <span>Recordatorios</span>
+        </button>
+
+      </div>
+
+      <!-- =====================================
+           SEGUIMIENTO
+      ====================================== -->
+
+      <section
+        class="jp-teacher-panel active"
+        id="jp-panel-seguimiento"
+        role="tabpanel"
+      >
+
+        <div class="jp-teacher-card">
+
+          <h2>📊 Seguimiento de alumnos</h2>
+
+          <p class="jp-teacher-description">
+            Consultá los entrenamientos registrados y el avance de cada alumno.
+          </p>
+
+          <div class="jp-follow-controls">
+
+            <div>
+              <label for="alumnoSeguimiento">
+                Seleccionar alumno
+              </label>
+
+              <select id="alumnoSeguimiento">
+                <% clientes.forEach(c => { %>
+                  <option value="<%= c._id %>">
+                    <%= c.apellido %>, <%= c.nombre %>
+                  </option>
+                <% }) %>
+              </select>
+            </div>
+
+            <button
+              type="button"
+              class="btn"
+              id="consultarSeguimiento"
+            >
+              📊 Consultar progreso
+            </button>
+
+          </div>
+
+          <div id="resultadoSeguimiento">
+
+            <div class="jp-teacher-empty" style="margin-top:23px">
+              <span class="icon">📈</span>
+              Seleccioná un alumno y presioná
+              <strong>Consultar progreso</strong>.
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- =====================================
+           CREAR RUTINA
+      ====================================== -->
+
+      <section
+        class="jp-teacher-panel"
+        id="jp-panel-rutina"
+        role="tabpanel"
+        hidden
+      >
+
+        <div class="jp-teacher-card">
+
+          <h2>🏋️ Preparar rutina</h2>
+
+          <p class="jp-teacher-description">
+            Creá una rutina personalizada.
+            Los ejercicios aparecerán automáticamente
+            en la aplicación del alumno.
+          </p>
+
+          <form
+            method="post"
+            action="/rutinas/guardar"
+            id="rutinaForm"
+          >
+
+            <div class="jp-teacher-fields">
+
+              <div>
+                <label for="rAlumno">Alumno</label>
+
+                <select
+                  id="rAlumno"
+                  name="alumnoId"
+                  required
+                >
+                  <% clientes.forEach(c => { %>
+                    <option value="<%= c._id %>">
+                      <%= c.apellido %>, <%= c.nombre %>
+                    </option>
+                  <% }) %>
+                </select>
+              </div>
+
+              <div>
+                <label for="rDia">Día de entrenamiento</label>
+
+                <select id="rDia" name="dia">
+                  <% [
+                    'Lunes',
+                    'Martes',
+                    'Miércoles',
+                    'Jueves',
+                    'Viernes',
+                    'Sábado',
+                    'Domingo'
+                  ].forEach(d => { %>
+                    <option><%= d %></option>
+                  <% }) %>
+                </select>
+              </div>
+
+            </div>
+
+            <label for="rTitulo">Nombre de la rutina</label>
+
+            <input
+              id="rTitulo"
+              name="titulo"
+              placeholder="Ej.: Tren superior · Pecho y brazos"
+              required
+            >
+
+            <div class="jp-routine-editor-heading">
+              <h3>Ejercicios</h3>
+              <small class="muted">En orden de realización</small>
+            </div>
+
+            <div id="ejerciciosEditor"></div>
+
+            <button
+              type="button"
+              class="btn secondary"
+              id="addEjercicio"
+            >
+              + Agregar ejercicio
+            </button>
+
+            <textarea
+              name="ejercicios"
+              id="ejerciciosPayload"
+              hidden
+              required
+            ></textarea>
+
+            <div class="jp-teacher-info">
+              Completá las series, repeticiones y peso.
+              El descanso y las indicaciones son opcionales.
+            </div>
+
+            <div class="jp-teacher-actions">
+              <button class="btn" type="submit">
+                💾 Guardar rutina
+              </button>
+            </div>
+
+          </form>
+
+        </div>
+
+      </section>
+
+      <!-- =====================================
+           IMPORTAR EXCEL
+      ====================================== -->
+
+      <section
+        class="jp-teacher-panel"
+        id="jp-panel-excel"
+        role="tabpanel"
+        hidden
+      >
+
+        <div class="jp-teacher-card">
+
+          <h2>📥 Importar rutina desde Excel</h2>
+
+          <p class="jp-teacher-description">
+            Cargá la planilla de entrenamiento del gimnasio
+            y asignala a un alumno.
+          </p>
+
+          <div class="jp-teacher-info">
+            El sistema reconoce las planillas con
+            <strong>DÍA 1, DÍA 2, DÍA 3...</strong>
+            y los archivos exportados desde JP Entrenamiento.
+          </div>
+
+          <form
+            method="post"
+            action="/rutinas/importar"
+            enctype="multipart/form-data"
+          >
+
+            <label for="excelAlumno">Seleccionar alumno</label>
+
+            <select
+              id="excelAlumno"
+              name="alumnoId"
+              required
+            >
+              <% clientes.forEach(c => { %>
+                <option value="<%= c._id %>">
+                  <%= c.apellido %>, <%= c.nombre %>
+                </option>
+              <% }) %>
+            </select>
+
+            <div class="jp-excel-box">
+
+              <label for="excelArchivo">
+                Archivo de entrenamiento (.xlsx)
+              </label>
+
+              <input
+                id="excelArchivo"
+                type="file"
+                name="archivo"
+                accept=".xlsx"
+                required
+              >
+
+            </div>
+
+            <div class="jp-teacher-info jp-teacher-warning">
+              ⚠️ Si el alumno ya tiene rutinas cargadas,
+              se reemplazarán únicamente los días
+              incluidos en el Excel.
+            </div>
+
+            <div class="jp-teacher-actions">
+
+              <button class="btn" type="submit">
+                📥 Importar rutina
+              </button>
+
+            </div>
+
+          </form>
+
+        </div>
+
+      </section>
+
+      <!-- =====================================
+           RECORDATORIOS
+      ====================================== -->
+
+      <section
+        class="jp-teacher-panel"
+        id="jp-panel-mensajes"
+        role="tabpanel"
+        hidden
+      >
+
+        <div class="jp-teacher-card">
+
+          <h2>🔔 Recordatorios a alumnos</h2>
+
+          <p class="jp-teacher-description">
+            Enviá mensajes individuales o grupales.
+            Los alumnos los recibirán dentro de su aplicación.
+          </p>
+
+          <form
+            method="post"
+            action="/profesor/mensaje"
+            id="formMensajeProfesor"
+          >
+
+            <label for="tipoMensaje">
+              ¿A quién querés enviar el mensaje?
+            </label>
+
+            <select
+              name="destinatario"
+              id="tipoMensaje"
+              required
+            >
+
+              <option value="individual">
+                👤 Un alumno
+              </option>
+
+              <option value="grupal">
+                👥 Todos los alumnos
+              </option>
+
+            </select>
+
+            <div id="selectorAlumnoMensaje">
+
+              <label for="alumnoMensaje">
+                Seleccionar alumno
+              </label>
+
+              <select
+                name="alumnoId"
+                id="alumnoMensaje"
+              >
+
+                <% clientes.forEach(c => { %>
+                  <option value="<%= c._id %>">
+                    <%= c.apellido %>, <%= c.nombre %>
+                  </option>
+                <% }) %>
+
+              </select>
+
+            </div>
+
+            <label for="tituloMensaje">Título</label>
+
+            <input
+              type="text"
+              name="titulo"
+              id="tituloMensaje"
+              maxlength="100"
+              placeholder="Ej.: Recordatorio de entrenamiento"
+              required
+            >
+
+            <label for="textoMensaje">Mensaje</label>
+
+            <textarea
+              name="mensaje"
+              id="textoMensaje"
+              rows="5"
+              maxlength="1000"
+              placeholder="Escribí el mensaje para tus alumnos..."
+              required
+            ></textarea>
+
+            <div class="jp-teacher-info">
+              🔔 El alumno verá una ventana emergente
+              cuando abra su aplicación.
+            </div>
+
+            <div class="jp-teacher-actions">
+
+              <button type="submit" class="btn">
+                🔔 Enviar mensaje
+              </button>
+
+            </div>
+
+          </form>
+
+        </div>
+
+      </section>
+
+    </div>
+
+  </main>
+
+</div>
+
+<script src="/js/rutina-editor.js?v=3" defer></script>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ======================================
+     NAVEGACIÓN ENTRE PESTAÑAS
+  ====================================== */
+
+  const tabs = document.querySelectorAll('.jp-teacher-tab');
+  const panels = document.querySelectorAll('.jp-teacher-panel');
+
+  function abrirTab(nombre) {
+    tabs.forEach(tab => {
+      const activo = tab.dataset.teacherTab === nombre;
+
+      tab.classList.toggle('active', activo);
+      tab.setAttribute('aria-selected', activo ? 'true' : 'false');
+    });
+
+    panels.forEach(panel => {
+      const activo = panel.id === 'jp-panel-' + nombre;
+
+      panel.classList.toggle('active', activo);
+      panel.hidden = !activo;
+    });
+
+    try {
+      sessionStorage.setItem('jp_profesor_tab', nombre);
+    } catch (error) {
+      // La navegación funciona aunque el navegador bloquee storage.
+    }
+  }
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', function () {
+      abrirTab(this.dataset.teacherTab);
+    });
+  });
+
+  let tabInicial = 'seguimiento';
+
+  try {
+    const guardada = sessionStorage.getItem('jp_profesor_tab');
+
+    if (
+      guardada &&
+      document.getElementById('jp-panel-' + guardada)
+    ) {
+      tabInicial = guardada;
+    }
+  } catch (error) {}
+
+  if (new URLSearchParams(window.location.search).has('importado')) {
+    tabInicial = 'excel';
+  }
+
+  if (
+    new URLSearchParams(window.location.search).get('mensaje') === 'enviado'
+  ) {
+    tabInicial = 'mensajes';
+  }
+
+  abrirTab(tabInicial);
+
+  /* ======================================
+     MENSAJES DEL PROFESOR
+  ====================================== */
+
+  const tipoMensaje = document.getElementById('tipoMensaje');
+  const selectorAlumnoMensaje =
+    document.getElementById('selectorAlumnoMensaje');
+  const alumnoMensaje = document.getElementById('alumnoMensaje');
+  const formMensaje = document.getElementById('formMensajeProfesor');
+
+  function actualizarDestinatario() {
+    const individual = tipoMensaje.value === 'individual';
+
+    selectorAlumnoMensaje.style.display = individual ? 'block' : 'none';
+    alumnoMensaje.required = individual;
+  }
+
+  if (tipoMensaje && selectorAlumnoMensaje && alumnoMensaje) {
+    tipoMensaje.addEventListener('change', actualizarDestinatario);
+    actualizarDestinatario();
+  }
+
+  if (formMensaje) {
+    formMensaje.addEventListener('submit', function (event) {
+      const destinatario = tipoMensaje.value === 'grupal'
+        ? 'TODOS los alumnos'
+        : 'el alumno seleccionado';
+
+      if (!confirm('¿Enviar este mensaje a ' + destinatario + '?')) {
+        event.preventDefault();
+      }
+    });
+  }
+
+  /* ======================================
+     SEGUIMIENTO DE ALUMNOS
+  ====================================== */
+
+  const selector = document.getElementById('alumnoSeguimiento');
+  const boton = document.getElementById('consultarSeguimiento');
+  const resultado = document.getElementById('resultadoSeguimiento');
+
+  function crearElemento(etiqueta, clase, texto) {
+    const elemento = document.createElement(etiqueta);
+
+    if (clase) elemento.className = clase;
+    if (texto !== undefined) elemento.textContent = texto;
+
+    return elemento;
+  }
+
+  function formatearFecha(fechaISO) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(fechaISO || '')) {
+      return fechaISO || 'Sin fecha';
+    }
+
+    const [anio, mes, dia] = fechaISO.split('-');
+
+    return dia + '/' + mes + '/' + anio;
+  }
+
+  async function consultarProgreso() {
+    if (!selector || !selector.value) return;
+
+    resultado.replaceChildren(
+      crearElemento('div', 'jp-teacher-empty', 'Consultando entrenamientos...')
+    );
+
+    boton.disabled = true;
+
+    try {
+      const respuesta = await fetch(
+        '/profesor/progreso/' + encodeURIComponent(selector.value),
+        { credentials: 'same-origin' }
+      );
+
+      if (!respuesta.ok) throw new Error('Error al consultar');
+
+      const datos = await respuesta.json();
+
+      if (!datos.ok) throw new Error('Respuesta inválida');
+
+      resultado.replaceChildren();
+
+      if (!datos.registros || !datos.registros.length) {
+        const vacio = crearElemento('div', 'jp-teacher-empty');
+
+        vacio.style.marginTop = '23px';
+
+        vacio.appendChild(
+          crearElemento('span', 'icon', '🏋️')
+        );
+
+        vacio.appendChild(
+          crearElemento(
+            'p',
+            '',
+            'Este alumno todavía no registró entrenamientos.'
+          )
+        );
+
+        resultado.appendChild(vacio);
+        return;
+      }
+
+      const registros = datos.registros;
+
+      const sesiones = registros.length;
+
+      const completados = registros.reduce(
+        (total, registro) => total + registro.completados,
+        0
+      );
+
+      const ejercicios = registros.reduce(
+        (total, registro) => total + registro.total,
+        0
+      );
+
+      const promedio = ejercicios
+        ? Math.round(completados * 100 / ejercicios)
+        : 0;
+
+      /* RESUMEN */
+
+      const resumen = crearElemento('div', 'jp-follow-summary');
+
+      [
+        ['Entrenamientos', sesiones],
+        ['Ejercicios hechos', completados],
+        ['Progreso general', promedio + '%']
+      ].forEach(([etiqueta, valor]) => {
+        const caja = crearElemento('div', 'jp-follow-stat');
+
+        caja.appendChild(crearElemento('small', '', etiqueta));
+        caja.appendChild(crearElemento('strong', '', String(valor)));
+
+        resumen.appendChild(caja);
+      });
+
+      resultado.appendChild(resumen);
+
+      resultado.appendChild(
+        crearElemento('h3', 'jp-history-heading', 'Historial de entrenamientos')
+      );
+
+      /* HISTORIAL */
+
+      registros.forEach(registro => {
+        const detalle = crearElemento('details', 'jp-session');
+
+        const cabecera = crearElemento('summary');
+
+        const info = crearElemento('div', 'jp-session-title');
+
+        info.appendChild(
+          crearElemento(
+            'strong',
+            '',
+            formatearFecha(registro.fecha) + ' · Rutina ' + registro.dia
+          )
+        );
+
+        info.appendChild(
+          crearElemento(
+            'small',
+            '',
+            (registro.titulo || 'Entrenamiento') +
+              ' · ' +
+              registro.completados +
+              '/' +
+              registro.total +
+              ' ejercicios'
+          )
+        );
+
+        const porcentaje = crearElemento(
+          'span',
+          'jp-session-percent' +
+            (registro.porcentaje === 0
+              ? ' zero'
+              : registro.porcentaje < 100
+                ? ' partial'
+                : ''),
+          registro.porcentaje + '%'
+        );
+
+        cabecera.append(info, porcentaje);
+        detalle.appendChild(cabecera);
+
+        const cuerpo = crearElemento('div', 'jp-session-body');
+
+        const barra = crearElemento('div', 'jp-session-progress');
+        const relleno = crearElemento('div', 'jp-session-fill');
+
+        relleno.style.width = registro.porcentaje + '%';
+
+        barra.appendChild(relleno);
+        cuerpo.appendChild(barra);
+
+        registro.ejercicios.forEach(ejercicio => {
+          const fila = crearElemento('div', 'jp-session-exercise');
+
+          fila.appendChild(
+            crearElemento(
+              'span',
+              'check',
+              ejercicio.completado ? '✅' : '⬜'
+            )
+          );
+
+          fila.appendChild(
+            crearElemento('span', '', ejercicio.nombre)
+          );
+
+          cuerpo.appendChild(fila);
+        });
+
+        detalle.appendChild(cuerpo);
+        resultado.appendChild(detalle);
+      });
+
+    } catch (error) {
+      resultado.replaceChildren(
+        crearElemento(
+          'div',
+          'jp-teacher-empty',
+          'No pudimos consultar el progreso. Intentá nuevamente.'
+        )
+      );
+    } finally {
+      boton.disabled = false;
+    }
+  }
+
+  if (boton) {
+    boton.addEventListener('click', consultarProgreso);
+  }
+
+})();
+</script>
+
+<%- include('partials/end') %>

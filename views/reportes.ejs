@@ -703,11 +703,17 @@
     const totalIngresosPeriodo = Number(totalIngresos || 0);
     const totalCuotasPeriodo = Number(totalCuotas || 0);
     const totalVentasPeriodo = Number(totalVentas || 0);
+    const totalVentasInmediatasPeriodo = Number(totalVentasInmediatas || 0);
+    const totalVentasFiadasPeriodo = Number(totalVentasFiadas || 0);
+    const totalCobrosCuentaPeriodo = Number(totalCobrosCuenta || 0);
+    const deudaActual = Number(totalPendiente || 0);
     const totalGastosPeriodo = Number(totalGastos || 0);
     const gananciaNetaPeriodo = Number(gananciaNeta || 0);
 
     const totalCuotasMesActual = Number(totalCuotasMes || 0);
     const totalVentasMesActual = Number(totalVentasMes || 0);
+    const totalVentasInmediatasMesActual = Number(totalVentasInmediatasMes || 0);
+    const totalCobrosCuentaMesActual = Number(totalCobrosCuentaMes || 0);
     const totalGastosMesActual = Number(totalGastosMes || 0);
     const gananciaNetaMesActual = Number(gananciaNetaMes || 0);
 
@@ -716,7 +722,7 @@
     const gastosCount = Number(cantidadGastos || 0);
     const movimientosCount = Number(cantidadMovimientos || 0);
 
-    const totalIngresosCount = pagosCount + ventasCount;
+    const totalIngresosCount = pagosCount + Number(cantidadCobrosCuenta || 0) + (Array.isArray(ventas) ? ventas.filter(v => !v.aCuenta).length : ventasCount);
     const promedioMovimiento = totalIngresosCount > 0 ? (totalIngresosPeriodo / totalIngresosCount) : 0;
 
     const ahoraAR = new Date();
@@ -810,7 +816,7 @@
             <h2 class="hero-title">📊 Reporte financiero premium</h2>
             <p class="hero-subtitle">
               Aquí el dueño del gimnasio puede ver con claridad cuánto ingresó por cuotas,
-              cuánto se vendió en productos, cuánto se gastó y cuál fue la ganancia neta real.
+              cuánto se vendió en productos, cuánto se gastó y cuál fue el resultado de caja.
             </p>
           </div>
 
@@ -850,7 +856,7 @@
               <div class="summary-icon">💵</div>
             </div>
             <h3 class="summary-value">$<%= money(totalIngresosPeriodo) %></h3>
-            <p class="summary-note">Cuotas cobradas + ventas de productos en el rango.</p>
+            <p class="summary-note">Cuotas + ventas inmediatas + cobros de cuentas corrientes.</p>
           </div>
 
           <div class="summary-card card-income">
@@ -868,7 +874,7 @@
               <div class="summary-icon">🛍️</div>
             </div>
             <h3 class="summary-value">$<%= money(totalVentasPeriodo) %></h3>
-            <p class="summary-note">Suplementos y productos vendidos en el período.</p>
+            <p class="summary-note">Total vendido, incluyendo ventas fiadas.</p>
           </div>
 
           <div class="summary-card card-expense">
@@ -882,13 +888,13 @@
 
           <div class="summary-card card-balance">
             <div class="summary-top">
-              <p class="summary-label">Ganancia neta</p>
+              <p class="summary-label">Resultado de caja</p>
               <div class="summary-icon">📈</div>
             </div>
             <h3 class="summary-value <%= gananciaNetaPeriodo >= 0 ? 'positive' : 'negative' %>">
               $<%= money(gananciaNetaPeriodo) %>
             </h3>
-            <p class="summary-note">Ingresos totales menos gastos del rango seleccionado.</p>
+            <p class="summary-note">Dinero cobrado menos gastos. No equivale a utilidad contable.</p>
           </div>
 
           <div class="summary-card card-count">
@@ -897,7 +903,7 @@
               <div class="summary-icon">🧾</div>
             </div>
             <h3 class="summary-value"><%= movimientosCount %></h3>
-            <p class="summary-note">Pagos, ventas y gastos encontrados en el rango.</p>
+            <p class="summary-note">Cuotas, ventas, cobros de deudas y gastos.</p>
           </div>
 
           <div class="summary-card card-count">
@@ -906,7 +912,7 @@
               <div class="summary-icon">⭐</div>
             </div>
             <h3 class="summary-value">$<%= money(promedioMovimiento) %></h3>
-            <p class="summary-note">Promedio considerando cuotas y ventas.</p>
+            <p class="summary-note">Promedio por cuota, venta inmediata y cobro de deuda.</p>
           </div>
 
           <div class="summary-card card-count">
@@ -916,6 +922,29 @@
             </div>
             <h3 class="summary-value"><%= diasRango > 0 ? diasRango : 0 %></h3>
             <p class="summary-note">Período exacto usado para el informe.</p>
+          </div>
+        </div>
+
+        <div class="dashboard-grid" style="grid-template-columns:repeat(auto-fit,minmax(210px,1fr))">
+          <div class="summary-card card-income">
+            <p class="summary-label">Ventas cobradas al momento</p>
+            <h3 class="summary-value">$<%= money(totalVentasInmediatasPeriodo) %></h3>
+            <p class="summary-note">Ventas pagadas al realizarse.</p>
+          </div>
+          <div class="summary-card card-count">
+            <p class="summary-label">Ventas fiadas del período</p>
+            <h3 class="summary-value">$<%= money(totalVentasFiadasPeriodo) %></h3>
+            <p class="summary-note">Generaron deuda, no ingreso inmediato.</p>
+          </div>
+          <div class="summary-card card-income">
+            <p class="summary-label">Cobros de cuentas corrientes</p>
+            <h3 class="summary-value">$<%= money(totalCobrosCuentaPeriodo) %></h3>
+            <p class="summary-note">Pagos recibidos durante el período.</p>
+          </div>
+          <div class="summary-card card-expense">
+            <p class="summary-label">Deuda pendiente actual</p>
+            <h3 class="summary-value">$<%= money(deudaActual) %></h3>
+            <p class="summary-note">Saldo de hoy, no del período filtrado.</p>
           </div>
         </div>
 
@@ -939,9 +968,19 @@
                 <div class="mini-stat">
                   <p class="mini-stat-label">Ventas del mes</p>
                   <h4 class="mini-stat-value">$<%= money(totalVentasMesActual) %></h4>
-                  <p class="mini-stat-sub">Ingreso total por ventas de productos del gimnasio.</p>
+                  <p class="mini-stat-sub">Incluye productos vendidos a cuenta corriente.</p>
                 </div>
 
+                <div class="mini-stat">
+                  <p class="mini-stat-label">Cobros de deudas del mes</p>
+                  <h4 class="mini-stat-value positive">$<%= money(totalCobrosCuentaMesActual) %></h4>
+                  <p class="mini-stat-sub">Ingresos por pagos de cuentas corrientes.</p>
+                </div>
+                <div class="mini-stat">
+                  <p class="mini-stat-label">Ventas cobradas del mes</p>
+                  <h4 class="mini-stat-value positive">$<%= money(totalVentasInmediatasMesActual) %></h4>
+                  <p class="mini-stat-sub">Sin contar las compras fiadas.</p>
+                </div>
                 <div class="mini-stat">
                   <p class="mini-stat-label">Gastos del mes</p>
                   <h4 class="mini-stat-value negative">$<%= money(totalGastosMesActual) %></h4>
@@ -949,11 +988,11 @@
                 </div>
 
                 <div class="mini-stat">
-                  <p class="mini-stat-label">Ganancia neta mensual</p>
+                  <p class="mini-stat-label">Resultado de caja mensual</p>
                   <h4 class="mini-stat-value <%= gananciaNetaMesActual >= 0 ? 'positive' : 'negative' %>">
                     $<%= money(gananciaNetaMesActual) %>
                   </h4>
-                  <p class="mini-stat-sub">Resultado real del mes: cuotas + ventas - gastos.</p>
+                  <p class="mini-stat-sub">Cuotas + ventas cobradas + cobros de deudas - gastos.</p>
                 </div>
               </div>
             </div>
@@ -996,7 +1035,7 @@
           <div class="panel-header">
             <div>
               <h3>Detalle completo de movimientos</h3>
-              <p>Pagos de cuotas, ventas de productos y gastos en una sola vista</p>
+              <p>Cuotas, ventas, compras fiadas, cobros de deudas y gastos</p>
             </div>
           </div>
 
@@ -1020,6 +1059,10 @@
                           <span class="tipo-badge tipo-cuota">CUOTA</span>
                         <% } else if (item.tipo === 'Venta') { %>
                           <span class="tipo-badge tipo-venta">VENTA</span>
+                        <% } else if (item.tipo === 'Venta fiada') { %>
+                          <span class="tipo-badge tipo-venta">VENTA FIADA</span>
+                        <% } else if (item.tipo === 'Cobro cuenta') { %>
+                          <span class="tipo-badge tipo-cuota">COBRO DE DEUDA</span>
                         <% } else { %>
                           <span class="tipo-badge tipo-gasto">GASTO</span>
                         <% } %>
@@ -1030,7 +1073,7 @@
 
                         <% if (item.tipo === 'Cuota') { %>
                           <span>Pago de alumno registrado</span>
-                        <% } else if (item.tipo === 'Venta') { %>
+                        <% } else if (item.tipo === 'Venta' || item.tipo === 'Venta fiada') { %>
                           <span>
                             Venta de producto
                             <% if (item.cantidad) { %>
@@ -1040,6 +1083,8 @@
                               · <%= item.metodoPago %>
                             <% } %>
                           </span>
+                        <% } else if (item.tipo === 'Cobro cuenta') { %>
+                          <span>Pago de cuenta corriente · <%= item.metodoPago || 'No especificado' %></span>
                         <% } else { %>
                           <span>
                             Gasto del negocio
@@ -1057,9 +1102,11 @@
                         <%= formatMovimientoFecha(item) %>
                       </td>
 
-                      <td class="td-amount <%= item.tipo === 'Gasto' ? 'monto-gasto' : 'monto-ingreso' %>">
+                      <td class="td-amount <%= item.tipo === 'Gasto' ? 'monto-gasto' : (item.tipo === 'Venta fiada' ? '' : 'monto-ingreso') %>">
                         <% if (item.tipo === 'Gasto') { %>
                           - $<%= money(item.monto) %>
+                        <% } else if (item.tipo === 'Venta fiada') { %>
+                          $<%= money(item.monto) %> <small class="text-muted">(fiado)</small>
                         <% } else { %>
                           + $<%= money(item.monto) %>
                         <% } %>

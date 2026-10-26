@@ -1,0 +1,1420 @@
+<%- include('partials/head', { title: 'Cuentas corrientes' }) %>
+
+<style>
+/* ==========================================
+   JP ENTRENAMIENTO 2.0
+   CUENTAS CORRIENTES
+========================================== */
+
+.jp-accounts,
+.jp-accounts * {
+  box-sizing: border-box;
+}
+
+.jp-accounts {
+  --ac-blue: #315bb0;
+  --ac-dark: #172b4c;
+  --ac-muted: #73839b;
+  --ac-border: #e3eaf4;
+  --ac-green: #15956a;
+
+  color: var(--ac-dark);
+  padding-bottom: 35px;
+}
+
+.jp-accounts-header {
+  background: linear-gradient(125deg, #182f58, #345ca9);
+  border-radius: 23px;
+  padding: 30px;
+  color: white;
+  margin-bottom: 22px;
+}
+
+.jp-accounts-header h1 {
+  color: white;
+  font-size: clamp(25px, 3vw, 34px);
+  margin: 0 0 8px;
+  font-weight: 800;
+}
+
+.jp-accounts-header p {
+  color: #dce7ff;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* RESUMEN */
+
+.jp-accounts-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+  margin-bottom: 22px;
+}
+
+.jp-accounts-stat {
+  background: white;
+  border: 1px solid var(--ac-border);
+  border-radius: 18px;
+  padding: 23px;
+}
+
+.jp-accounts-stat small {
+  display: block;
+  color: var(--ac-muted);
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.jp-accounts-stat strong {
+  display: block;
+  font-size: clamp(23px, 3vw, 31px);
+  color: #193d79;
+  font-weight: 800;
+}
+
+.jp-accounts-stat.debt strong {
+  color: #d17a22;
+}
+
+/* PESTAÑAS */
+
+.jp-accounts-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 11px;
+  margin-bottom: 21px;
+}
+
+.jp-accounts-tab {
+  border: 1px solid var(--ac-border);
+  background: white;
+  border-radius: 15px;
+  padding: 17px 10px;
+  color: #596d8b;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.jp-accounts-tab:hover {
+  background: #f3f6ff;
+}
+
+.jp-accounts-tab.active {
+  background: #edf3ff;
+  border-color: #aac3f1;
+  color: #2855a8;
+}
+
+.jp-accounts-panel {
+  display: none;
+}
+
+.jp-accounts-panel.active {
+  display: block;
+}
+
+.jp-accounts-card {
+  background: white;
+  border: 1px solid var(--ac-border);
+  border-radius: 21px;
+  padding: 26px;
+}
+
+.jp-accounts-card h2 {
+  font-size: 21px;
+  color: var(--ac-dark);
+  margin: 0 0 8px;
+  font-weight: 800;
+}
+
+.jp-accounts-description {
+  color: var(--ac-muted);
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 0 0 23px;
+}
+
+/* CAMPOS */
+
+.jp-accounts label {
+  display: block;
+  margin: 16px 0 8px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #233958;
+}
+
+.jp-accounts input,
+.jp-accounts select {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid #dce5f2;
+  border-radius: 12px;
+  background: white;
+  color: #263c5d;
+  font-size: 14px;
+  outline: none;
+}
+
+.jp-accounts input:focus,
+.jp-accounts select:focus {
+  border-color: #527ed4;
+  box-shadow: 0 0 0 3px rgba(56, 103, 200, .11);
+}
+
+.jp-accounts .btn {
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-weight: 800;
+}
+
+.jp-accounts .btn:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+/* BUSCADOR */
+
+.jp-accounts-search {
+  margin-bottom: 20px;
+}
+
+.jp-accounts-search input {
+  background: #f8faff;
+}
+
+/* DEUDORES */
+
+.jp-debt-list {
+  display: grid;
+  gap: 12px;
+}
+
+.jp-debt-item {
+  border: 1px solid #e6ebf3;
+  border-radius: 16px;
+  padding: 19px;
+  background: #fbfcff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+}
+
+.jp-debt-person {
+  min-width: 0;
+}
+
+.jp-debt-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: #1d3455;
+  margin-bottom: 7px;
+}
+
+.jp-debt-label {
+  color: #8290a3;
+  font-size: 12px;
+}
+
+.jp-debt-amount {
+  display: block;
+  font-size: 23px;
+  color: #d17a22;
+  font-weight: 800;
+  margin-top: 4px;
+}
+
+.jp-debt-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.jp-debt-actions .btn {
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.jp-accounts-empty {
+  padding: 35px 20px;
+  border: 1px dashed #dce5f1;
+  border-radius: 16px;
+  text-align: center;
+  background: #f8faff;
+  color: #72839c;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.jp-accounts-empty strong {
+  display: block;
+  font-size: 17px;
+  color: #263e62;
+  margin-bottom: 7px;
+}
+
+/* FORMULARIOS */
+
+.jp-accounts-form {
+  max-width: 690px;
+}
+
+.jp-accounts-info {
+  background: #f0f5ff;
+  border: 1px solid #e0eaff;
+  border-radius: 14px;
+  padding: 16px;
+  margin: 19px 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: #42618f;
+}
+
+.jp-accounts-warning {
+  background: #fff8e9;
+  border-color: #f4e2b5;
+  color: #86611a;
+}
+
+.jp-accounts-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
+}
+
+.jp-accounts-balance {
+  margin-top: 18px;
+  background: #f8faff;
+  border: 1px solid #e5eaf3;
+  padding: 20px;
+  border-radius: 16px;
+}
+
+.jp-accounts-balance small {
+  display: block;
+  color: #7b8ba2;
+  font-size: 12px;
+  margin-bottom: 7px;
+}
+
+.jp-accounts-balance strong {
+  display: block;
+  color: #d17a22;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.jp-accounts-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.jp-accounts-preview {
+  background: #f0f9f5;
+  border: 1px solid #d5eee0;
+  color: #19734d;
+  padding: 15px 17px;
+  border-radius: 13px;
+  margin-top: 19px;
+  font-size: 13px;
+}
+
+.jp-accounts-preview strong {
+  font-size: 19px;
+}
+
+.jp-accounts-help {
+  font-size: 12px;
+  color: #8190a4;
+  margin-top: 8px;
+}
+
+/* MOVIMIENTOS */
+
+.jp-accounts-history {
+  margin-top: 20px;
+}
+
+.jp-accounts-history summary {
+  cursor: pointer;
+  font-weight: 800;
+  color: #315bb0;
+  padding: 12px 0;
+}
+
+.jp-accounts-history .table-wrap {
+  margin-top: 14px;
+}
+
+.jp-accounts-history table {
+  width: 100%;
+}
+
+.jp-accounts-history th,
+.jp-accounts-history td {
+  padding: 12px;
+  font-size: 12px;
+}
+
+.jp-accounts-history td {
+  overflow-wrap: anywhere;
+}
+
+.jp-accounts-history .tag {
+  font-size: 11px;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 760px) {
+
+  .jp-debt-item {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .jp-debt-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .jp-accounts-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+}
+
+@media (max-width: 560px) {
+
+  .jp-accounts-header {
+    padding: 24px 20px;
+    border-radius: 18px;
+  }
+
+  .jp-accounts-card {
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .jp-accounts-tabs {
+    gap: 7px;
+  }
+
+  .jp-accounts-tab {
+    padding: 14px 6px;
+    font-size: 11px;
+  }
+
+  .jp-accounts-summary {
+    gap: 9px;
+  }
+
+  .jp-accounts-stat {
+    padding: 15px;
+  }
+
+  .jp-accounts-stat small {
+    font-size: 11px;
+  }
+
+  .jp-accounts-stat strong {
+    font-size: 21px;
+  }
+
+  .jp-debt-actions .btn {
+    flex: 1;
+    text-align: center;
+  }
+
+}
+</style>
+
+<div class="shell">
+
+  <%- include('partials/nav') %>
+
+  <main class="main">
+
+    <div class="jp-accounts">
+
+      <!-- =====================================
+           ENCABEZADO
+      ====================================== -->
+
+      <header class="jp-accounts-header">
+
+        <h1>💰 Cuentas corrientes</h1>
+
+        <p>
+          Controlá las deudas de tus alumnos,
+          registrá compras pendientes y recibí pagos.
+        </p>
+
+      </header>
+
+      <!-- =====================================
+           RESUMEN GENERAL
+      ====================================== -->
+
+      <div class="jp-accounts-summary">
+
+        <div class="jp-accounts-stat debt">
+
+          <small>💰 Total pendiente de cobro</small>
+
+          <strong>
+            $<%= totalPendiente.toLocaleString('es-AR', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            }) %>
+          </strong>
+
+        </div>
+
+        <div class="jp-accounts-stat">
+
+          <small>👥 Alumnos con deuda</small>
+
+          <strong>
+            <%= deudores.length %>
+          </strong>
+
+        </div>
+
+      </div>
+
+      <!-- =====================================
+           NAVEGACIÓN
+      ====================================== -->
+
+      <div class="jp-accounts-tabs">
+
+        <button
+          type="button"
+          class="jp-accounts-tab active"
+          data-accounts-tab="deudas"
+        >
+          💰 Alumnos con deuda
+        </button>
+
+        <button
+          type="button"
+          class="jp-accounts-tab"
+          data-accounts-tab="compra"
+        >
+          🛒 Anotar compra
+        </button>
+
+        <button
+          type="button"
+          class="jp-accounts-tab"
+          data-accounts-tab="pago"
+        >
+          💵 Registrar pago
+        </button>
+
+      </div>
+
+      <!-- =====================================
+           PESTAÑA 1 - ALUMNOS CON DEUDA
+      ====================================== -->
+
+      <section
+        class="jp-accounts-panel active"
+        id="accounts-panel-deudas"
+      >
+
+        <div class="jp-accounts-card">
+
+          <h2>👥 Alumnos con deuda pendiente</h2>
+
+          <p class="jp-accounts-description">
+            Estos alumnos tienen compras pendientes de pago.
+            Podés cobrarles directamente o consultar sus movimientos.
+          </p>
+
+          <% if (deudores.length) { %>
+
+            <div class="jp-accounts-search">
+
+              <input
+                type="search"
+                id="buscarDeudor"
+                placeholder="🔎 Buscar alumno por nombre o apellido..."
+                autocomplete="off"
+              >
+
+            </div>
+
+            <div class="jp-debt-list" id="listaDeudores">
+
+              <% deudores.forEach(c => { %>
+
+                <div
+                  class="jp-debt-item"
+                  data-nombre="<%= (c.nombre + ' ' + c.apellido).toLowerCase() %>"
+                >
+
+                  <div class="jp-debt-person">
+
+                    <div class="jp-debt-name">
+                      <%= c.apellido %>, <%= c.nombre %>
+                    </div>
+
+                    <span class="jp-debt-label">
+                      Saldo pendiente
+                    </span>
+
+                    <strong class="jp-debt-amount">
+                      $<%= c.saldoCuenta.toLocaleString('es-AR', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                      }) %>
+                    </strong>
+
+                  </div>
+
+                  <div class="jp-debt-actions">
+
+                    <button
+                      type="button"
+                      class="btn"
+                      data-cobrar="<%= c._id %>"
+                    >
+                      💵 Cobrar
+                    </button>
+
+                    <a
+                      class="btn secondary"
+                      href="/cuentas/<%= c._id %>"
+                    >
+                      📋 Ver movimientos
+                    </a>
+
+                  </div>
+
+                </div>
+
+              <% }) %>
+
+            </div>
+
+            <div
+              class="jp-accounts-empty"
+              id="sinResultadosDeuda"
+              style="display:none;margin-top:15px"
+            >
+              No encontramos alumnos con ese nombre.
+            </div>
+
+          <% } else { %>
+
+            <div class="jp-accounts-empty">
+
+              <strong>🎉 ¡No hay deudas pendientes!</strong>
+
+              Todos los alumnos tienen sus cuentas al día.
+
+            </div>
+
+          <% } %>
+
+        </div>
+
+      </section>
+
+      <!-- =====================================
+           PESTAÑA 2 - ANOTAR COMPRA
+      ====================================== -->
+
+      <section
+        class="jp-accounts-panel"
+        id="accounts-panel-compra"
+        hidden
+      >
+
+        <div class="jp-accounts-card">
+
+          <h2>🛒 Anotar compra pendiente</h2>
+
+          <p class="jp-accounts-description">
+            Registrá un producto que el alumno lleva
+            y pagará más adelante.
+          </p>
+
+          <div class="jp-accounts-info">
+
+            💡 Esta sección es solamente para
+            <strong>compras que quedan debiendo</strong>.
+
+            Si el alumno paga en el momento,
+            registrá la venta desde Inicio o Ventas.
+
+          </div>
+
+          <form
+            method="post"
+            action="/cuentas/venta"
+            id="formCompraCuenta"
+            class="jp-accounts-form"
+          >
+
+            <!-- La ruta actual requiere modalidad.
+                 En esta pantalla siempre será cuenta. -->
+
+            <input
+              type="hidden"
+              name="modalidad"
+              value="cuenta"
+            >
+
+            <label for="compraAlumno">
+              Alumno
+            </label>
+
+            <select
+              name="alumnoId"
+              id="compraAlumno"
+              required
+            >
+
+              <option value="">
+                Seleccionar alumno...
+              </option>
+
+              <% clientes.forEach(c => { %>
+
+                <option value="<%= c._id %>">
+                  <%= c.apellido %>, <%= c.nombre %>
+                </option>
+
+              <% }) %>
+
+            </select>
+
+            <label for="compraProducto">
+              Producto
+            </label>
+
+            <select
+              name="productoId"
+              id="compraProducto"
+              required
+            >
+
+              <option value="">
+                Seleccionar producto...
+              </option>
+
+              <% productos.forEach(p => { %>
+
+                <option
+                  value="<%= p._id %>"
+                  data-precio="<%= p.precioVenta %>"
+                  data-stock="<%= p.stock %>"
+                >
+
+                  <%= p.nombre %>
+                  · $<%= Number(p.precioVenta || 0).toLocaleString('es-AR') %>
+                  · Stock: <%= p.stock %>
+
+                </option>
+
+              <% }) %>
+
+            </select>
+
+            <label for="compraCantidad">
+              Cantidad
+            </label>
+
+            <input
+              type="number"
+              name="cantidad"
+              id="compraCantidad"
+              value="1"
+              min="1"
+              max="100"
+              step="1"
+              required
+            >
+
+            <div
+              class="jp-accounts-preview"
+              id="resumenCompra"
+              hidden
+            >
+
+              Total que se anotará como deuda:
+
+              <br>
+
+              <strong id="totalCompra">
+                $0
+              </strong>
+
+            </div>
+
+            <div class="jp-accounts-info jp-accounts-warning">
+
+              ⚠️ Al confirmar, se descontará el producto
+              del stock y se sumará el importe a la
+              cuenta corriente del alumno.
+
+            </div>
+
+            <div class="jp-accounts-actions">
+
+              <button
+                type="submit"
+                class="btn"
+              >
+                🛒 Anotar deuda
+              </button>
+
+            </div>
+
+          </form>
+
+        </div>
+
+      </section>
+
+      <!-- =====================================
+           PESTAÑA 3 - REGISTRAR PAGO
+      ====================================== -->
+
+      <section
+        class="jp-accounts-panel"
+        id="accounts-panel-pago"
+        hidden
+      >
+
+        <div class="jp-accounts-card">
+
+          <h2>💵 Registrar pago de deuda</h2>
+
+          <p class="jp-accounts-description">
+            Seleccioná al alumno y registrá
+            el dinero que entrega para cancelar
+            total o parcialmente su deuda.
+          </p>
+
+          <% if (deudores.length) { %>
+
+            <form
+              method="post"
+              action="/cuentas/pago"
+              id="formPagoCuenta"
+              class="jp-accounts-form"
+            >
+
+              <label for="pagoAlumno">
+                Alumno con deuda
+              </label>
+
+              <select
+                name="alumnoId"
+                id="pagoAlumno"
+                required
+              >
+
+                <option value="">
+                  Seleccionar alumno...
+                </option>
+
+                <% deudores.forEach(c => { %>
+
+                  <option
+                    value="<%= c._id %>"
+                    data-saldo="<%= c.saldoCuenta %>"
+                  >
+
+                    <%= c.apellido %>, <%= c.nombre %>
+
+                  </option>
+
+                <% }) %>
+
+              </select>
+
+              <div
+                class="jp-accounts-balance"
+                id="saldoPagoBox"
+                hidden
+              >
+
+                <small>
+                  Saldo pendiente del alumno
+                </small>
+
+                <strong id="saldoPagoTexto">
+                  $0
+                </strong>
+
+              </div>
+
+              <div class="jp-accounts-row">
+
+                <div>
+
+                  <label for="pagoImporte">
+                    Importe recibido
+                  </label>
+
+                  <input
+                    type="number"
+                    name="importe"
+                    id="pagoImporte"
+                    min="0.01"
+                    step="0.01"
+                    placeholder="Ej.: 2500"
+                    required
+                  >
+
+                </div>
+
+                <div>
+
+                  <label for="pagoMedio">
+                    Medio de pago
+                  </label>
+
+                  <select
+                    name="medio"
+                    id="pagoMedio"
+                    required
+                  >
+
+                    <option value="Efectivo">
+                      Efectivo
+                    </option>
+
+                    <option value="Transferencia">
+                      Transferencia
+                    </option>
+
+                    <option value="Mercado Pago">
+                      Mercado Pago
+                    </option>
+
+                    <option value="Otro">
+                      Otro
+                    </option>
+
+                  </select>
+
+                </div>
+
+              </div>
+
+              <div class="jp-accounts-actions">
+
+                <button
+                  type="button"
+                  class="btn secondary"
+                  id="pagarTotal"
+                >
+                  💰 Cobrar deuda completa
+                </button>
+
+                <button
+                  type="submit"
+                  class="btn"
+                >
+                  ✓ Registrar pago
+                </button>
+
+              </div>
+
+              <p class="jp-accounts-help">
+                Podés cobrar una parte o el total.
+                El sistema actualizará automáticamente
+                el saldo pendiente.
+              </p>
+
+            </form>
+
+          <% } else { %>
+
+            <div class="jp-accounts-empty">
+
+              <strong>✅ No hay pagos pendientes</strong>
+
+              Actualmente ningún alumno registra deuda.
+
+            </div>
+
+          <% } %>
+
+        </div>
+
+      </section>
+
+      <!-- =====================================
+           MOVIMIENTOS RECIENTES
+      ====================================== -->
+
+      <details class="jp-accounts-history">
+
+        <summary>
+          📋 Ver últimos movimientos de cuentas corrientes
+        </summary>
+
+        <div class="jp-accounts-card">
+
+          <h2>Movimientos recientes</h2>
+
+          <p class="jp-accounts-description">
+            Últimos cargos y pagos registrados.
+            Para ver el historial completo de un alumno,
+            utilizá el botón «Ver movimientos».
+          </p>
+
+          <div class="table-wrap">
+
+            <table>
+
+              <thead>
+                <tr>
+                  <th>Alumno</th>
+                  <th>Detalle</th>
+                  <th>Tipo</th>
+                  <th>Importe</th>
+                </tr>
+              </thead>
+
+              <tbody>
+
+                <% movs.forEach(m => { %>
+
+                  <tr>
+
+                    <td>
+                      <%= m.alumno
+                        ? m.alumno.apellido + ', ' + m.alumno.nombre
+                        : 'Alumno eliminado' %>
+                    </td>
+
+                    <td>
+                      <%= m.descripcion %>
+                    </td>
+
+                    <td>
+
+                      <span class="tag <%= m.tipo === 'cargo' ? 'warn' : 'ok' %>">
+
+                        <%= m.tipo === 'cargo'
+                          ? 'Deuda'
+                          : 'Pago' %>
+
+                      </span>
+
+                    </td>
+
+                    <td>
+                      $<%= Number(m.importe || 0).toLocaleString('es-AR', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                      }) %>
+                    </td>
+
+                  </tr>
+
+                <% }) %>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+      </details>
+
+    </div>
+
+  </main>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* =====================================
+     UTILIDADES
+  ====================================== */
+
+  function formatoDinero(valor) {
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS'
+    }).format(Number(valor) || 0);
+  }
+
+  /* =====================================
+     NAVEGACIÓN ENTRE PESTAÑAS
+  ====================================== */
+
+  const tabs = document.querySelectorAll('.jp-accounts-tab');
+  const panels = document.querySelectorAll('.jp-accounts-panel');
+
+  function abrirPestana(nombre) {
+
+    tabs.forEach(tab => {
+
+      const activa = tab.dataset.accountsTab === nombre;
+
+      tab.classList.toggle('active', activa);
+
+    });
+
+    panels.forEach(panel => {
+
+      const activa = panel.id === 'accounts-panel-' + nombre;
+
+      panel.classList.toggle('active', activa);
+
+      panel.hidden = !activa;
+
+    });
+
+  }
+
+  tabs.forEach(tab => {
+
+    tab.addEventListener('click', function () {
+
+      abrirPestana(this.dataset.accountsTab);
+
+    });
+
+  });
+
+  /* =====================================
+     BUSCADOR DE ALUMNOS CON DEUDA
+  ====================================== */
+
+  const buscador = document.getElementById('buscarDeudor');
+
+  if (buscador) {
+
+    buscador.addEventListener('input', function () {
+
+      const texto = this.value
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim();
+
+      let encontrados = 0;
+
+      document.querySelectorAll('.jp-debt-item').forEach(item => {
+
+        const nombre = (item.dataset.nombre || '')
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '');
+
+        const visible = nombre.includes(texto);
+
+        item.style.display = visible ? '' : 'none';
+
+        if (visible) encontrados++;
+
+      });
+
+      const sinResultados =
+        document.getElementById('sinResultadosDeuda');
+
+      if (sinResultados) {
+        sinResultados.style.display =
+          encontrados ? 'none' : 'block';
+      }
+
+    });
+
+  }
+
+  /* =====================================
+     FORMULARIO DE COMPRA
+  ====================================== */
+
+  const producto = document.getElementById('compraProducto');
+  const cantidad = document.getElementById('compraCantidad');
+
+  const resumenCompra = document.getElementById('resumenCompra');
+  const totalCompra = document.getElementById('totalCompra');
+
+  function actualizarCompra() {
+
+    if (!producto || !cantidad) return;
+
+    const opcion = producto.selectedOptions[0];
+
+    const precio = Number(opcion?.dataset.precio || 0);
+    const stock = Number(opcion?.dataset.stock || 0);
+    const unidades = Number(cantidad.value || 0);
+
+    if (!producto.value) {
+
+      resumenCompra.hidden = true;
+      cantidad.removeAttribute('max');
+      cantidad.max = 100;
+
+      return;
+
+    }
+
+    cantidad.max = Math.min(100, stock);
+
+    const total = Math.round(precio * unidades * 100) / 100;
+
+    totalCompra.textContent = formatoDinero(total);
+
+    resumenCompra.hidden = false;
+
+  }
+
+  if (producto && cantidad) {
+
+    producto.addEventListener('change', actualizarCompra);
+    cantidad.addEventListener('input', actualizarCompra);
+
+    actualizarCompra();
+
+  }
+
+  const formCompra = document.getElementById('formCompraCuenta');
+
+  if (formCompra) {
+
+    formCompra.addEventListener('submit', function (event) {
+
+      const alumno = document.getElementById('compraAlumno');
+      const producto = document.getElementById('compraProducto');
+      const cantidad = document.getElementById('compraCantidad');
+
+      if (!alumno.value || !producto.value) {
+        event.preventDefault();
+        alert('Seleccioná un alumno y un producto.');
+        return;
+      }
+
+      const opcion = producto.selectedOptions[0];
+      const stock = Number(opcion.dataset.stock || 0);
+      const unidades = Number(cantidad.value);
+
+      if (
+        !Number.isInteger(unidades) ||
+        unidades < 1 ||
+        unidades > 100 ||
+        unidades > stock
+      ) {
+
+        event.preventDefault();
+
+        alert('Revisá la cantidad. No puede superar el stock disponible.');
+
+        return;
+      }
+
+      const nombreAlumno = alumno.selectedOptions[0].textContent.trim();
+
+      const confirmado = confirm(
+        '¿Anotar esta compra como deuda de ' +
+        nombreAlumno +
+        '?\n\nImporte: ' +
+        totalCompra.textContent
+      );
+
+      if (!confirmado) {
+        event.preventDefault();
+      }
+
+    });
+
+  }
+
+  /* =====================================
+     REGISTRAR PAGO
+  ====================================== */
+
+  const pagoAlumno = document.getElementById('pagoAlumno');
+  const pagoImporte = document.getElementById('pagoImporte');
+
+  const saldoPagoBox = document.getElementById('saldoPagoBox');
+  const saldoPagoTexto = document.getElementById('saldoPagoTexto');
+
+  const pagarTotal = document.getElementById('pagarTotal');
+
+  function saldoSeleccionado() {
+
+    if (!pagoAlumno) return 0;
+
+    const opcion = pagoAlumno.selectedOptions[0];
+
+    return Number(opcion?.dataset.saldo || 0);
+
+  }
+
+  function actualizarAlumnoPago() {
+
+    if (!pagoAlumno) return;
+
+    const saldo = saldoSeleccionado();
+
+    if (!pagoAlumno.value || saldo <= 0) {
+
+      saldoPagoBox.hidden = true;
+
+      pagoImporte.value = '';
+      pagoImporte.removeAttribute('max');
+
+      return;
+
+    }
+
+    saldoPagoBox.hidden = false;
+
+    saldoPagoTexto.textContent = formatoDinero(saldo);
+
+    pagoImporte.max = saldo.toFixed(2);
+
+    pagoImporte.value = '';
+
+  }
+
+  if (pagoAlumno) {
+
+    pagoAlumno.addEventListener('change', actualizarAlumnoPago);
+
+    actualizarAlumnoPago();
+
+  }
+
+  if (pagarTotal) {
+
+    pagarTotal.addEventListener('click', function () {
+
+      if (!pagoAlumno.value) {
+
+        alert('Primero seleccioná un alumno.');
+
+        return;
+
+      }
+
+      pagoImporte.value = saldoSeleccionado().toFixed(2);
+
+      pagoImporte.focus();
+
+    });
+
+  }
+
+  /* =====================================
+     COBRAR DESDE LA LISTA DE DEUDORES
+  ====================================== */
+
+  document.querySelectorAll('[data-cobrar]').forEach(boton => {
+
+    boton.addEventListener('click', function () {
+
+      const alumnoId = this.dataset.cobrar;
+
+      abrirPestana('pago');
+
+      if (pagoAlumno) {
+
+        pagoAlumno.value = alumnoId;
+
+        actualizarAlumnoPago();
+
+      }
+
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+
+    });
+
+  });
+
+  /* =====================================
+     CONFIRMACIÓN DE PAGO
+  ====================================== */
+
+  const formPago = document.getElementById('formPagoCuenta');
+
+  if (formPago) {
+
+    formPago.addEventListener('submit', function (event) {
+
+      if (!pagoAlumno.value) {
+
+        event.preventDefault();
+
+        alert('Seleccioná un alumno con deuda.');
+
+        return;
+
+      }
+
+      const saldo = saldoSeleccionado();
+      const importe = Number(pagoImporte.value);
+
+      if (
+        !Number.isFinite(importe) ||
+        importe <= 0 ||
+        importe > saldo + 0.001
+      ) {
+
+        event.preventDefault();
+
+        alert('El importe debe ser mayor a cero y no superar la deuda.');
+
+        return;
+
+      }
+
+      const nombre = pagoAlumno.selectedOptions[0].textContent.trim();
+
+      const medio = document.getElementById('pagoMedio').value;
+
+      const confirmado = confirm(
+        '¿Confirmás este cobro?\n\n' +
+        'Alumno: ' + nombre + '\n' +
+        'Importe: ' + formatoDinero(importe) + '\n' +
+        'Medio: ' + medio + '\n\n' +
+        'Saldo restante: ' + formatoDinero(
+          Math.max(0, saldo - importe)
+        )
+      );
+
+      if (!confirmado) {
+        event.preventDefault();
+      }
+
+    });
+
+  }
+
+})();
+</script>
+
+<%- include('partials/end') %>

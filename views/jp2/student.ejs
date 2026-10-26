@@ -1,0 +1,1750 @@
+<%- include('partials/head', { title: 'Mi gimnasio' }) %>
+
+<%
+  const fechaActual = new Date();
+  const fechaVencimiento = venc ? new Date(venc) : null;
+
+  const diasRestantes = fechaVencimiento && !isNaN(fechaVencimiento.getTime())
+    ? Math.ceil((fechaVencimiento.getTime() - fechaActual.getTime()) / 86400000)
+    : null;
+
+  const cuotaVigente = diasRestantes !== null && diasRestantes >= 0;
+
+  const nombreAlumno = c.nombre || 'Alumno';
+  const apellidoAlumno = c.apellido || '';
+  const planAlumno = c.plan || 'Sin plan';
+
+  const listaRutinas = Array.isArray(rutinas) ? rutinas : [];
+  const listaNovedades = Array.isArray(novedades) ? novedades : [];
+
+  const cuentaAlumno = cuenta || { total: 0, movs: [] };
+  const movimientos = Array.isArray(cuentaAlumno.movs) ? cuentaAlumno.movs : [];
+
+  const configuracion = conf || {};
+
+  const ordenDias = [
+    'Lunes',
+    'Martes',
+    'Miércoles',
+    'Jueves',
+    'Viernes',
+    'Sábado',
+    'Domingo'
+  ];
+
+  const rutinasOrdenadas = [...listaRutinas].sort(
+    (a, b) => ordenDias.indexOf(a.dia) - ordenDias.indexOf(b.dia)
+  );
+
+  const totalEjercicios = rutinasOrdenadas.reduce(
+    (total, rutina) => total + (Array.isArray(rutina.ejercicios) ? rutina.ejercicios.length : 0),
+    0
+  );
+
+  const saldoCuenta = Number(cuentaAlumno.total || 0);
+
+  const formatoDinero = valor =>
+    Number(valor || 0).toLocaleString('es-AR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+  const formatoFecha = valor => {
+    if (!valor) return 'Sin fecha';
+    const fecha = new Date(valor);
+    if (isNaN(fecha.getTime())) return 'Sin fecha';
+    return fecha.toLocaleDateString('es-AR', { timeZone: 'UTC' });
+  };
+%>
+
+<style>
+  /* ==========================================
+     JP ENTRENAMIENTO 2.0 - APP ALUMNOS
+     Estilos aislados de la vista administrativa
+  ========================================== */
+
+  body {
+    margin: 0;
+    background: #eef2f8;
+  }
+
+  .jp-student-app,
+  .jp-student-app * {
+    box-sizing: border-box;
+  }
+
+  .jp-student-app {
+    --jp-primary: #18366b;
+    --jp-secondary: #3867c8;
+    --jp-text: #172846;
+    --jp-muted: #718099;
+    --jp-border: #e5ebf4;
+    --jp-background: #f3f6fb;
+
+    width: 100%;
+    max-width: 520px;
+    min-height: 100dvh;
+    margin: 0 auto;
+    padding: 0 16px 104px;
+    background: var(--jp-background);
+    color: var(--jp-text);
+    font-family: 'Segoe UI', Arial, sans-serif;
+    position: relative;
+  }
+
+  .jp-student-app button,
+  .jp-student-app input {
+    font: inherit;
+  }
+
+  .jp-app-header {
+    margin: 0 -16px 20px;
+    padding: 25px 22px 29px;
+    background: linear-gradient(135deg, #152b53, #3865c6);
+    color: white;
+    border-radius: 0 0 28px 28px;
+  }
+
+  .jp-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 26px;
+  }
+
+  .jp-brand-logo {
+    width: 49px;
+    height: 49px;
+    object-fit: contain;
+    background: white;
+    padding: 5px;
+    border-radius: 15px;
+  }
+
+  .jp-brand strong {
+    display: block;
+    font-size: 15px;
+    letter-spacing: .2px;
+  }
+
+  .jp-brand small {
+    display: block;
+    color: #cbd9f9;
+    margin-top: 3px;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+  }
+
+  .jp-greeting {
+    font-size: clamp(24px, 6vw, 31px);
+    font-weight: 800;
+    line-height: 1.2;
+    margin: 0 0 8px;
+  }
+
+  .jp-subtitle {
+    margin: 0;
+    color: #d9e4ff;
+    font-size: 14px;
+  }
+
+  .jp-page {
+    display: none;
+    animation: jpAppear .18s ease-out;
+  }
+
+  .jp-page.is-active {
+    display: block;
+  }
+
+  @keyframes jpAppear {
+    from { opacity: .5; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .jp-section-heading {
+    margin: 6px 0 18px;
+  }
+
+  .jp-section-heading h2 {
+    margin: 0 0 5px;
+    font-size: 23px;
+    font-weight: 800;
+    color: #152a4d;
+  }
+
+  .jp-section-heading p {
+    margin: 0;
+    color: var(--jp-muted);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .jp-card {
+    background: white;
+    border: 1px solid var(--jp-border);
+    border-radius: 21px;
+    padding: 19px;
+    margin-bottom: 15px;
+    box-shadow: 0 8px 28px rgba(24, 47, 88, .035);
+  }
+
+  .jp-card h3 {
+    margin: 0 0 12px;
+    font-size: 16px;
+    color: #192d4d;
+  }
+
+  .jp-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 11px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .jp-status.ok {
+    background: #e3f8eb;
+    color: #138345;
+  }
+
+  .jp-status.danger {
+    background: #ffebed;
+    color: #c43248;
+  }
+
+  .jp-status.warning {
+    background: #fff3dc;
+    color: #a76c00;
+  }
+
+  .jp-plan-name {
+    margin: 14px 0 8px;
+    font-size: 27px;
+    font-weight: 800;
+  }
+
+  .jp-info-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-top: 13px;
+    font-size: 13px;
+  }
+
+  .jp-info-line span {
+    color: var(--jp-muted);
+  }
+
+  .jp-info-line strong {
+    text-align: right;
+  }
+
+  .jp-alert-text {
+    font-size: 12px;
+    color: var(--jp-muted);
+    margin: 12px 0 0;
+  }
+
+  .jp-main-action {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    width: 100%;
+    padding: 17px 19px;
+    border: 0;
+    border-radius: 18px;
+    color: white;
+    background: linear-gradient(135deg, #24478b, #4676db);
+    cursor: pointer;
+    text-align: left;
+    margin: 16px 0;
+  }
+
+  .jp-main-action strong {
+    display: block;
+    font-size: 15px;
+  }
+
+  .jp-main-action small {
+    display: block;
+    margin-top: 5px;
+    color: #dbe6ff;
+    font-size: 12px;
+  }
+
+  .jp-main-action .arrow {
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+
+  .jp-mini-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .jp-mini-stat {
+    padding: 17px;
+    border: 1px solid var(--jp-border);
+    border-radius: 18px;
+    background: white;
+  }
+
+  .jp-mini-stat small {
+    display: block;
+    color: var(--jp-muted);
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+
+  .jp-mini-stat strong {
+    font-size: 21px;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+  }
+
+  /* DÍAS DE ENTRENAMIENTO */
+
+  .jp-days {
+    display: flex;
+    gap: 9px;
+    overflow-x: auto;
+    padding: 2px 0 13px;
+    margin-bottom: 7px;
+    scrollbar-width: thin;
+  }
+
+  .jp-day-button {
+    flex: 0 0 auto;
+    border: 1px solid #dce5f3;
+    border-radius: 13px;
+    padding: 12px 17px;
+    background: white;
+    color: #47607f;
+    font-size: 13px;
+    font-weight: 750;
+    cursor: pointer;
+  }
+
+  .jp-day-button.active {
+    color: white;
+    background: #254b94;
+    border-color: #254b94;
+  }
+
+  .jp-day-content {
+    display: none;
+  }
+
+  .jp-day-content.active {
+    display: block;
+  }
+
+  .jp-workout-title {
+    font-size: 18px;
+    font-weight: 800;
+    margin: 5px 0 7px;
+    overflow-wrap: anywhere;
+  }
+
+  .jp-workout-count {
+    color: var(--jp-muted);
+    font-size: 12px;
+    margin: 0 0 16px;
+  }
+
+  .jp-progress-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 9px;
+  }
+
+  .jp-progress-row span:last-child {
+    color: #3668c6;
+  }
+
+  .jp-progress-track {
+    height: 9px;
+    background: #e8edf6;
+    border-radius: 100px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .jp-progress-fill {
+    height: 100%;
+    width: 0;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #2a65cf, #24b77a);
+    transition: width .2s ease;
+  }
+
+  /* EJERCICIOS */
+
+  .jp-exercise {
+    padding: 17px;
+    margin-bottom: 13px;
+    border: 1px solid #e2e9f4;
+    border-radius: 19px;
+    background: white;
+    transition: border-color .2s, background .2s;
+  }
+
+  .jp-exercise.completed {
+    border-color: #a7e2c0;
+    background: #f6fff9;
+  }
+
+  .jp-exercise-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    margin-bottom: 15px;
+  }
+
+  .jp-exercise-number {
+    display: grid;
+    place-items: center;
+    width: 33px;
+    height: 33px;
+    flex: 0 0 33px;
+    border-radius: 11px;
+    background: #e8efff;
+    color: #2857b2;
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  .jp-exercise-name {
+    margin: 3px 0 0;
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.45;
+    color: #15294a;
+    overflow-wrap: anywhere;
+  }
+
+  .jp-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+    margin-bottom: 13px;
+  }
+
+  .jp-metric {
+    padding: 12px 10px;
+    background: #f2f5fa;
+    border-radius: 12px;
+    text-align: center;
+    min-width: 0;
+  }
+
+  .jp-metric strong {
+    display: block;
+    font-size: 16px;
+    font-weight: 800;
+    color: #1a386b;
+    overflow-wrap: anywhere;
+  }
+
+  .jp-metric small {
+    display: block;
+    font-size: 11px;
+    color: #71809a;
+    margin-top: 4px;
+  }
+
+  .jp-tip {
+    background: #fff8e8;
+    border-radius: 12px;
+    padding: 12px;
+    margin: 0 0 13px;
+    color: #795b19;
+    font-size: 12px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+  }
+
+  .jp-complete-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 13px;
+    background: #eef3fc;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 750;
+    cursor: pointer;
+  }
+
+  .jp-complete-label input {
+    width: 20px;
+    height: 20px;
+    accent-color: #239a60;
+    flex-shrink: 0;
+  }
+
+  .jp-complete-label span {
+    color: #264675;
+  }
+
+  /* CUENTA */
+
+  .jp-balance {
+    padding: 23px;
+    border-radius: 21px;
+    background: linear-gradient(135deg, #193762, #315fba);
+    color: white;
+    margin-bottom: 18px;
+  }
+
+  .jp-balance small {
+    color: #dce6fb;
+    font-size: 13px;
+  }
+
+  .jp-balance strong {
+    display: block;
+    font-size: 31px;
+    margin: 10px 0 6px;
+    overflow-wrap: anywhere;
+  }
+
+  .jp-balance p {
+    margin: 0;
+    color: #dce6fb;
+    font-size: 12px;
+  }
+
+  .jp-movement {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 15px 0;
+    border-bottom: 1px solid #edf0f6;
+  }
+
+  .jp-movement:last-child {
+    border-bottom: 0;
+  }
+
+  .jp-movement strong {
+    display: block;
+    font-size: 13px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  .jp-movement small {
+    display: block;
+    color: var(--jp-muted);
+    font-size: 11px;
+    margin-top: 4px;
+  }
+
+  .jp-movement-amount {
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  .jp-movement-amount.charge {
+    color: #cb4053;
+  }
+
+  .jp-movement-amount.payment {
+    color: #14834e;
+  }
+
+  /* AVISOS */
+
+  .jp-notice {
+    border-bottom: 1px solid #edf0f6;
+    padding: 15px 0;
+  }
+
+  .jp-notice:first-child {
+    padding-top: 0;
+  }
+
+  .jp-notice:last-child {
+    border-bottom: 0;
+  }
+
+  .jp-notice strong {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+
+  .jp-notice p {
+    margin: 0 0 7px;
+    color: #52647e;
+    font-size: 13px;
+    line-height: 1.6;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+  }
+
+  .jp-notice small {
+    color: var(--jp-muted);
+    font-size: 11px;
+  }
+
+  .jp-schedule {
+    font-size: 13px;
+    color: #52647e;
+    line-height: 1.7;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+  }
+
+  /* PERFIL */
+
+  .jp-profile-top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .jp-avatar {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+    background: #e6efff;
+    color: #2d58ad;
+    font-size: 22px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+
+  .jp-profile-top strong {
+    display: block;
+    font-size: 16px;
+  }
+
+  .jp-profile-top small {
+    color: var(--jp-muted);
+    display: block;
+    margin-top: 5px;
+  }
+
+  .jp-form-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 750;
+    margin: 15px 0 7px;
+  }
+
+  .jp-form-input {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    padding: 13px;
+    border: 1px solid #dce5f1;
+    border-radius: 12px;
+    outline: none;
+    background: white;
+    color: #172846;
+  }
+
+  .jp-form-input:focus {
+    border-color: #3867c8;
+    box-shadow: 0 0 0 3px rgba(56, 103, 200, .12);
+  }
+
+  .jp-btn {
+    display: block;
+    width: 100%;
+    padding: 14px 16px;
+    border: 0;
+    border-radius: 13px;
+    background: #2857ae;
+    color: white;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    margin-top: 17px;
+  }
+
+  .jp-btn-outline {
+    background: #f0f3f9;
+    color: #355076;
+  }
+
+  .jp-empty {
+    text-align: center;
+    padding: 30px 15px;
+    color: #70809a;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .jp-empty-icon {
+    display: block;
+    font-size: 31px;
+    margin-bottom: 12px;
+  }
+
+  /* NAVEGACIÓN INFERIOR */
+
+  .jp-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    width: 100%;
+    max-width: 520px;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0;
+    background: white;
+    border-top: 1px solid #e2e9f4;
+    padding: 9px 5px calc(9px + env(safe-area-inset-bottom));
+    box-shadow: 0 -8px 30px rgba(18, 38, 73, .07);
+  }
+
+  .jp-nav-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-width: 0;
+    padding: 8px 2px;
+    border: 0;
+    border-radius: 13px;
+    background: transparent;
+    color: #8190a7;
+    cursor: pointer;
+    font-size: 10px;
+    font-weight: 750;
+  }
+
+  .jp-nav-button .icon {
+    font-size: 21px;
+    line-height: 1.1;
+  }
+
+  .jp-nav-button.active {
+    color: #2856ae;
+    background: #edf3ff;
+  }
+
+  .jp-small-note {
+    color: #7a889d;
+    font-size: 11px;
+    line-height: 1.6;
+    margin-top: 15px;
+  }
+
+  @media (max-width: 360px) {
+    .jp-student-app {
+      padding-left: 12px;
+      padding-right: 12px;
+    }
+
+    .jp-app-header {
+      margin-left: -12px;
+      margin-right: -12px;
+    }
+
+    .jp-card {
+      padding: 15px;
+    }
+
+    .jp-nav-button {
+      font-size: 9px;
+    }
+
+    .jp-nav-button .icon {
+      font-size: 19px;
+    }
+  }
+
+  @media (min-width: 521px) {
+    .jp-student-app {
+      box-shadow: 0 0 45px rgba(20, 40, 75, .08);
+    }
+  }
+</style>
+
+<div class="jp-student-app">
+
+  <!-- ======================================
+       PANTALLA INICIO
+  ======================================= -->
+
+  <section class="jp-page is-active" id="jp-page-inicio">
+
+    <header class="jp-app-header">
+
+      <div class="jp-brand">
+        <img
+          src="/images/logo-jp.png"
+          alt="JP Entrenamiento"
+          class="jp-brand-logo"
+        >
+
+        <div>
+          <strong>JP ENTRENAMIENTO</strong>
+          <small>Bienvenido a la app de JP</small>
+        </div>
+      </div>
+
+      <h1 class="jp-greeting">
+        ¡Hola, <%= nombreAlumno %>! 💪
+      </h1>
+
+      <p class="jp-subtitle">
+        Tu entrenamiento, siempre a mano.
+      </p>
+
+    </header>
+
+    <div class="jp-section-heading">
+      <h2>Mi gimnasio</h2>
+      <p>Tu información más importante.</p>
+    </div>
+
+    <div class="jp-card">
+
+      <span class="jp-status <%= diasRestantes === null ? 'warning' : cuotaVigente ? 'ok' : 'danger' %>">
+        <%= diasRestantes === null
+          ? 'Cuota sin fecha'
+          : cuotaVigente
+            ? '✓ Cuota al día'
+            : '⚠ Cuota vencida'
+        %>
+      </span>
+
+      <div class="jp-plan-name">
+        <%= planAlumno %>
+      </div>
+
+      <div class="jp-info-line">
+        <span>Próximo vencimiento</span>
+        <strong><%= formatoFecha(fechaVencimiento) %></strong>
+      </div>
+
+      <p class="jp-alert-text">
+        <% if (diasRestantes === null) { %>
+          Consultá en recepción por tu próximo vencimiento.
+        <% } else if (diasRestantes === 0) { %>
+          Tu cuota vence hoy.
+        <% } else if (diasRestantes > 0) { %>
+          Faltan <%= diasRestantes %> días para el vencimiento.
+        <% } else { %>
+          Tu cuota venció hace <%= Math.abs(diasRestantes) %> días.
+        <% } %>
+      </p>
+
+    </div>
+
+    <button
+      type="button"
+      class="jp-main-action"
+      data-open-page="rutina"
+    >
+      <span>
+        <strong>🏋️ Ver mi entrenamiento</strong>
+        <small>
+          <%= rutinasOrdenadas.length %> días ·
+          <%= totalEjercicios %> ejercicios asignados
+        </small>
+      </span>
+
+      <span class="arrow">→</span>
+    </button>
+
+    <div class="jp-mini-grid">
+
+      <div class="jp-mini-stat">
+        <small>📅 Días de rutina</small>
+        <strong><%= rutinasOrdenadas.length %></strong>
+      </div>
+
+      <div class="jp-mini-stat">
+        <small>💳 Saldo de productos</small>
+        <strong>$<%= formatoDinero(saldoCuenta) %></strong>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ======================================
+       PANTALLA RUTINA
+  ======================================= -->
+
+  <section class="jp-page" id="jp-page-rutina">
+
+    <div class="jp-section-heading" style="padding-top:26px">
+      <h2>🏋️ Mi entrenamiento</h2>
+      <p>Elegí un día y completá los ejercicios en orden.</p>
+    </div>
+
+    <% if (!rutinasOrdenadas.length) { %>
+
+      <div class="jp-card jp-empty">
+        <span class="jp-empty-icon">🏋️</span>
+        Tu profesor todavía no te asignó una rutina.
+      </div>
+
+    <% } else { %>
+
+      <div class="jp-days" role="tablist" aria-label="Días de entrenamiento">
+
+        <% rutinasOrdenadas.forEach((rutina, indice) => { %>
+
+          <button
+            type="button"
+            class="jp-day-button <%= indice === 0 ? 'active' : '' %>"
+            data-day="<%= indice %>"
+            role="tab"
+            aria-selected="<%= indice === 0 ? 'true' : 'false' %>"
+          >
+            <%= rutina.dia %>
+          </button>
+
+        <% }) %>
+
+      </div>
+
+      <% rutinasOrdenadas.forEach((rutina, indice) => { %>
+
+        <div
+          class="jp-day-content <%= indice === 0 ? 'active' : '' %>"
+          data-day-content="<%= indice %>"
+        >
+
+          <div class="jp-card">
+
+            <h3 class="jp-workout-title">
+              <%= rutina.titulo || rutina.dia %>
+            </h3>
+
+            <p class="jp-workout-count">
+              <%= rutina.ejercicios.length %> ejercicios para realizar
+            </p>
+
+            <div class="jp-progress-row">
+              <span>Progreso del entrenamiento</span>
+              <span class="jp-progress-text">
+                0 / <%= rutina.ejercicios.length %>
+              </span>
+            </div>
+
+            <div class="jp-progress-track">
+              <div class="jp-progress-fill"></div>
+            </div>
+
+            <% rutina.ejercicios.forEach((ejercicio, numero) => { %>
+
+              <article class="jp-exercise">
+
+                <div class="jp-exercise-header">
+
+                  <span class="jp-exercise-number">
+                    <%= numero + 1 %>
+                  </span>
+
+                  <h3 class="jp-exercise-name">
+                    <%= ejercicio.nombre %>
+                  </h3>
+
+                </div>
+
+                <div class="jp-metrics">
+
+                  <% if (ejercicio.series) { %>
+                    <div class="jp-metric">
+                      <strong><%= ejercicio.series %></strong>
+                      <small>Series</small>
+                    </div>
+                  <% } %>
+
+                  <% if (ejercicio.repeticiones) { %>
+                    <div class="jp-metric">
+                      <strong><%= ejercicio.repeticiones %></strong>
+                      <small>Repeticiones</small>
+                    </div>
+                  <% } %>
+
+                  <% if (ejercicio.peso && ejercicio.peso !== '-') { %>
+                    <div class="jp-metric">
+                      <strong><%= ejercicio.peso %></strong>
+                      <small>Peso</small>
+                    </div>
+                  <% } %>
+
+                  <% if (ejercicio.descanso && ejercicio.descanso !== '-') { %>
+                    <div class="jp-metric">
+                      <strong><%= ejercicio.descanso %></strong>
+                      <small>Descanso</small>
+                    </div>
+                  <% } %>
+
+                </div>
+
+                <% if (ejercicio.indicaciones) { %>
+                  <p class="jp-tip">
+                    💡 <%= ejercicio.indicaciones %>
+                  </p>
+                <% } %>
+
+                <label class="jp-complete-label">
+
+                  <input
+  type="checkbox"
+  class="jp-exercise-check"
+  data-routine="<%= rutina._id %>"
+  data-exercise="<%= ejercicio._id || numero %>"
+  data-index="<%= numero %>"
+>
+
+                  <span>Marcar como realizado</span>
+
+                </label>
+
+              </article>
+
+            <% }) %>
+
+          </div>
+
+        </div>
+
+      <% }) %>
+
+      <p class="jp-small-note">
+        Tu progreso se guarda automaticamente en tu cuenta.
+        El profesor puede actualizar tu rutina cuando sea necesario.
+      </p>
+
+    <% } %>
+
+  </section>
+
+
+  <!-- ======================================
+       PANTALLA CUENTA
+  ======================================= -->
+
+  <section class="jp-page" id="jp-page-cuenta">
+
+    <div class="jp-section-heading" style="padding-top:26px">
+      <h2>💳 Mi cuenta</h2>
+      <p>Consultá tus consumos y pagos de productos.</p>
+    </div>
+
+    <div class="jp-balance">
+      <small>Saldo de productos</small>
+
+      <strong>
+        $<%= formatoDinero(saldoCuenta) %>
+      </strong>
+
+      <p>
+        <%= saldoCuenta > 0
+          ? 'Importe pendiente de pago'
+          : saldoCuenta < 0
+            ? 'Saldo a favor'
+            : 'No tenés saldo pendiente'
+        %>
+      </p>
+    </div>
+
+    <div class="jp-card">
+
+      <h3>Últimos movimientos</h3>
+
+      <% if (!movimientos.length) { %>
+
+        <div class="jp-empty">
+          Todavía no tenés movimientos registrados.
+        </div>
+
+      <% } else { %>
+
+        <% movimientos.forEach(movimiento => { %>
+
+          <div class="jp-movement">
+
+            <div>
+              <strong>
+                <%= movimiento.descripcion || 'Movimiento' %>
+              </strong>
+
+              <small>
+                <%= formatoFecha(movimiento.fecha) %>
+              </small>
+            </div>
+
+            <div class="jp-movement-amount <%= movimiento.tipo === 'cargo' ? 'charge' : 'payment' %>">
+              <%= movimiento.tipo === 'cargo' ? '+' : '-' %>
+              $<%= formatoDinero(movimiento.importe) %>
+            </div>
+
+          </div>
+
+        <% }) %>
+
+      <% } %>
+
+    </div>
+
+  </section>
+
+
+  <!-- ======================================
+       PANTALLA AVISOS
+  ======================================= -->
+
+  <section class="jp-page" id="jp-page-avisos">
+
+    <div class="jp-section-heading" style="padding-top:26px">
+      <h2>🔔 Avisos</h2>
+      <p>Novedades e información del gimnasio.</p>
+    </div>
+
+    <div class="jp-card">
+
+      <h3>📢 Novedades</h3>
+
+      <% if (!listaNovedades.length) { %>
+
+        <div class="jp-empty">
+          No hay novedades por el momento.
+        </div>
+
+      <% } else { %>
+
+        <% listaNovedades.forEach(novedad => { %>
+
+          <div class="jp-notice">
+
+            <strong><%= novedad.titulo %></strong>
+
+            <p><%= novedad.mensaje %></p>
+
+            <small>
+              <%= formatoFecha(novedad.fecha) %>
+            </small>
+
+          </div>
+
+        <% }) %>
+
+      <% } %>
+
+    </div>
+
+    <div class="jp-card">
+
+      <h3>🕒 Horarios del gimnasio</h3>
+
+      <div class="jp-schedule">
+        <%= configuracion.horarios || 'Consultar horarios en recepción.' %>
+      </div>
+
+      <% if (configuracion.diasCerrados) { %>
+        <div class="jp-info-line">
+          <span>Días cerrados</span>
+          <strong><%= configuracion.diasCerrados %></strong>
+        </div>
+      <% } %>
+
+      <% if (configuracion.direccion) { %>
+        <div class="jp-info-line">
+          <span>Dirección</span>
+          <strong><%= configuracion.direccion %></strong>
+        </div>
+      <% } %>
+
+    </div>
+
+  </section>
+
+
+  <!-- ======================================
+       PANTALLA PERFIL
+  ======================================= -->
+
+  <section class="jp-page" id="jp-page-perfil">
+
+    <div class="jp-section-heading" style="padding-top:26px">
+      <h2>👤 Mi perfil</h2>
+      <p>Tu información personal.</p>
+    </div>
+
+    <div class="jp-card">
+
+      <div class="jp-profile-top">
+
+        <div class="jp-avatar">
+          <%= nombreAlumno.charAt(0).toUpperCase() %>
+        </div>
+
+        <div>
+          <strong>
+            <%= nombreAlumno %> <%= apellidoAlumno %>
+          </strong>
+
+          <small>
+            Alumno JP Entrenamiento
+          </small>
+        </div>
+
+      </div>
+
+      <div class="jp-info-line">
+        <span>DNI</span>
+        <strong><%= c.dni || 'Sin registrar' %></strong>
+      </div>
+
+      <div class="jp-info-line">
+        <span>Plan</span>
+        <strong><%= planAlumno %></strong>
+      </div>
+
+    </div>
+
+    <div class="jp-card">
+
+      <h3>🔐 Cambiar contraseña</h3>
+
+      <form action="/mi-app/clave" method="post">
+
+        <label class="jp-form-label">
+          Contraseña actual
+        </label>
+
+        <input
+          class="jp-form-input"
+          type="password"
+          name="actual"
+          autocomplete="current-password"
+          required
+        >
+
+        <label class="jp-form-label">
+          Nueva contraseña
+        </label>
+
+        <input
+          class="jp-form-input"
+          type="password"
+          name="nueva"
+          minlength="6"
+          autocomplete="new-password"
+          required
+        >
+
+        <button type="submit" class="jp-btn">
+          Guardar nueva contraseña
+        </button>
+
+      </form>
+
+    </div>
+
+    <div class="jp-card">
+
+      <form method="post" action="/logout">
+        <button type="submit" class="jp-btn jp-btn-outline">
+          Cerrar sesión
+        </button>
+      </form>
+
+    </div>
+
+  </section>
+
+</div>
+
+
+<!-- ======================================
+     NAVEGACIÓN INFERIOR
+======================================= -->
+
+<nav class="jp-bottom-nav" aria-label="Navegación de alumnos">
+
+  <button
+    type="button"
+    class="jp-nav-button active"
+    data-open-page="inicio"
+    aria-current="page"
+  >
+    <span class="icon">🏠</span>
+    <span>Inicio</span>
+  </button>
+
+  <button
+    type="button"
+    class="jp-nav-button"
+    data-open-page="rutina"
+  >
+    <span class="icon">🏋️</span>
+    <span>Rutina</span>
+  </button>
+
+  <button
+    type="button"
+    class="jp-nav-button"
+    data-open-page="cuenta"
+  >
+    <span class="icon">💳</span>
+    <span>Mis Consumos</span>
+  </button>
+
+  <button
+    type="button"
+    class="jp-nav-button"
+    data-open-page="avisos"
+  >
+    <span class="icon">🔔</span>
+    <span>Avisos</span>
+  </button>
+
+  <button
+    type="button"
+    class="jp-nav-button"
+    data-open-page="perfil"
+  >
+    <span class="icon">👤</span>
+    <span>Perfil</span>
+  </button>
+
+</nav>
+
+
+<script>
+(function () {
+  'use strict';
+
+  const paginas = document.querySelectorAll('.jp-page');
+  const botonesNavegacion = document.querySelectorAll('.jp-nav-button');
+  const botonesAbrir = document.querySelectorAll('[data-open-page]');
+  const botonesDias = document.querySelectorAll('.jp-day-button');
+  const panelesDias = document.querySelectorAll('.jp-day-content');
+
+  /* ======================================
+     NAVEGACIÓN PRINCIPAL
+  ====================================== */
+
+  function abrirPagina(nombre) {
+
+    const paginaDestino = document.getElementById('jp-page-' + nombre);
+
+    if (!paginaDestino) return;
+
+    paginas.forEach(pagina => {
+      pagina.classList.toggle('is-active', pagina === paginaDestino);
+    });
+
+    botonesNavegacion.forEach(boton => {
+      const activo = boton.dataset.openPage === nombre;
+
+      boton.classList.toggle('active', activo);
+
+      if (activo) {
+        boton.setAttribute('aria-current', 'page');
+      } else {
+        boton.removeAttribute('aria-current');
+      }
+    });
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'instant'
+    });
+
+  }
+
+  botonesAbrir.forEach(boton => {
+
+    boton.addEventListener('click', function () {
+      abrirPagina(this.dataset.openPage);
+    });
+
+  });
+
+
+  /* ======================================
+     SELECCIÓN DEL DÍA
+  ====================================== */
+
+  function abrirDia(indice) {
+
+    botonesDias.forEach(boton => {
+
+      const activo = boton.dataset.day === String(indice);
+
+      boton.classList.toggle('active', activo);
+      boton.setAttribute('aria-selected', activo ? 'true' : 'false');
+
+    });
+
+    panelesDias.forEach(panel => {
+      panel.classList.toggle(
+        'active',
+        panel.dataset.dayContent === String(indice)
+      );
+    });
+
+  }
+
+  botonesDias.forEach(boton => {
+
+    boton.addEventListener('click', function () {
+      abrirDia(this.dataset.day);
+    });
+
+  });
+
+
+ /* ======================================
+   PROGRESO DE ENTRENAMIENTO - MONGODB
+====================================== */
+
+const checks = document.querySelectorAll('.jp-exercise-check');
+
+function actualizarProgreso() {
+  document.querySelectorAll('.jp-day-content').forEach(panel => {
+    const ejercicios = panel.querySelectorAll('.jp-exercise-check');
+    const completados = panel.querySelectorAll(
+      '.jp-exercise-check:checked'
+    ).length;
+
+    const total = ejercicios.length;
+    const porcentaje = total
+      ? Math.round(completados * 100 / total)
+      : 0;
+
+    const texto = panel.querySelector('.jp-progress-text');
+    const barra = panel.querySelector('.jp-progress-fill');
+
+    if (texto) texto.textContent = completados + ' / ' + total;
+    if (barra) barra.style.width = porcentaje + '%';
+  });
+}
+
+function actualizarTarjeta(check) {
+  const tarjeta = check.closest('.jp-exercise');
+
+  if (tarjeta) {
+    tarjeta.classList.toggle('completed', check.checked);
+  }
+}
+
+async function cargarProgreso() {
+  try {
+    const respuesta = await fetch('/mi-app/progreso', {
+      credentials: 'same-origin'
+    });
+
+    if (!respuesta.ok) throw new Error('Error al cargar');
+
+    const datos = await respuesta.json();
+
+    if (!datos.ok) throw new Error('Respuesta inválida');
+
+    checks.forEach(check => {
+      const registro = datos.registros.find(
+        r => r.rutina === check.dataset.routine
+      );
+
+      const indice = Number(check.dataset.index);
+
+      check.checked = Boolean(
+        registro &&
+        registro.ejercicios[indice] &&
+        registro.ejercicios[indice].completado
+      );
+
+      actualizarTarjeta(check);
+    });
+
+    actualizarProgreso();
+
+  } catch (error) {
+    console.error('Error al cargar el progreso:', error);
+  }
+}
+
+checks.forEach(check => {
+  check.addEventListener('change', async function () {
+    const valorAnterior = !this.checked;
+
+    actualizarTarjeta(this);
+    actualizarProgreso();
+
+    this.disabled = true;
+
+    try {
+      const respuesta = await fetch('/mi-app/progreso', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          rutinaId: this.dataset.routine,
+          ejercicioIndex: Number(this.dataset.index),
+          completado: this.checked
+        })
+      });
+
+      if (!respuesta.ok) {
+        throw new Error('No se pudo guardar');
+      }
+
+      const datos = await respuesta.json();
+
+      if (!datos.ok) {
+        throw new Error('Error al guardar');
+      }
+
+    } catch (error) {
+      this.checked = valorAnterior;
+      actualizarTarjeta(this);
+      actualizarProgreso();
+
+      alert('No pudimos guardar tu progreso. Intentá nuevamente.');
+    } finally {
+      this.disabled = false;
+    }
+  });
+});
+
+cargarProgreso();
+
+})();
+</script>
+<!-- =====================================
+     MENSAJES EMERGENTES JP 2.0
+===================================== -->
+
+<style>
+
+.jp-message-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(12, 25, 49, .72);
+  z-index: 99999;
+
+  display: none;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+}
+
+.jp-message-overlay.visible {
+  display: flex;
+}
+
+.jp-message-box {
+  width: 100%;
+  max-width: 420px;
+  max-height: 85vh;
+  overflow-y: auto;
+
+  background: white;
+  border-radius: 24px;
+  padding: 27px;
+
+  text-align: center;
+  box-shadow: 0 20px 70px rgba(0, 0, 0, .2);
+}
+
+.jp-message-icon {
+  font-size: 43px;
+  margin-bottom: 12px;
+}
+
+.jp-message-box h2 {
+  font-size: 21px;
+  margin: 0 0 12px;
+  color: #173361;
+}
+
+.jp-message-box p {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #465a77;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.jp-message-box small {
+  display: block;
+  margin-top: 15px;
+  color: #8491a4;
+}
+
+.jp-message-box button {
+  width: 100%;
+  margin-top: 23px;
+  padding: 15px;
+
+  background: #2857ae;
+  border: none;
+  border-radius: 13px;
+
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+</style>
+
+<div
+  class="jp-message-overlay"
+  id="jpMessageOverlay"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="jpMessageTitle"
+>
+
+  <div class="jp-message-box">
+
+    <div class="jp-message-icon">
+      🔔
+    </div>
+
+    <h2 id="jpMessageTitle"></h2>
+
+    <p id="jpMessageText"></p>
+
+    <small id="jpMessageAuthor"></small>
+
+    <button
+      type="button"
+      id="jpMessageConfirm"
+    >
+      ✓ Entendido
+    </button>
+
+  </div>
+
+</div>
+
+<script>
+(function () {
+
+  const overlay = document.getElementById('jpMessageOverlay');
+  const titulo = document.getElementById('jpMessageTitle');
+  const texto = document.getElementById('jpMessageText');
+  const autor = document.getElementById('jpMessageAuthor');
+  const boton = document.getElementById('jpMessageConfirm');
+
+  if (!overlay || !boton) return;
+
+  let pendientes = [];
+  let actual = null;
+
+  async function cargarMensajes() {
+
+    try {
+
+      const respuesta = await fetch('/mi-app/mensajes', {
+        credentials: 'same-origin'
+      });
+
+      if (!respuesta.ok) return;
+
+      const datos = await respuesta.json();
+
+      if (!datos.ok) return;
+
+      pendientes = datos.mensajes
+        .filter(m => !m.leido)
+        .reverse();
+
+      mostrarSiguiente();
+
+    } catch (error) {
+
+      console.error('Error al consultar mensajes:', error);
+
+    }
+
+  }
+
+  function mostrarSiguiente() {
+
+    if (!pendientes.length) {
+
+      overlay.classList.remove('visible');
+      actual = null;
+
+      return;
+    }
+
+    actual = pendientes.shift();
+
+    titulo.textContent = actual.titulo;
+    texto.textContent = actual.mensaje;
+    autor.textContent = 'Mensaje de ' + actual.profesor;
+
+    overlay.classList.add('visible');
+    boton.focus();
+
+  }
+
+  boton.addEventListener('click', async function () {
+
+    if (!actual) return;
+
+    boton.disabled = true;
+    boton.textContent = 'Guardando...';
+
+    try {
+
+      const respuesta = await fetch(
+        '/mi-app/mensajes/' + encodeURIComponent(actual.id) + '/leido',
+        {
+          method: 'POST',
+          credentials: 'same-origin'
+        }
+      );
+
+      if (!respuesta.ok) {
+        throw new Error('No se pudo confirmar el mensaje');
+      }
+
+      mostrarSiguiente();
+
+    } catch (error) {
+
+      alert('No pudimos confirmar la lectura. Intentá nuevamente.');
+
+    } finally {
+
+      boton.disabled = false;
+      boton.textContent = '✓ Entendido';
+
+    }
+
+  });
+
+  cargarMensajes();
+
+})();
+</script>
+<%- include('partials/end') %>
+

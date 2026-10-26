@@ -1,0 +1,3 @@
+const mongoose=require('mongoose');
+const schema=new mongoose.Schema({alumno:{type:mongoose.Schema.Types.ObjectId,ref:'Cliente',required:true,index:true},tipo:{type:String,enum:['cargo','pago'],required:true},importe:{type:Number,required:true,min:0},descripcion:{type:String,required:true},producto:{type:mongoose.Schema.Types.ObjectId,ref:'Producto'},cantidad:Number,venta:{type:mongoose.Schema.Types.ObjectId,ref:'Venta'},medio:String,actor:String,fecha:{type:Date,default:Date.now},operacion:{type:String,unique:true,required:true}}, {timestamps:true});
+module.exports=mongoose.model('MovimientoCuenta',schema);

@@ -2,6 +2,11 @@ const Cliente = require('../models/cliente');
 const Producto = require('../models/Producto');
 const Venta = require('../models/Venta');
 const Gasto = require('../models/Gasto');
+const MovimientoCuenta = require('../models/MovimientoCuenta');
+
+// ========================================
+// FECHAS DE ARGENTINA
+// ========================================
 
 function getArgentinaDateParts(date = new Date()) {
   const formatter = new Intl.DateTimeFormat('en-CA', {
@@ -56,8 +61,9 @@ function getArgentinaDateStringFromStoredDate(dateValue) {
 }
 
 function addDaysToArgentinaDate(dateStr, days) {
-  const base = startOfArgentinaDay(dateStr);
-  base.setUTCDate(base.getUTCDate() + days);
+  const [year, month, day] = String(dateStr).split('-').map(Number);
+  const base = new Date(Date.UTC(year, month - 1, day + days, 12));
+
   return getArgentinaDateString(base);
 }
 
@@ -80,32 +86,68 @@ function getMonthRangeArgentina(date = new Date()) {
   };
 }
 
-// Mostrar todos los clientes con resumen real de pagos + ventas + gastos + stock
+function redondear(valor) {
+  return Math.round(Number(valor || 0) * 100) / 100;
+}
+
+function sumar(items, campo) {
+  return redondear(
+    items.reduce(
+      (total, item) => total + Number(item[campo] || 0),
+      0
+    )
+  );
+}
+
+function fechaValida(valor) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(valor)) return false;
+
+  const fecha = new Date(`${valor}T12:00:00Z`);
+
+  return (
+    !Number.isNaN(fecha.getTime()) &&
+    fecha.toISOString().slice(0, 10) === valor
+  );
+}
+
+// ========================================
+// INICIO - LISTAR CLIENTES
+// ========================================
+
 exports.listarClientes = async (req, res) => {
   try {
     const clientes = await Cliente.find().sort({ creadoEn: -1 });
 
     const hoyArgentinaStr = getArgentinaDateString();
     const hoySinHora = startOfArgentinaDay(hoyArgentinaStr);
-    const manana = startOfArgentinaDay(addDaysToArgentinaDate(hoyArgentinaStr, 1));
+    const manana = startOfArgentinaDay(
+      addDaysToArgentinaDate(hoyArgentinaStr, 1)
+    );
 
-    const ahoraArgentina = new Date(`${hoyArgentinaStr}T12:00:00-03:00`);
+    const ahoraArgentina = new Date(
+      `${hoyArgentinaStr}T12:00:00-03:00`
+    );
+
     const diaHoy = ahoraArgentina.getDate();
     const mesHoy = ahoraArgentina.getMonth();
 
-    let totalClientes = clientes.length;
+    const totalClientes = clientes.length;
+
     let alDia = 0;
     let vencidos = 0;
     let totalRecaudadoHoy = 0;
-    let cumpleañeros = [];
-    let proximosCumples = [];
+
+    const cumpleañeros = [];
+    const proximosCumples = [];
 
     for (const cliente of clientes) {
       let ultimoPago = null;
 
       if (cliente.pagos && cliente.pagos.length > 0) {
         ultimoPago = cliente.pagos.reduce((ultimo, actual) => {
-          return new Date(actual.fecha) > new Date(ultimo.fecha) ? actual : ultimo;
+          return new Date(actual.fecha) > new Date(ultimo.fecha)
+            ? actual
+            : ultimo;
         });
 
         cliente.pagos.forEach((p) => {
@@ -134,12 +176,21 @@ exports.listarClientes = async (req, res) => {
         const mesCumple = cumple.getMonth();
 
         if (diaCumple === diaHoy && mesCumple === mesHoy) {
-          cumpleañeros.push(`${cliente.nombre} ${cliente.apellido}`);
+          cumpleañeros.push(
+            `${cliente.nombre} ${cliente.apellido}`
+          );
         } else {
-          const esteAño = new Date(ahoraArgentina.getFullYear(), mesCumple, diaCumple);
+          const esteAño = new Date(
+            ahoraArgentina.getFullYear(),
+            mesCumple,
+            diaCumple
+          );
+
           esteAño.setHours(0, 0, 0, 0);
 
-          const diffDias = Math.ceil((esteAño - hoySinHora) / (1000 * 60 * 60 * 24));
+          const diffDias = Math.ceil(
+            (esteAño - hoySinHora) / (1000 * 60 * 60 * 24)
+          );
 
           if (diffDias > 0 && diffDias <= 5) {
             proximosCumples.push(
@@ -151,37 +202,110 @@ exports.listarClientes = async (req, res) => {
     }
 
     clientes.sort((a, b) => {
-      if (a.estadoPago === 'vencido' && b.estadoPago !== 'vencido') return -1;
-      if (a.estadoPago !== 'vencido' && b.estadoPago === 'vencido') return 1;
+      if (a.estadoPago === 'vencido' && b.estadoPago !== 'vencido') {
+        return -1;
+      }
+
+      if (a.estadoPago !== 'vencido' && b.estadoPago === 'vencido') {
+        return 1;
+      }
+
       return 0;
     });
 
-    const [ventasHoy, gastosHoy, productos] = await Promise.all([
-      Venta.find({ fecha: { $gte: hoySinHora, $lt: manana } }),
-      Gasto.find({ fechaLocal: hoyArgentinaStr }),
-      Producto.find()
+    // ========================================
+    // RESUMEN FINANCIERO DEL DÍA
+    // ========================================
+
+    const [
+      ventasHoy,
+      gastosHoy,
+      productos,
+      pagosCuentaHoy
+    ] = await Promise.all([
+      Venta.find({
+        fecha: {
+          $gte: hoySinHora,
+          $lt: manana
+        }
+      }),
+
+      Gasto.find({
+        fechaLocal: hoyArgentinaStr
+      }),
+
+      Producto.find(),
+
+      MovimientoCuenta.find({
+        tipo: 'pago',
+        fecha: {
+          $gte: hoySinHora,
+          $lt: manana
+        }
+      })
     ]);
 
-    const totalVentasHoy = ventasHoy.reduce((acc, venta) => acc + Number(venta.total || 0), 0);
-    const totalGastosHoy = gastosHoy.reduce((acc, gasto) => acc + Number(gasto.monto || 0), 0);
-    const gananciaNetaHoy = totalRecaudadoHoy + totalVentasHoy - totalGastosHoy;
+    // Todas las ventas, incluidas las fiadas
+    const totalVendidoHoy = sumar(ventasHoy, 'total');
+
+    // Solamente las ventas cobradas al momento
+    const totalVentasHoy = redondear(
+      ventasHoy
+        .filter((venta) => venta.aCuenta !== true)
+        .reduce(
+          (total, venta) => total + Number(venta.total || 0),
+          0
+        )
+    );
+
+    // Pagos recibidos de cuentas corrientes
+    const totalCobrosCuentaHoy = sumar(
+      pagosCuentaHoy,
+      'importe'
+    );
+
+    const totalGastosHoy = sumar(gastosHoy, 'monto');
+
+    totalRecaudadoHoy = redondear(totalRecaudadoHoy);
+
+    // Dinero efectivamente recibido
+    const ingresosEfectivosHoy = redondear(
+      totalRecaudadoHoy +
+      totalVentasHoy +
+      totalCobrosCuentaHoy
+    );
+
+    // Resultado de caja
+    const gananciaNetaHoy = redondear(
+      ingresosEfectivosHoy - totalGastosHoy
+    );
 
     const stockBajo = productos.filter(
-      (p) => Number(p.stock || 0) <= Number(p.stockMinimo || 0)
+      (p) =>
+        Number(p.stock || 0) <= Number(p.stockMinimo || 0)
     ).length;
 
     res.render('index', {
       clientes,
+
       resumen: {
         totalClientes,
         alDia,
         vencidos,
+
         totalRecaudado: totalRecaudadoHoy,
+
         ventasHoy: totalVentasHoy,
+        totalVendidoHoy,
+        cobrosCuentaHoy: totalCobrosCuentaHoy,
+        ingresosEfectivosHoy,
+
         gastosHoy: totalGastosHoy,
         gananciaNetaHoy,
+
         stockBajo
       },
+
       cumpleañeros,
       proximosCumples
     });
@@ -191,24 +315,40 @@ exports.listarClientes = async (req, res) => {
   }
 };
 
+// ========================================
+// FORMULARIO NUEVO CLIENTE
+// ========================================
+
 exports.formularioNuevo = (req, res) => {
   res.render('nueva');
 };
 
+// ========================================
+// GUARDAR CLIENTE
+// ========================================
+
 exports.guardarCliente = async (req, res) => {
   try {
     if (req.body.fechaNacimiento) {
-      req.body.fechaNacimiento = new Date(req.body.fechaNacimiento);
+      req.body.fechaNacimiento = new Date(
+        req.body.fechaNacimiento
+      );
     }
 
     const nuevoCliente = new Cliente(req.body);
+
     await nuevoCliente.save();
+
     res.redirect('/');
   } catch (error) {
     console.error('Error al guardar cliente:', error);
     res.status(500).send('Error al guardar cliente');
   }
 };
+
+// ========================================
+// FORMULARIO EDITAR CLIENTE
+// ========================================
 
 exports.formularioEditar = async (req, res) => {
   try {
@@ -225,13 +365,23 @@ exports.formularioEditar = async (req, res) => {
   }
 };
 
+// ========================================
+// ACTUALIZAR CLIENTE
+// ========================================
+
 exports.actualizarCliente = async (req, res) => {
   try {
     if (req.body.fechaNacimiento) {
-      req.body.fechaNacimiento = new Date(req.body.fechaNacimiento);
+      req.body.fechaNacimiento = new Date(
+        req.body.fechaNacimiento
+      );
     }
 
-    await Cliente.findByIdAndUpdate(req.params.id, req.body);
+    await Cliente.findByIdAndUpdate(
+      req.params.id,
+      req.body
+    );
+
     res.redirect('/editar/' + req.params.id);
   } catch (error) {
     console.error('Error al actualizar cliente:', error);
@@ -239,15 +389,24 @@ exports.actualizarCliente = async (req, res) => {
   }
 };
 
+// ========================================
+// ELIMINAR CLIENTE
+// ========================================
+
 exports.eliminarCliente = async (req, res) => {
   try {
     await Cliente.findByIdAndDelete(req.params.id);
+
     res.redirect('/');
   } catch (error) {
     console.error('Error al eliminar cliente:', error);
     res.status(500).send('Error al eliminar cliente');
   }
 };
+
+// ========================================
+// AGREGAR PAGO DE CUOTA
+// ========================================
 
 exports.agregarPago = async (req, res) => {
   const { fecha, monto } = req.body;
@@ -280,12 +439,20 @@ exports.agregarPago = async (req, res) => {
   }
 };
 
+// ========================================
+// ELIMINAR PAGO DE CUOTA
+// ========================================
+
 exports.eliminarPago = async (req, res) => {
   const { clienteId, pagoId } = req.params;
 
   try {
     await Cliente.findByIdAndUpdate(clienteId, {
-      $pull: { pagos: { _id: pagoId } }
+      $pull: {
+        pagos: {
+          _id: pagoId
+        }
+      }
     });
 
     res.redirect('/editar/' + clienteId);
@@ -295,111 +462,359 @@ exports.eliminarPago = async (req, res) => {
   }
 };
 
+// ========================================
+// REPORTES FINANCIEROS
+// ========================================
+
 exports.reportePagos = async (req, res) => {
   try {
     const clientes = await Cliente.find();
 
     const hoyArgentinaStr = getArgentinaDateString();
-    const hace30DiasStr = addDaysToArgentinaDate(hoyArgentinaStr, -29);
+    const hace30DiasStr = addDaysToArgentinaDate(
+      hoyArgentinaStr,
+      -29
+    );
 
     const desdeStr = req.query.desde || hace30DiasStr;
     const hastaStr = req.query.hasta || hoyArgentinaStr;
 
+    if (
+      !fechaValida(desdeStr) ||
+      !fechaValida(hastaStr) ||
+      desdeStr > hastaStr
+    ) {
+      return res.status(400).send(
+        'Rango de fechas inválido'
+      );
+    }
+
     const desde = startOfArgentinaDay(desdeStr);
     const hasta = endOfArgentinaDay(hastaStr);
 
-    let pagosFiltrados = [];
+    // ========================================
+    // CUOTAS DEL PERÍODO
+    // ========================================
+
+    const pagosFiltrados = [];
 
     clientes.forEach((cliente) => {
-      const pagosValidos = (cliente.pagos || []).filter((p) => {
+      (cliente.pagos || []).forEach((p) => {
         const fechaPago = new Date(p.fecha);
-        return fechaPago >= desde && fechaPago <= hasta;
-      });
 
-      pagosValidos.forEach((p) => {
-        pagosFiltrados.push({
-          tipo: 'Cuota',
-          nombre: `${cliente.nombre} ${cliente.apellido}`,
-          fecha: new Date(p.fecha),
-          monto: Number(p.monto || 0),
-          fechaLocal: getArgentinaDateStringFromStoredDate(p.fecha)
-        });
+        if (fechaPago >= desde && fechaPago <= hasta) {
+          pagosFiltrados.push({
+            tipo: 'Cuota',
+            nombre: `${cliente.nombre} ${cliente.apellido}`,
+            fecha: fechaPago,
+            monto: Number(p.monto || 0),
+            fechaLocal:
+              getArgentinaDateStringFromStoredDate(p.fecha)
+          });
+        }
       });
     });
 
+    // ========================================
+    // VENTAS DEL PERÍODO
+    // ========================================
+
     const ventasFiltradas = await Venta.find({
-      fecha: { $gte: desde, $lte: hasta }
+      fecha: {
+        $gte: desde,
+        $lte: hasta
+      }
     }).sort({ fecha: -1 });
 
-    const ventasDetalle = ventasFiltradas.map((venta) => ({
-      tipo: 'Venta',
-      nombre: venta.nombreProducto || 'Producto',
-      fecha: new Date(venta.fecha),
-      monto: Number(venta.total || 0),
-      metodoPago: venta.metodoPago || 'No especificado',
-      cantidad: Number(venta.cantidad || 0)
-    }));
+    const ventasDetalle = ventasFiltradas.map(
+      (venta) => ({
+        tipo:
+          venta.aCuenta === true
+            ? 'Venta fiada'
+            : 'Venta',
+
+        nombre: venta.nombreProducto || 'Producto',
+        fecha: new Date(venta.fecha),
+        fechaLocal: getArgentinaDateString(venta.fecha),
+        monto: Number(venta.total || 0),
+        metodoPago:
+          venta.metodoPago || 'No especificado',
+        cantidad: Number(venta.cantidad || 0),
+        aCuenta: venta.aCuenta === true
+      })
+    );
+
+    const ventasInmediatas = ventasDetalle.filter(
+      (venta) => !venta.aCuenta
+    );
+
+    const ventasFiadas = ventasDetalle.filter(
+      (venta) => venta.aCuenta
+    );
+
+    // ========================================
+    // COBROS DE CUENTAS CORRIENTES
+    // ========================================
+
+    const pagosCuenta = await MovimientoCuenta.find({
+      tipo: 'pago',
+      fecha: {
+        $gte: desde,
+        $lte: hasta
+      }
+    })
+      .populate('alumno', 'nombre apellido')
+      .sort({ fecha: -1 });
+
+    const cobrosDetalle = pagosCuenta.map(
+      (pago) => ({
+        tipo: 'Cobro cuenta',
+
+        nombre: pago.alumno
+          ? `${pago.alumno.nombre} ${pago.alumno.apellido}`
+          : 'Alumno',
+
+        fecha: new Date(pago.fecha),
+        fechaLocal: getArgentinaDateString(pago.fecha),
+        monto: Number(pago.importe || 0),
+        metodoPago:
+          pago.medio || 'No especificado',
+        descripcion:
+          pago.descripcion || 'Pago de cuenta corriente'
+      })
+    );
+
+    // ========================================
+    // GASTOS DEL PERÍODO
+    // ========================================
 
     const gastosFiltrados = await Gasto.find({
-      fechaLocal: { $gte: desdeStr, $lte: hastaStr }
+      fechaLocal: {
+        $gte: desdeStr,
+        $lte: hastaStr
+      }
     }).sort({ fecha: -1 });
 
-    const gastosDetalle = gastosFiltrados.map((gasto) => ({
-      tipo: 'Gasto',
-      nombre: gasto.descripcion || 'Gasto',
-      fecha: new Date(gasto.fecha),
-      fechaLocal: gasto.fechaLocal || '',
-      monto: Number(gasto.monto || 0),
-      categoria: gasto.categoria || 'Otros',
-      metodoPago: gasto.metodoPago || 'No especificado'
-    }));
+    const gastosDetalle = gastosFiltrados.map(
+      (gasto) => ({
+        tipo: 'Gasto',
+        nombre: gasto.descripcion || 'Gasto',
+        fecha: new Date(gasto.fecha),
+        fechaLocal: gasto.fechaLocal || '',
+        monto: Number(gasto.monto || 0),
+        categoria: gasto.categoria || 'Otros',
+        metodoPago:
+          gasto.metodoPago || 'No especificado'
+      })
+    );
 
-    const totalCuotas = pagosFiltrados.reduce((acc, item) => acc + Number(item.monto || 0), 0);
-    const totalVentas = ventasDetalle.reduce((acc, item) => acc + Number(item.monto || 0), 0);
-    const totalGastos = gastosDetalle.reduce((acc, item) => acc + Number(item.monto || 0), 0);
-    const totalIngresos = totalCuotas + totalVentas;
-    const gananciaNeta = totalIngresos - totalGastos;
+    // ========================================
+    // TOTALES DEL PERÍODO
+    // ========================================
+
+    const totalCuotas = sumar(
+      pagosFiltrados,
+      'monto'
+    );
+
+    // Todas las ventas, incluidas las fiadas
+    const totalVentas = sumar(
+      ventasDetalle,
+      'monto'
+    );
+
+    const totalVentasInmediatas = sumar(
+      ventasInmediatas,
+      'monto'
+    );
+
+    const totalVentasFiadas = sumar(
+      ventasFiadas,
+      'monto'
+    );
+
+    const totalCobrosCuenta = sumar(
+      cobrosDetalle,
+      'monto'
+    );
+
+    const totalGastos = sumar(
+      gastosDetalle,
+      'monto'
+    );
+
+    // Dinero realmente cobrado
+    const totalIngresos = redondear(
+      totalCuotas +
+      totalVentasInmediatas +
+      totalCobrosCuenta
+    );
+
+    // Resultado de caja
+    const gananciaNeta = redondear(
+      totalIngresos - totalGastos
+    );
+
+    // ========================================
+    // HISTORIAL DE MOVIMIENTOS
+    // ========================================
 
     const movimientos = [
       ...pagosFiltrados,
       ...ventasDetalle,
+      ...cobrosDetalle,
       ...gastosDetalle
-    ].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+    ].sort(
+      (a, b) =>
+        new Date(b.fecha) - new Date(a.fecha)
+    );
 
-    const { inicioMes, finMes } = getMonthRangeArgentina();
+    // ========================================
+    // RESUMEN DEL MES ACTUAL
+    // ========================================
 
-    let pagosMes = [];
+    const { inicioMes, finMes } =
+      getMonthRangeArgentina();
+
+    const inicioMesStr =
+      getArgentinaDateString(inicioMes);
+
+    const finMesStr =
+      getArgentinaDateString(finMes);
+
+    const pagosMes = [];
+
     clientes.forEach((cliente) => {
-      const pagosValidosMes = (cliente.pagos || []).filter((p) => {
+      (cliente.pagos || []).forEach((p) => {
         const fechaPago = new Date(p.fecha);
-        return fechaPago >= inicioMes && fechaPago <= finMes;
-      });
 
-      pagosValidosMes.forEach((p) => {
-        pagosMes.push(Number(p.monto || 0));
+        if (
+          fechaPago >= inicioMes &&
+          fechaPago <= finMes
+        ) {
+          pagosMes.push({
+            monto: Number(p.monto || 0)
+          });
+        }
       });
     });
 
-    const ventasMes = await Venta.find({
-      fecha: { $gte: inicioMes, $lte: finMes }
-    });
+    const [
+      ventasMes,
+      gastosMes,
+      cobrosMes
+    ] = await Promise.all([
+      Venta.find({
+        fecha: {
+          $gte: inicioMes,
+          $lte: finMes
+        }
+      }),
 
-    const gastosMes = await Gasto.find({
-      fechaLocal: {
-        $gte: getArgentinaDateString(inicioMes),
-        $lte: getArgentinaDateString(finMes)
+      Gasto.find({
+        fechaLocal: {
+          $gte: inicioMesStr,
+          $lte: finMesStr
+        }
+      }),
+
+      MovimientoCuenta.find({
+        tipo: 'pago',
+        fecha: {
+          $gte: inicioMes,
+          $lte: finMes
+        }
+      })
+    ]);
+
+    const totalCuotasMes = sumar(
+      pagosMes,
+      'monto'
+    );
+
+    const totalVentasMes = sumar(
+      ventasMes,
+      'total'
+    );
+
+    const totalVentasInmediatasMes = redondear(
+      ventasMes
+        .filter((venta) => venta.aCuenta !== true)
+        .reduce(
+          (total, venta) =>
+            total + Number(venta.total || 0),
+          0
+        )
+    );
+
+    const totalCobrosCuentaMes = sumar(
+      cobrosMes,
+      'importe'
+    );
+
+    const totalGastosMes = sumar(
+      gastosMes,
+      'monto'
+    );
+
+    const ingresosEfectivosMes = redondear(
+      totalCuotasMes +
+      totalVentasInmediatasMes +
+      totalCobrosCuentaMes
+    );
+
+    const gananciaNetaMes = redondear(
+      ingresosEfectivosMes - totalGastosMes
+    );
+
+    // ========================================
+    // SALDO TOTAL DE CUENTAS CORRIENTES
+    // ========================================
+
+    const saldos = await MovimientoCuenta.aggregate([
+      {
+        $group: {
+          _id: '$alumno',
+
+          total: {
+            $sum: {
+              $cond: [
+                { $eq: ['$tipo', 'cargo'] },
+                '$importe',
+                {
+                  $multiply: [
+                    '$importe',
+                    -1
+                  ]
+                }
+              ]
+            }
+          }
+        }
       }
-    });
+    ]);
 
-    const totalCuotasMes = pagosMes.reduce((acc, monto) => acc + Number(monto || 0), 0);
-    const totalVentasMes = ventasMes.reduce((acc, venta) => acc + Number(venta.total || 0), 0);
-    const totalGastosMes = gastosMes.reduce((acc, gasto) => acc + Number(gasto.monto || 0), 0);
-    const gananciaNetaMes = totalCuotasMes + totalVentasMes - totalGastosMes;
+    const totalPendiente = redondear(
+      saldos.reduce(
+        (total, cuenta) =>
+          total +
+          Math.max(
+            0,
+            Number(cuenta.total || 0)
+          ),
+        0
+      )
+    );
+
+    // ========================================
+    // PRODUCTOS MÁS VENDIDOS
+    // ========================================
 
     const mapaProductos = {};
 
     ventasFiltradas.forEach((venta) => {
-      const nombre = venta.nombreProducto || 'Producto';
+      const nombre =
+        venta.nombreProducto || 'Producto';
 
       if (!mapaProductos[nombre]) {
         mapaProductos[nombre] = {
@@ -409,13 +824,24 @@ exports.reportePagos = async (req, res) => {
         };
       }
 
-      mapaProductos[nombre].cantidad += Number(venta.cantidad || 0);
-      mapaProductos[nombre].total += Number(venta.total || 0);
+      mapaProductos[nombre].cantidad +=
+        Number(venta.cantidad || 0);
+
+      mapaProductos[nombre].total +=
+        Number(venta.total || 0);
     });
 
-    const productosMasVendidos = Object.values(mapaProductos)
-      .sort((a, b) => b.cantidad - a.cantidad)
-      .slice(0, 5);
+    const productosMasVendidos =
+      Object.values(mapaProductos)
+        .sort(
+          (a, b) =>
+            b.cantidad - a.cantidad
+        )
+        .slice(0, 5);
+
+    // ========================================
+    // RENDERIZAR REPORTE
+    // ========================================
 
     res.render('reportes', {
       pagos: pagosFiltrados,
@@ -424,20 +850,30 @@ exports.reportePagos = async (req, res) => {
       movimientos,
 
       total: totalIngresos,
+
       totalCuotas,
       totalVentas,
+      totalVentasInmediatas,
+      totalVentasFiadas,
+      totalCobrosCuenta,
+      totalPendiente,
+
       totalGastos,
       totalIngresos,
       gananciaNeta,
 
       totalCuotasMes,
       totalVentasMes,
+      totalVentasInmediatasMes,
+      totalCobrosCuentaMes,
       totalGastosMes,
+      ingresosEfectivosMes,
       gananciaNetaMes,
 
       cantidadPagos: pagosFiltrados.length,
       cantidadVentas: ventasDetalle.length,
       cantidadGastos: gastosDetalle.length,
+      cantidadCobrosCuenta: cobrosDetalle.length,
       cantidadMovimientos: movimientos.length,
 
       productosMasVendidos,
@@ -446,7 +882,13 @@ exports.reportePagos = async (req, res) => {
       hasta: hastaStr
     });
   } catch (error) {
-    console.error('Error en reportePagos:', error);
-    res.status(500).send('Error al generar reporte');
+    console.error(
+      'Error en reportePagos:',
+      error
+    );
+
+    res.status(500).send(
+      'Error al generar reporte'
+    );
   }
 };

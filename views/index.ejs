@@ -704,8 +704,32 @@
       }
     }
   </style>
+<link rel="stylesheet" href="/css/jp-dashboard.css">
 </head>
-<body>
+<body class="jp-dashboard">
+  <button class="jp-menu-toggle" id="jpMenuToggle" type="button" aria-label="Abrir menú" aria-controls="jpSidebar" aria-expanded="false">☰</button>
+  <div class="jp-menu-backdrop" id="jpMenuBackdrop"></div>
+  <aside class="jp-sidebar" id="jpSidebar" aria-label="Menú principal">
+    <a class="jp-sidebar-brand" href="/"><img src="/images/logo-jp.png" alt="JP"><span><strong>JP Entrenamiento</strong><small>GESTIÓN 2.0</small></span></a>
+    <div class="jp-sidebar-caption">GENERAL</div>
+    <nav class="jp-sidebar-links" aria-label="Navegación">
+      <a class="active" href="/" aria-current="page">🏠 <span>Inicio</span></a>
+      <a href="/#alumnos">👥 <span>Alumnos</span></a>
+      
+      <a href="/gestion">⚙️ <span>Configuración</span></a>
+      <div class="jp-sidebar-caption">OPERACIONES</div>
+      <a href="/profesor">🏋️ <span>Rutinas</span></a>
+      <a href="/cuentas">💳 <span>Cuentas corrientes</span></a>
+      <a href="/productos">📦 <span>Productos</span></a>
+      <a href="/ventas">🛒 <span>Ventas</span></a>
+      <a href="/gastos">📉 <span>Gastos</span></a>
+      <a href="/reportes">📊 <span>Reportes</span></a>
+      <div class="jp-sidebar-caption">ALUMNOS</div>
+      <a href="/acceso">📱 <span>Accesos de alumnos</span></a>
+    </nav>
+    <form method="post" action="/logout" class="jp-logout-form"><button class="jp-sidebar-logout" type="submit">↪ <span>Cerrar sesión</span></button></form>
+  </aside>
+  <div class="jp-dashboard-content">
   <div class="fondo-logo"></div>
 
   <% const money = (n) => Number(n || 0).toFixed(2); %>
@@ -737,19 +761,14 @@
       <div class="brand-wrap">
         <img src="/images/logo-jp.png" alt="Logo JP" class="brand-logo">
         <div class="brand-text">
-          <h1>JP Entrenamiento Personalizado</h1>
-          <p>Panel principal de alumnos, pagos, ventas, stock y gastos</p>
+          <h1>Panel general</h1>
+          <p>Tu gimnasio, organizado en un solo lugar</p>
         </div>
-      </div>
-
-      <div class="top-actions">
-        <a href="/reportes" class="btn-top btn-top-light">📊 Reportes</a>
-        <a href="/logout" class="btn-top btn-top-danger">🚪 Cerrar sesión</a>
       </div>
     </div>
   </header>
 
-  <main class="container page-wrap contenido">
+  <main class="container-fluid page-wrap contenido">
     <section>
       <div class="section-title">Resumen general del día</div>
 
@@ -828,53 +847,7 @@
       </div>
     </section>
 
-    <section class="quick-panel">
-      <div class="section-title mb-3">Accesos rápidos</div>
-
-      <div class="quick-actions">
-        <a href="/nueva" class="quick-btn">
-          <div class="quick-icon">➕</div>
-          <div class="quick-text">
-            <strong>Nuevo Alumno</strong>
-            <span>Cargar cliente nuevo al sistema</span>
-          </div>
-        </a>
-
-        <a href="/productos" class="quick-btn">
-          <div class="quick-icon">📦</div>
-          <div class="quick-text">
-            <strong>Productos</strong>
-            <span>Stock, precios y control</span>
-          </div>
-        </a>
-
-        <a href="/ventas" class="quick-btn">
-          <div class="quick-icon">💰</div>
-          <div class="quick-text">
-            <strong>Vender</strong>
-            <span>Registrar ventas rápidas</span>
-          </div>
-        </a>
-
-        <a href="/gastos" class="quick-btn">
-          <div class="quick-icon">🧾</div>
-          <div class="quick-text">
-            <strong>Gastos</strong>
-            <span>Cargar egresos del gimnasio</span>
-          </div>
-        </a>
-
-        <a href="/reportes" class="quick-btn">
-          <div class="quick-icon">📊</div>
-          <div class="quick-text">
-            <strong>Reportes</strong>
-            <span>Ver ingresos y movimientos</span>
-          </div>
-        </a>
-      </div>
-    </section>
-
-    <section class="toolbar">
+    <section class="toolbar" id="alumnos">
       <a href="/nueva" class="btn-main">➕ Nuevo Alumno</a>
 
       <div class="search-wrap">
@@ -985,7 +958,16 @@
     Todos los derechos reservados - M.L DESARROLLOS WEB.
   </footer>
 
+  </div><!-- /jp-dashboard-content -->
   <script>
+    const menuToggle = document.getElementById('jpMenuToggle');
+    const menuBackdrop = document.getElementById('jpMenuBackdrop');
+    const menuSidebar = document.getElementById('jpSidebar');
+    function closeMenu(){ document.body.classList.remove('jp-menu-open'); menuToggle.setAttribute('aria-expanded','false'); }
+    menuToggle.addEventListener('click',()=>{const open=document.body.classList.toggle('jp-menu-open');menuToggle.setAttribute('aria-expanded',String(open));});
+    menuBackdrop.addEventListener('click',closeMenu);
+    menuSidebar.querySelectorAll('a').forEach(a=>a.addEventListener('click',closeMenu));
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu();});
     const buscador = document.getElementById('buscador');
     const filas = document.querySelectorAll('#tablaClientes tbody tr');
 
