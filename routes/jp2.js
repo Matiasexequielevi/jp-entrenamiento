@@ -687,27 +687,64 @@ router.post('/rutinas/guardar', staff, async (req, res, next) => {
 
     if (rutinaId) {
       // Editar exactamente la rutina seleccionada.
-      guardada = await Rutina.findOneAndUpdate(
-        {
-          _id: rutinaId,
-          alumno: id,
-          dia
-        },
-        {
-          $set: cambios
-        },
-        {
-          new: true,
-          runValidators: true
-        }
-      );
+      // ========================================
+// EDITAR RUTINA EXISTENTE
+// ========================================
 
-      if (!guardada) {
-        return err(
-          res,
-          'No se encontró la rutina original. Recargá el panel y elegí Editar nuevamente.'
-        );
-      }
+// Buscar por ID y alumno, sin exigir que coincida
+// el día anterior.
+const rutinaOriginal = await Rutina.findOne({
+  _id: rutinaId,
+  alumno: id
+});
+
+if (!rutinaOriginal) {
+  return err(
+    res,
+    'No encontramos esta rutina para el alumno seleccionado. Recargá el panel y elegí Editar nuevamente.'
+  );
+}
+
+// Evitar duplicar una rutina en el mismo día.
+const otraRutina = await Rutina.findOne({
+  alumno: id,
+  dia,
+  _id: { $ne: rutinaId }
+});
+
+if (otraRutina) {
+  return err(
+    res,
+    'Este alumno ya tiene otra rutina para ' +
+    dia +
+    '. Seleccioná otro día o editá la rutina existente.'
+  );
+}
+
+// Actualizar la rutina original.
+guardada = await Rutina.findOneAndUpdate(
+  {
+    _id: rutinaId,
+    alumno: id
+  },
+  {
+    $set: {
+      ...cambios,
+      dia
+    }
+  },
+  {
+    new: true,
+    runValidators: true
+  }
+);
+
+if (!guardada) {
+  return err(
+    res,
+    'No se pudo actualizar la rutina. Intentá nuevamente.'
+  );
+}
 
     } else {
       // Si ya existe una rutina para ese alumno y día,
