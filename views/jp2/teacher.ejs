@@ -406,6 +406,14 @@
     display: none !important;
   }
 
+  .jp-routine-item {display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px;margin:10px 0;border:1px solid #e4eaf4;border-radius:14px;background:#f8faff}
+  .jp-routine-item span {font-size:12px;color:#72819a}
+  .jp-edit-exercise,.jp-warm-row {padding:15px;margin:12px 0;border:1px solid #dce5f2;border-radius:15px;background:#f8faff}
+  .jp-edit-head {display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .jp-fields {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .jp-mini-actions {display:flex;gap:6px;flex-wrap:wrap}
+  .jp-mini-actions button {padding:7px 10px;border:1px solid #cad7ed;border-radius:9px;background:white;color:#244b91;cursor:pointer}
+  @media(max-width:560px){.jp-routine-item{flex-direction:column;align-items:stretch}.jp-fields{grid-template-columns:1fr}}
   /* EXCEL */
 
   .jp-excel-box {
@@ -478,6 +486,18 @@
       font-size: 19px;
     }
   }
+
+  /* Gestión de rutinas: dos vistas, alumno por alumno */
+  .jp-routine-nav{display:flex;gap:10px;margin:0 0 22px;flex-wrap:wrap}
+  .jp-routine-nav button{border:1px solid #d7e2f4;background:#f7f9ff;color:#365580;border-radius:12px;padding:13px 20px;font-weight:800;cursor:pointer}
+  .jp-routine-nav button.active{background:#244b91;color:white;border-color:#244b91}
+  .jp-routine-view[hidden],.jp-routine-item[hidden]{display:none!important}
+  .jp-routine-student-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:18px 0}
+  .jp-routine-day{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:17px;margin:10px 0;border:1px solid #e4eaf4;border-radius:15px;background:#f8faff}
+  .jp-routine-day strong{display:block;color:#173e7a;font-size:15px;margin-bottom:5px}
+  .jp-routine-day small{color:#667b9c}
+  .jp-routine-day .btn{flex-shrink:0}
+  @media(max-width:560px){.jp-routine-nav button{flex:1}.jp-routine-day{align-items:flex-start}.jp-routine-day .btn{padding:10px 12px}}
 </style>
 
 <div class="shell">
@@ -618,117 +638,73 @@
 
       </section>
 
-      <!-- =====================================
-           CREAR RUTINA
-      ====================================== -->
-
-      <section
-        class="jp-teacher-panel"
-        id="jp-panel-rutina"
-        role="tabpanel"
-        hidden
-      >
-
+      <!-- RUTINAS: crear y administrar, en vistas separadas -->
+      <section class="jp-teacher-panel" id="jp-panel-rutina" role="tabpanel" hidden>
         <div class="jp-teacher-card">
+          <div class="jp-routine-nav" aria-label="Gestión de rutinas">
+            <button type="button" id="jpTabCrear" class="active" aria-pressed="true">➕ Crear rutina</button>
+            <button type="button" id="jpTabCreadas" aria-pressed="false">📋 Rutinas creadas</button>
+          </div>
 
-          <h2>🏋️ Preparar rutina</h2>
-
-          <p class="jp-teacher-description">
-            Creá una rutina personalizada.
-            Los ejercicios aparecerán automáticamente
-            en la aplicación del alumno.
-          </p>
-
-          <form
-            method="post"
-            action="/rutinas/guardar"
-            id="rutinaForm"
-          >
-
-            <div class="jp-teacher-fields">
-
-              <div>
-                <label for="rAlumno">Alumno</label>
-
-                <select
-                  id="rAlumno"
-                  name="alumnoId"
-                  required
-                >
-                  <% clientes.forEach(c => { %>
-                    <option value="<%= c._id %>">
-                      <%= c.apellido %>, <%= c.nombre %>
-                    </option>
-                  <% }) %>
-                </select>
+          <div id="jpVistaCrear" class="jp-routine-view">
+            <div class="jp-routine-student-header">
+              <div><h2 id="jpTituloEditor">🏋️ Crear rutina</h2><p class="jp-teacher-description" style="margin:5px 0 0">Prepará el entrenamiento y guardalo para el alumno.</p></div>
+              <button type="button" id="jpCancelarEdicion" class="btn secondary" hidden>← Volver a rutinas creadas</button>
+            </div>
+            <form method="post" action="/rutinas/guardar" id="rutinaForm">
+              <input type="hidden" name="rutinaId" id="rutinaId">
+              <div class="jp-teacher-fields">
+                <div><label for="rAlumno">Alumno (<%= clientes.length %> disponibles)</label>
+                  <input type="search" id="buscarAlumnoRutina" placeholder="🔎 Buscar por nombre o apellido..." autocomplete="off" aria-label="Buscar alumno para crear rutina" style="margin-bottom:8px">
+                  <select id="rAlumno" name="alumnoId" required>
+                  <% clientes.forEach(c=>{ %><option value="<%= c._id %>"><%= c.apellido %>, <%= c.nombre %></option><% }) %>
+                </select></div>
+                <div><label for="rDia">Día de entrenamiento</label><select id="rDia" name="dia">
+                  <% ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'].forEach(d=>{ %><option value="<%= d %>"><%= d %></option><% }) %>
+                </select></div>
               </div>
+              <label for="rTitulo">Nombre de la rutina</label>
+              <input id="rTitulo" name="titulo" placeholder="Ej.: Tren superior · Pecho y brazos" required>
+              <div class="jp-teacher-info" id="modoRutina">Nueva rutina. Seleccioná un alumno, el día y agregá sus ejercicios.</div>
+              <div class="jp-routine-editor-heading"><h3>🔥 Calentamiento</h3><small class="muted">Opcional</small></div>
+              <div id="calentamientoEditor"></div>
+              <button type="button" class="btn secondary" id="addCalentamiento">+ Agregar calentamiento</button>
+              <div class="jp-routine-editor-heading"><h3>Ejercicios</h3><small class="muted">En orden de realización</small></div>
+              <div id="ejerciciosEditor"></div>
+              <button type="button" class="btn secondary" id="addEjercicio">+ Agregar ejercicio</button>
+              <textarea name="ejercicios" id="ejerciciosPayload" hidden></textarea>
+              <input type="hidden" name="ejerciciosJson" id="ejerciciosJson">
+              <input type="hidden" name="calentaJson" id="calentaJson">
+              <div class="jp-teacher-info">Para combinar 2 o 3 ejercicios consecutivos, asignales la misma letra (A, B, C...).</div>
+              <div class="jp-teacher-actions"><button class="btn" type="submit">💾 Guardar rutina</button></div>
+            </form>
+          </div>
 
-              <div>
-                <label for="rDia">Día de entrenamiento</label>
-
-                <select id="rDia" name="dia">
-                  <% [
-                    'Lunes',
-                    'Martes',
-                    'Miércoles',
-                    'Jueves',
-                    'Viernes',
-                    'Sábado',
-                    'Domingo'
-                  ].forEach(d => { %>
-                    <option><%= d %></option>
-                  <% }) %>
-                </select>
-              </div>
-
+          <div id="jpVistaCreadas" class="jp-routine-view" hidden>
+            <h2>📋 Rutinas creadas</h2>
+            <p class="jp-teacher-description">Seleccioná un alumno para consultar y editar sus entrenamientos. Se muestra una rutina por día.</p>
+            <label for="filtroRutinas">Seleccionar alumno (<%= clientes.length %> disponibles)</label>
+            <input type="search" id="buscarAlumnoCreadas" placeholder="🔎 Buscar por nombre o apellido..." autocomplete="off" aria-label="Buscar alumno en rutinas creadas" style="margin-bottom:8px">
+            <select id="filtroRutinas" required><option value="">— Elegí un alumno —</option>
+              <% clientes.forEach(c=>{ %><option value="<%= c._id %>"><%= c.apellido %>, <%= c.nombre %></option><% }) %>
+            </select>
+            <div id="jpResumenRutinas" class="jp-teacher-info" hidden></div>
+            <div id="listaRutinas" class="jp-routine-list">
+              <% const diasOrden=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo']; %>
+              <% rutinas.forEach(r=>{ if(!r.alumno)return; %>
+                <div class="jp-routine-day jp-routine-item" hidden data-alumno="<%= r.alumno._id %>" data-rutina="<%= r._id %>" data-dia="<%= r.dia %>">
+                  <div><strong><%= r.dia %> · <%= r.titulo %></strong><small><%= (r.ejercicios||[]).length %> ejercicios</small></div>
+                  <button type="button" class="btn secondary jp-edit-existing" data-id="<%= r._id %>">✏️ Editar</button>
+                </div>
+              <% }) %>
             </div>
-
-            <label for="rTitulo">Nombre de la rutina</label>
-
-            <input
-              id="rTitulo"
-              name="titulo"
-              placeholder="Ej.: Tren superior · Pecho y brazos"
-              required
-            >
-
-            <div class="jp-routine-editor-heading">
-              <h3>Ejercicios</h3>
-              <small class="muted">En orden de realización</small>
-            </div>
-
-            <div id="ejerciciosEditor"></div>
-
-            <button
-              type="button"
-              class="btn secondary"
-              id="addEjercicio"
-            >
-              + Agregar ejercicio
-            </button>
-
-            <textarea
-              name="ejercicios"
-              id="ejerciciosPayload"
-              hidden
-              required
-            ></textarea>
-
-            <div class="jp-teacher-info">
-              Completá las series, repeticiones y peso.
-              El descanso y las indicaciones son opcionales.
-            </div>
-
-            <div class="jp-teacher-actions">
-              <button class="btn" type="submit">
-                💾 Guardar rutina
-              </button>
-            </div>
-
-          </form>
-
+            <div id="jpRutinasVacio" class="jp-teacher-empty">Seleccioná un alumno para ver sus rutinas.</div>
+          </div>
+          <script type="application/json" id="rutinasExistentes"><%- JSON.stringify(rutinas.map(r=>({
+            _id:String(r._id),alumno:r.alumno?String(r.alumno._id):'',dia:r.dia,titulo:r.titulo,
+            ejercicios:r.ejercicios,calentamiento:r.calentamiento||[],actualizada:r.actualizada||r.updatedAt||r.createdAt||null
+          }))).replace(/</g,'\\u003c') %></script>
         </div>
-
       </section>
 
       <!-- =====================================
@@ -927,7 +903,7 @@
 
 </div>
 
-<script src="/js/rutina-editor.js?v=3" defer></script>
+<script src="/js/rutina-editor.js?v=6" defer></script>
 
 <script>
 (function () {
@@ -981,6 +957,10 @@
     }
   } catch (error) {}
 
+  if (new URLSearchParams(window.location.search).has('rutina')) {
+    tabInicial = 'rutina';
+  }
+
   if (new URLSearchParams(window.location.search).has('importado')) {
     tabInicial = 'excel';
   }
@@ -996,6 +976,36 @@
   /* ======================================
      MENSAJES DEL PROFESOR
   ====================================== */
+
+  // Buscador para listas grandes: mantiene los alumnos recibidos desde MongoDB.
+  // No modifica los IDs ni los datos enviados al servidor.
+  function activarBusquedaAlumnos(inputId, selectId) {
+    const input = document.getElementById(inputId);
+    const select = document.getElementById(selectId);
+    if (!input || !select) return;
+    const opciones = Array.from(select.options).map(o => ({
+      value: o.value, text: o.textContent, disabled: o.disabled
+    }));
+    const normalizar = texto => String(texto || '').normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    input.addEventListener('input', () => {
+      const actual = select.value;
+      const busqueda = normalizar(input.value);
+      const visibles = opciones.filter(o => !o.value || normalizar(o.text).includes(busqueda));
+      select.replaceChildren();
+      visibles.forEach(o => {
+        const option = new Option(o.text, o.value);
+        option.disabled = o.disabled;
+        select.add(option);
+      });
+      if (visibles.some(o => o.value === actual)) select.value = actual;
+      else if (visibles.some(o => o.value)) select.value = visibles.find(o => o.value).value;
+      else select.value = '';
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  }
+  activarBusquedaAlumnos('buscarAlumnoRutina', 'rAlumno');
+  activarBusquedaAlumnos('buscarAlumnoCreadas', 'filtroRutinas');
 
   const tipoMensaje = document.getElementById('tipoMensaje');
   const selectorAlumnoMensaje =

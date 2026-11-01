@@ -496,6 +496,12 @@
     color: #264675;
   }
 
+  .jp-warmup {background:#fff8e8;border:1px solid #f4e1b6;border-radius:17px;padding:17px;margin-bottom:19px}
+  .jp-warmup h3 {margin:0 0 10px;color:#765419}
+  .jp-warmup-row {display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px;padding:9px 0;border-bottom:1px solid #efdfbb;font-size:13px}
+  .jp-warmup-row:last-child{border-bottom:0}
+  .jp-warmup-row small{width:100%;color:#7e6a45}
+  .jp-combo-title {background:#e8efff;border-left:4px solid #3867c8;padding:12px;border-radius:10px;font-weight:800;color:#214781;margin:14px 0 10px;font-size:13px}
   /* CUENTA */
 
   .jp-balance {
@@ -951,7 +957,20 @@
               <div class="jp-progress-fill"></div>
             </div>
 
+            <% if (rutina.calentamiento && rutina.calentamiento.length) { %>
+              <div class="jp-warmup"><h3>🔥 Calentamiento</h3>
+                <% rutina.calentamiento.forEach(c=>{ %>
+                  <div class="jp-warmup-row"><strong><%= c.nombre %></strong>
+                    <% if(c.duracion){ %><span><%= c.duracion %></span><% } %>
+                    <% if(c.indicaciones){ %><small><%= c.indicaciones %></small><% } %>
+                  </div>
+                <% }) %>
+              </div>
+            <% } %>
             <% rutina.ejercicios.forEach((ejercicio, numero) => { %>
+              <% if (ejercicio.grupo && (numero===0 || rutina.ejercicios[numero-1].grupo!==ejercicio.grupo)) { %>
+                <div class="jp-combo-title">🔗 Bloque combinado <%= ejercicio.grupo %> · realizar seguidos</div>
+              <% } %>
 
               <article class="jp-exercise">
 
